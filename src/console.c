@@ -10,6 +10,8 @@
 	Works with:
 		5.3.x, 5.2.x, 5.1.x
 	
+	5.2.x and 5.1.x assume that you have enough memory for some functions.
+	
 */
 
 #if defined(__MINGW32__) || defined(__linux__) || defined(__unix__)
@@ -46,6 +48,7 @@ const char HELP_MESSAGE[] =
 	"Lua Console | Version: 5/1/2017\n"
 	"\n"
 	"Supports Lua5.3, Lua5.2, Lua5.1\n"
+	"5.2.x and 5.1.x assume that you have enough memory for some functions.\n"
 	"\n"
 	"\t- Line by Line interpretation\n"
 	"\t- Files executed by passing\n"
