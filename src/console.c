@@ -52,7 +52,7 @@ const char HELP_MESSAGE[] =
 	"\t- Working directory support\n"
 	"\t- Built in stack-dump\n"
 	"\n"
-	"Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-?] \n"
+	"Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-?] \n"
 	"\n"
 	"-v \t Prints the Lua version in use\n"
 	"-e \t Prevents lua core libraries from loading\n"
