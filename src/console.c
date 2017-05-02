@@ -8,7 +8,7 @@
 		- Built in stack-dump
 	
 	Works with:
-		5.3.x
+		5.3.x, 5.2.x, 5.1.x
 	
 */
 
