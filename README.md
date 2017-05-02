@@ -11,7 +11,7 @@ Lua Console | Version: 5/1/2017
 
 Supports Lua5.3, Lua5.2, Lua5.1
 
-Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-?]
+Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-?]
 
 
 -v      Prints the Lua version in use
