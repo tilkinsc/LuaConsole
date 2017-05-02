@@ -14,14 +14,14 @@ Supports Lua5.3, Lua5.2, Lua5.1
 Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-?]
 
 
--v       Prints the Lua version in use
+-v      Prints the Lua version in use
 
--e       Prevents lua core libraries from loading
+-e      Prevents lua core libraries from loading
 
--s       Issues a new root path
+-s      Issues a new root path
 
--p       Has console post exist after script in line by line mode
+-p      Has console post exist after script in line by line mode
 
--a       Removes the additions
+-a      Removes the additions
 
--?       Displays this help message
+-?      Displays this help message
