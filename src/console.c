@@ -43,7 +43,7 @@ typedef enum LuaConsoleError {
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua.c Console Updated 4/29/2017\n"
+	"Lua Console | Version: 5/1/2017\n"
 	"\n"
 	"\t- Line by Line interpretation\n"
 	"\t- Files executed by passing\n"
