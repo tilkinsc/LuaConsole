@@ -2,7 +2,7 @@
 
 A simple, powerful lua console with the intent of replacing CMD and Terminal
 
-Lua.c Console Updated 4/29/2017
+Lua Console | Version: 5/1/2017
 
         - Line by Line interpretation
         - Files executed by passing
