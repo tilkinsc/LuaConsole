@@ -11,6 +11,9 @@ Lua Console | Version: 5/1/2017
 
 Supports Lua5.3, Lua5.2, Lua5.1
 
+5.2.x and 5.1.x assume that you have enough memory for some functions.
+
+
 Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-?]
 
 
