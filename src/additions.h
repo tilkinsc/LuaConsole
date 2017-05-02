@@ -3,8 +3,8 @@
 
 #include "lua.h"
 
-static int stackDump(lua_State* L);
+int stackDump(lua_State* L);
 
-static void additions_add(lua_State* L);
+void additions_add(lua_State* L);
 
 #endif
