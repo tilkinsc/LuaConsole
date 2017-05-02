@@ -103,12 +103,12 @@ static void print_error(LuaConsoleError error) {
 
 // handles line by line interpretation
 static int lua_main_postexist(lua_State* L) {
-	char* buffer = calloc(1025, 1);
+	char* buffer = malloc(1025);
 	if(buffer == 0) {
 		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
 		exit(1);
 	}
-	char* buffer2 = calloc(1033, 1);
+	char* buffer2 = malloc(1033);
 	if(buffer2 == 0) {
 		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
 		exit(1);
