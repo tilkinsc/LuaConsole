@@ -27,7 +27,7 @@
 
 
 
-int stackDump(lua_State *L) {
+static int stackDump(lua_State *L) {
 	int i = lua_gettop(L);
 	printf("--------------- Stack Dump ----------------\n");
 	while(i) {
@@ -70,7 +70,7 @@ static int lua_clear_window(lua_State* L) {
 	return 0;
 }
 
-void additions_add(lua_State* L) {
+static void additions_add(lua_State* L) {
 	
 	// stack dump addition
 	lua_pushcfunction(L, stackDump);
