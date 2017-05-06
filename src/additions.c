@@ -1,9 +1,10 @@
 /*
  * additions.c
- *
- *  Created on: Apr 30, 2017
- *      Author: Bud
+ * 
+ * Holds the additions functions to the console.
+ * 
  */
+
 
 #if defined(__linux__) || defined(__unix__)
 #include <unistd.h>
@@ -11,12 +12,15 @@
 #include <dirent.h>
 #endif
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "additions.h"
 
 #include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 
 #ifdef _WIN32
@@ -26,31 +30,6 @@
 #endif
 
 
-
-int stackDump(lua_State *L) {
-	int i = lua_gettop(L);
-	printf("--------------- Stack Dump ----------------\n");
-	while(i) {
-		int t = lua_type(L, i);
-		switch (t) {
-		case LUA_TSTRING:
-			printf("%d:(String):`%s`\n", i, lua_tostring(L, i));
-			break;
-		case LUA_TBOOLEAN:
-			printf("%d:(Boolean):%s\n", i, lua_toboolean(L, i) ? "true" : "false");
-			break;
-		case LUA_TNUMBER:
-			printf("%d:(Number):%g\n", i, lua_tonumber(L, i));
-			break;
-		default:
-			printf("%d:(Object):%s\n", i, lua_typename(L, t));
-			break;
-		}
-		i--;
-	}
-	printf("----------- Stack Dump Finished -----------\n");
-	return 0;
-}
 
 static int lua_cwd_getcwd(lua_State* L) {
 	char buffer[PATH_MAX];
@@ -70,10 +49,41 @@ static int lua_clear_window(lua_State* L) {
 	return 0;
 }
 
+int stack_dump(lua_State *L) {
+	int i = lua_gettop(L);
+	printf("--------------- Stack Dump ----------------\n");
+	while(i) {
+		int t = lua_type(L, i);
+		switch (t) {
+		case LUA_TSTRING:
+			fprintf(stdout, "%d:(String):`%s`\n", i, lua_tostring(L, i));
+			break;
+		case LUA_TBOOLEAN:
+			fprintf(stdout, "%d:(Boolean):%s\n", i, lua_toboolean(L, i) ? "true" : "false");
+			break;
+		case LUA_TNUMBER:
+			fprintf(stdout, "%d:(Number):%g\n", i, lua_tonumber(L, i));
+			break;
+		case LUA_TFUNCTION:
+			fprintf(stdout, "%d:(Function):@%p\n", i, lua_topointer(L, i));
+			break;
+		case LUA_TTABLE:
+			fprintf(stdout, "%d:(Table):@%p\n", i, lua_topointer(L, i));
+			break;
+		default:
+			fprintf(stdout, "%d:(Object):%s:@%p\n", i, lua_typename(L, t), lua_topointer(L, i));
+			break;
+		}
+		i--;
+	}
+	printf("----------- Stack Dump Finished -----------\n");
+	return 0;
+}
+
 void additions_add(lua_State* L) {
 	
 	// stack dump addition
-	lua_pushcfunction(L, stackDump);
+	lua_pushcfunction(L, stack_dump);
 	lua_setglobal(L, "stackdump");
 	
 	// os table addition
