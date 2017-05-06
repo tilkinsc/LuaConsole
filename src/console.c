@@ -48,7 +48,7 @@ typedef enum LuaConsoleError {
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua Console | Version: 5/1/2017\n"
+	"Lua Console | Version: 5/6/2017\n"
 	LUA_COPYRIGHT
 	LUA_CONSOLE_COPYRIGHT
 	"\n"
@@ -60,7 +60,7 @@ const char HELP_MESSAGE[] =
 	"\t- Working directory support\n"
 	"\t- Built in stack-dump\n"
 	"\n"
-	"Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-?] \n"
+	"Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-?] \n"
 	"\n"
 	"-v \t Prints the Lua version in use\n"
 	"-e \t Prevents lua core libraries from loading\n"
