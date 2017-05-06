@@ -1,38 +1,36 @@
 
 /*
-	
-	Lua.c Console
-		- Line by Line interpretation
-		- Files executed by passing
-		- Working directory support
-		- Built in stack-dump
-	
-	Works with:
-		5.3.x, 5.2.x, 5.1.x
-	
-	5.2.x and 5.1.x assume that you have enough memory for some functions.
-	
-*/
+ * Lua.c Console
+ * 
+ *		- Line by Line interpretation
+ *		- Files executed by passing
+ *		- Working directory support
+ *		- Built in stack-dump
+ * Works with:
+ *		Lua5.3.x, Lua5.2.x, Lua5.1.x
+ * 
+ * 5.2.x and 5.1.x assume that you have enough memory to start initial functions.
+ * 
+ */
 
-#if defined(__MINGW32__) || defined(__linux__) || defined(__unix__)
-#define CHDIR_FUNC chdir
+#if defined(__linux__) || defined(__unix__)
 #include <unistd.h>
+#define CHDIR_FUNC chdir
 #else
-#define CHDIR_FUNC _chdir
 #include <dirent.h>
+#define CHDIR_FUNC _chdir
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <limits.h>
-
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
 
 #include "additions.h"
+
 
 
 // internal enums, represent lua error category
@@ -48,7 +46,7 @@ const char HELP_MESSAGE[] =
 	"Lua Console | Version: 5/1/2017\n"
 	"\n"
 	"Supports Lua5.3, Lua5.2, Lua5.1\n"
-	"5.2.x and 5.1.x assume that you have enough memory for some functions.\n"
+	"5.2.x and 5.1.x assume that you have enough memory for initial functions.\n"
 	"\n"
 	"\t- Line by Line interpretation\n"
 	"\t- Files executed by passing\n"
@@ -62,6 +60,7 @@ const char HELP_MESSAGE[] =
 	"-s \t Issues a new root path\n"
 	"-p \t Has console post exist after script in line by line mode\n"
 	"-a \t Removes the additions\n"
+	"-n \t No console\n"
 	"-? \t Displays this help message\n";
 
 
@@ -96,7 +95,7 @@ static void print_error(LuaConsoleError error) {
 	int top = lua_gettop(L);
 	fprintf(stderr, " | Stack Top: %d | %s\n", lua_gettop(L), msg);
 	if(top > 1) // other than error message
-		stackDump(L);
+		stack_dump(L);
 	lua_pop(L, 1);
 }
 
@@ -190,12 +189,12 @@ static int lua_main_dofile(lua_State* L) {
 
 // all-in-one function to handle file and line by line interpretation
 int start_protective_mode(lua_CFunction func, const char* file) {
-	lua_pushcfunction(L, func);
+	lua_pushcclosure(L, func, 0); /* possible out of memory error in 5.2/5.1 */
 	int status = 0;
 	if(file == 0)
 		status = lua_pcall(L, 0, 0, 0);
 	else {
-		lua_pushlstring(L, file, strlen(file));
+		lua_pushlstring(L, file, strlen(file)); /* possible out of memory error in 5.2/5.1 */
 		status = lua_pcall(L, 1, 0, 0);
 	}
 	if(status != 0) {
