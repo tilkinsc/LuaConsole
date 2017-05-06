@@ -113,12 +113,12 @@ static int lua_main_postexist(lua_State* L) {
 	char* buffer = malloc(PRIMARY_BUFFER_SIZE);
 	if(buffer == 0) {
 		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	char* buffer2 = malloc(SECONDARY_BUFFER_SIZE);
 	if(buffer2 == 0) {
 		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	
 	if(squelch == 0) {
