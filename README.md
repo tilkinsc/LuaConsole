@@ -33,6 +33,7 @@ For example, <br>
 >1:(Number):1 <br>
 >----------- Stack Dump Finished ----------- <br>
 
+This sure beats `print(type(data), data)` calls, and can be used to detect anything left on the stack in C. To add your own C functions, inherit the project.
 
 Added comprehensive error feedback, which tells you about the stack (stack dumps if not just the error is on the stack), the type of error (syntax/runtime), and the regular lua feedback string with the line number sammich'd between two colons.
 
