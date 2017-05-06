@@ -32,6 +32,8 @@
 #include "additions.h"
 
 
+#define LUA_CONSOLE_COPYRIGHT "LuaConsole Copyright MIT (C) 2017 Hydroque\n"
+
 
 // internal enums, represent lua error category
 typedef enum LuaConsoleError {
@@ -44,6 +46,8 @@ typedef enum LuaConsoleError {
 // usage message
 const char HELP_MESSAGE[] = 
 	"Lua Console | Version: 5/1/2017\n"
+	LUA_COPYRIGHT
+	LUA_CONSOLE_COPYRIGHT
 	"\n"
 	"Supports Lua5.3, Lua5.2, Lua5.1\n"
 	"5.2.x and 5.1.x assume that you have enough memory for initial functions.\n"
@@ -60,7 +64,7 @@ const char HELP_MESSAGE[] =
 	"-s \t Issues a new root path\n"
 	"-p \t Has console post exist after script in line by line mode\n"
 	"-a \t Removes the additions\n"
-	"-n \t No console\n"
+	"-c \t No copyright on init\n"
 	"-? \t Displays this help message\n";
 
 
@@ -74,6 +78,7 @@ static int should_close = 0;
 
 // necessary to put this outside of main, print doesn't work
 static int no_libraries = 0;
+static int squelch = 0;
 
 
 
@@ -111,6 +116,11 @@ static int lua_main_postexist(lua_State* L) {
 	if(buffer2 == 0) {
 		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
 		exit(1);
+	}
+	
+	if(squelch == 0) {
+		printf(LUA_COPYRIGHT "\n");
+		printf(LUA_CONSOLE_COPYRIGHT);
 	}
 	
 	int status = 0;
@@ -250,6 +260,9 @@ int main(int argc, char* argv[])
 				break;
 			case 'a': case 'A':
 				no_additions = 1;
+				break;
+			case 'c': case 'C':
+				squelch = 1;
 				break;
 			case '?':
 				fprintf(stdout, "%s\n", HELP_MESSAGE);
