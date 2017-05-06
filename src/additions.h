@@ -3,7 +3,7 @@
 
 #include "lua.h"
 
-int stackDump(lua_State* L);
+int stack_dump(lua_State* L);
 
 void additions_add(lua_State* L);
 
