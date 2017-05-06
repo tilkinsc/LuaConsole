@@ -34,6 +34,9 @@
 
 #define LUA_CONSOLE_COPYRIGHT "LuaConsole Copyright MIT (C) 2017 Hydroque\n"
 
+#define PRIMARY_BUFFER_SIZE 1025
+#define SECONDARY_BUFFER_SIZE 1033
+
 
 // internal enums, represent lua error category
 typedef enum LuaConsoleError {
@@ -107,12 +110,12 @@ static void print_error(LuaConsoleError error) {
 
 // handles line by line interpretation
 static int lua_main_postexist(lua_State* L) {
-	char* buffer = malloc(1025);
+	char* buffer = malloc(PRIMARY_BUFFER_SIZE);
 	if(buffer == 0) {
 		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
 		exit(1);
 	}
-	char* buffer2 = malloc(1033);
+	char* buffer2 = malloc(SECONDARY_BUFFER_SIZE);
 	if(buffer2 == 0) {
 		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
 		exit(1);
@@ -127,14 +130,14 @@ static int lua_main_postexist(lua_State* L) {
 	while(should_close != 1) {
 		// reset
 		status = 0;
-		memset(buffer, 0, 1025);
-		memset(buffer2, 0, 1033);
+		memset(buffer, 0, PRIMARY_BUFFER_SIZE);
+		memset(buffer2, 0, SECONDARY_BUFFER_SIZE);
 		
 		// read
 		fputs(">", stdout);
-		fgets(buffer, 1024, stdin);
-		buffer[strlen(buffer)-1] = '\0';
-		snprintf(buffer2, 1032, "return %s;", buffer);
+		fgets(buffer, PRIMARY_BUFFER_SIZE - 1, stdin);
+		buffer[strlen(buffer)-1] = '\0'; // remove \n
+		snprintf(buffer2, SECONDARY_BUFFER_SIZE - 1, "return %s;", buffer);
 		
 		// do first test
 		status = luaL_loadstring(L, buffer2);
@@ -145,8 +148,8 @@ static int lua_main_postexist(lua_State* L) {
 			int top = lua_gettop(L);
 			status = lua_pcall(L, 0, LUA_MULTRET, 0);
 			if(status == 0) { // on success
-				top = lua_gettop(L) - top + 1;
-				if(top > 0) {
+				top = lua_gettop(L) - top + 1; // ignore function
+				if(top > 0) { // more than 0 arguments returned
 					if(no_libraries == 1) {
 						lua_pop(L, top);
 						continue;
@@ -209,9 +212,9 @@ int start_protective_mode(lua_CFunction func, const char* file) {
 	}
 	if(status != 0) {
 		print_error(INTERNAL_ERROR);
-		return 1;
+		return EXIT_FAILURE;
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 // handles arguments, cwd, loads necessary data, executes lua
@@ -266,7 +269,7 @@ int main(int argc, char* argv[])
 				break;
 			case '?':
 				fprintf(stdout, "%s\n", HELP_MESSAGE);
-				return 0;
+				return EXIT_SUCCESS;
 			}
 		}
 	}
@@ -276,26 +279,29 @@ int main(int argc, char* argv[])
 	if(change_start == 1 && CHDIR_FUNC(start) == -1) {
 		fprintf(stderr, "%s\n", "Invalid start directory supplied");
 		fprintf(stdout, "%s\n", HELP_MESSAGE);
-		return 1;
+		return EXIT_FAILURE;
 	}
+	
 	
 	// initiate lua
 	L = luaL_newstate();
 	if(L == 0) {
 		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
-		return 1;
+		return EXIT_FAILURE;
 	}
+	
 	
 	// initiate the libraries
 	if(no_libraries == 0)
 		luaL_openlibs(L);
+	
 	
 	// print out the version, new state because no_libraries can be 1
 	if(print_version == 1) {
 		lua_State* gL = luaL_newstate();
 		if(gL == 0) {
 			fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
-			return 1;
+			return EXIT_FAILURE;
 		}
 		
 		luaL_openlibs(gL);
@@ -311,7 +317,7 @@ int main(int argc, char* argv[])
 	// if there is nothing to do, then exit, as there is nothing left to do
 	if(no_file == 1 && post_exist != 1) {
 		lua_close(L);
-		return 0;
+		return EXIT_SUCCESS;
 	}
 	
 	
