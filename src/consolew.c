@@ -76,9 +76,6 @@ const char HELP_MESSAGE[] =
 static lua_State* L;
 
 
-// variable to end line by line iterpretation loop
-static int should_close = 0;
-
 // necessary to put this outside of main, print doesn't work
 static int no_libraries = 0;
 static int squelch = 0;
@@ -108,81 +105,6 @@ static void print_error(LuaConsoleError error) {
 }
 
 
-// handles line by line interpretation
-static int lua_main_postexist(lua_State* L) {
-	char* buffer = malloc(PRIMARY_BUFFER_SIZE);
-	if(buffer == 0) {
-		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
-		exit(EXIT_FAILURE);
-	}
-	char* buffer2 = malloc(SECONDARY_BUFFER_SIZE);
-	if(buffer2 == 0) {
-		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
-		exit(EXIT_FAILURE);
-	}
-	
-	if(squelch == 0) {
-		printf(LUA_COPYRIGHT "\n");
-		printf(LUA_CONSOLE_COPYRIGHT);
-	}
-	
-	int status = 0;
-	while(should_close != 1) {
-		// reset
-		status = 0;
-		memset(buffer, 0, PRIMARY_BUFFER_SIZE);
-		memset(buffer2, 0, SECONDARY_BUFFER_SIZE);
-		
-		// read
-		fputs(">", stdout);
-		fgets(buffer, PRIMARY_BUFFER_SIZE - 1, stdin);
-		buffer[strlen(buffer)-1] = '\0'; // remove \n
-		snprintf(buffer2, SECONDARY_BUFFER_SIZE - 1, "return %s;", buffer);
-		
-		// do first test
-		status = luaL_loadstring(L, buffer2);
-		if(status != 0) {
-			lua_pop(L, 1);
-		} else {
-			// attempt first test
-			int top = lua_gettop(L);
-			status = lua_pcall(L, 0, LUA_MULTRET, 0);
-			if(status == 0) { // on success
-				top = lua_gettop(L) - top + 1; // ignore function
-				if(top > 0) { // more than 0 arguments returned
-					if(no_libraries == 1) {
-						lua_pop(L, top);
-						continue;
-					}
-					lua_getglobal(L, "print");
-					lua_insert(L, lua_gettop(L)-top);
-					lua_call(L, top, 0);
-				}
-				continue;
-			}
-			lua_pop(L, 1);
-		}
-		
-		// do originally inserted code
-		status = luaL_loadstring(L, buffer);
-		if(status != 0) {
-			print_error(SYNTAX_ERROR);
-			continue;
-		}
-		
-		// attempt originally inserted code
-		status = lua_pcall(L, 0, 0, 0);
-		if(status != 0) {
-			print_error(RUNTIME_ERROR);
-		}
-	}
-	
-	free(buffer);
-	free(buffer2);
-	
-	return 0;
-}
-
 // handles the execution of a file.lua
 static int lua_main_dofile(lua_State* L) {
 	const char* file = lua_tostring(L, 1);
@@ -203,13 +125,8 @@ static int lua_main_dofile(lua_State* L) {
 // all-in-one function to handle file and line by line interpretation
 int start_protective_mode(lua_CFunction func, const char* file) {
 	lua_pushcclosure(L, func, 0); /* possible out of memory error in 5.2/5.1 */
-	int status = 0;
-	if(file == 0)
-		status = lua_pcall(L, 0, 0, 0);
-	else {
-		lua_pushlstring(L, file, strlen(file)); /* possible out of memory error in 5.2/5.1 */
-		status = lua_pcall(L, 1, 0, 0);
-	}
+	lua_pushlstring(L, file, strlen(file)); /* possible out of memory error in 5.2/5.1 */
+	int status = lua_pcall(L, 1, 0, 0);
 	if(status != 0) {
 		print_error(INTERNAL_ERROR);
 		return EXIT_FAILURE;
@@ -222,7 +139,6 @@ int main(int argc, char* argv[])
 {
 	int print_version = 0;
 	int change_start = 0;
-	int post_exist = 0;
 	int no_file = 0;
 	char* start = 0;
 	int no_additions = 0;
@@ -230,7 +146,6 @@ int main(int argc, char* argv[])
 	
 	// handle arguments
 	if(argc == 1) { // post-exist if !(arguments > 1)
-		post_exist = 1;
 		no_file = 1;
 	} else {
 		// don't try to execute file if it isn't first argument
@@ -257,9 +172,6 @@ int main(int argc, char* argv[])
 			case 's': case 'S':
 				change_start = 1;
 				start = argv[i+1];
-				break;
-			case 'p': case 'P':
-				post_exist = 1;
 				break;
 			case 'a': case 'A':
 				no_additions = 1;
@@ -315,7 +227,7 @@ int main(int argc, char* argv[])
 	
 	
 	// if there is nothing to do, then exit, as there is nothing left to do
-	if(no_file == 1 && post_exist != 1) {
+	if(no_file == 1) {
 		lua_close(L);
 		return EXIT_SUCCESS;
 	}
@@ -327,12 +239,8 @@ int main(int argc, char* argv[])
 	
 	
 	// load function into protected mode (pcall)
-	int status = 0;
-	if(post_exist == 1) {
-		if(no_file == 0)
-			status = start_protective_mode(&lua_main_dofile, argv[1]);
-		status = start_protective_mode(&lua_main_postexist, (const char*) 0);
-	} else status = start_protective_mode(&lua_main_dofile, argv[1]);
+	int status = start_protective_mode(&lua_main_dofile, argv[1]);
+		
 	lua_close(L);
 	
 	return status;
