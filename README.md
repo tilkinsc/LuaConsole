@@ -41,8 +41,41 @@ For example, <br>
 >\>. <br>
 >(Syntax) | Stack Top: 1 | [string "."]:1: unexpected symbol near '.' <br>
 
+# Bonus
 
+Put luaw.exe into C:\Windows\System32 and use resource hacker program (3rd party program) to put an icon into your .exe at -1, and enjoy this context menu edit as well as graphics with the .reg script below. Use at your own discression. I can't be held accountable for you breaking your system, as registry is pretty delicate.
+- allows to double click to run script files
+- right click Post-Exist allows to keep lua console open
+- see a cool icon on all your .lua files
+- get a cool icon on your .exe
+- (can add ;.LUA to EXTS env variable so you don't have to type in full name to run the file, eg run.lua > run)
 
+```reg
+Windows Registry Editor Version 5.00
 
+[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe]
 
+[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe\DefaultIcon]
+@="C:\\windows\\System32\\luaw.exe,-1"
 
+[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe\shell]
+
+[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe\shell\open]
+
+[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe\shell\open\command]
+@="\"C:\\Windows\\System32\\luaw.exe\" \"%1\""
+
+[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe\shell\Post-Exist]
+
+[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe\shell\Post-Exist\command]
+@="luaw.exe %1 -p"
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.lua]
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.lua\OpenWithList]
+"a"="luaw.exe"
+"MRUList"="a"
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.lua\UserChoice]
+"Progid"="Applications\\luaw.exe"
+```
