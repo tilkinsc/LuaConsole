@@ -17,7 +17,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define CHDIR_FUNC chdir
 #else
 #include <windows.h>
 #include <stdio.h>
@@ -25,7 +24,6 @@
 #include <dirent.h>
 #endif
 
-#include <stdio.h>
 #include <string.h>
 
 #include "lua.h"
@@ -129,8 +127,7 @@ static int lua_main_dofile(lua_State* L) {
 int start_protective_mode(lua_CFunction func, const char* file, char** parameters_argv, int param_len) {
 	lua_pushcclosure(L, func, 0); /* possible out of memory error in 5.2/5.1 */
 	lua_pushlstring(L, file, strlen(file)); /* possible out of memory error in 5.2/5.1 */
-	if(param_len != 0) {
-		printf("Creating table\n");
+	if(param_len != 0) { // load parameters in
 		lua_createtable(L, param_len, 0);
 		int i;
 		for (i=0; i<param_len; i++) {
@@ -167,7 +164,6 @@ int main(int argc, char* argv[])
 		// don't try to execute file if it isn't first argument
 		if(argv[1][0] == '-')
 			no_file = 1;
-		int last = 0;
 		int i;
 		for (i=1; i<argc; i++) {
 			// if we have args around, break
@@ -193,15 +189,15 @@ int main(int argc, char* argv[])
 				change_start = 1;
 				start = argv[i+1];
 				break;
-			case 'n': case 'N':
-				parameters = argc - i - 1;
-				parameters_argv = &(argv[i+1]);
-				break;
 			case 'a': case 'A':
 				no_additions = 1;
 				break;
 			case 'c': case 'C':
 				squelch = 1;
+				break;
+			case 'n': case 'N':
+				parameters = argc - i - 1;
+				parameters_argv = &(argv[i+1]);
 				break;
 			case '?':
 				fprintf(stdout, "%s\n", HELP_MESSAGE);
