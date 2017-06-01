@@ -15,14 +15,15 @@
 
 #if defined(__linux__) || defined(__unix__)
 #include <unistd.h>
-#define CHDIR_FUNC chdir
-#else
-#include <dirent.h>
-#define CHDIR_FUNC _chdir
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
+#else
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+#endif
+
 #include <string.h>
 
 #include "lua.h"
@@ -60,7 +61,7 @@ const char HELP_MESSAGE[] =
 	"\t- Working directory support\n"
 	"\t- Built in stack-dump\n"
 	"\n"
-	"Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-?] \n"
+	"Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-?] [-n]{parameter1 ...} \n"
 	"\n"
 	"-v \t Prints the Lua version in use\n"
 	"-e \t Prevents lua core libraries from loading\n"
@@ -68,6 +69,7 @@ const char HELP_MESSAGE[] =
 	"-p \t Has console post exist after script in line by line mode\n"
 	"-a \t Removes the additions\n"
 	"-c \t No copyright on init\n"
+	"-n \t Start of parameter section\n"
 	"-? \t Displays this help message\n";
 
 
@@ -201,8 +203,18 @@ static int lua_main_dofile(lua_State* L) {
 
 
 // all-in-one function to handle file and line by line interpretation
-int start_protective_mode(lua_CFunction func, const char* file) {
+int start_protective_mode(lua_CFunction func, const char* file, char** parameters_argv, int param_len) {
 	lua_pushcclosure(L, func, 0); /* possible out of memory error in 5.2/5.1 */
+	if(param_len != 0) { // load parameters in
+		lua_createtable(L, param_len, 0);
+		int i;
+		for (i=0; i<param_len; i++) {
+			lua_pushinteger(L, i+1);
+			lua_pushlstring(L, parameters_argv[i], strlen(parameters_argv[i]));
+			lua_settable(L, -3);
+		}
+		lua_setglobal(L, "args");
+	}
 	int status = 0;
 	if(file == 0)
 		status = lua_pcall(L, 0, 0, 0);
@@ -227,6 +239,9 @@ int main(int argc, char* argv[])
 	char* start = 0;
 	int no_additions = 0;
 	
+	int parameters = 0;
+	char** parameters_argv = 0;
+	
 	
 	// handle arguments
 	if(argc == 1) { // post-exist if !(arguments > 1)
@@ -238,6 +253,9 @@ int main(int argc, char* argv[])
 			no_file = 1;
 		int i;
 		for (i=1; i<argc; i++) {
+			// if we have args around, break
+			if(parameters_argv != 0)
+				break;
 			// don't parse non-switches
 			switch(argv[i][0]) {
 			case '/':
@@ -267,6 +285,10 @@ int main(int argc, char* argv[])
 			case 'c': case 'C':
 				squelch = 1;
 				break;
+			case 'n': case 'N':
+				parameters = argc - i - 1;
+				parameters_argv = &(argv[i+1]);
+				break;
 			case '?':
 				fprintf(stdout, "%s\n", HELP_MESSAGE);
 				return EXIT_SUCCESS;
@@ -276,7 +298,7 @@ int main(int argc, char* argv[])
 	
 	
 	// make sure to start in the requested directory, if any
-	if(change_start == 1 && CHDIR_FUNC(start) == -1) {
+	if(change_start == 1 && chdir(start) == -1) {
 		fprintf(stderr, "%s\n", "Invalid start directory supplied");
 		fprintf(stdout, "%s\n", HELP_MESSAGE);
 		return EXIT_FAILURE;
@@ -330,9 +352,9 @@ int main(int argc, char* argv[])
 	int status = 0;
 	if(post_exist == 1) {
 		if(no_file == 0)
-			status = start_protective_mode(&lua_main_dofile, argv[1]);
-		status = start_protective_mode(&lua_main_postexist, (const char*) 0);
-	} else status = start_protective_mode(&lua_main_dofile, argv[1]);
+			status = start_protective_mode(&lua_main_dofile, argv[1], parameters_argv, parameters);
+		status = start_protective_mode(&lua_main_postexist, NULL, parameters_argv, parameters);
+	} else status = start_protective_mode(&lua_main_dofile, argv[1], parameters_argv, parameters);
 	lua_close(L);
 	
 	return status;
