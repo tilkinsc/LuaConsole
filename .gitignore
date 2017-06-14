@@ -1,10 +1,5 @@
-/Debug
-
-/Release
-
 /.settings
 /.git
-/src/build.bat
 
 /src/*.o
 /src/*.exe
