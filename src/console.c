@@ -49,14 +49,13 @@ typedef enum LuaConsoleError {
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua Console | Version: 5/6/2017\n"
+	"Lua Console | Version: 6/13/2017\n"
 	LUA_COPYRIGHT
 	LUA_CONSOLE_COPYRIGHT
 	"\n"
 	"Supports Lua5.3, Lua5.2, Lua5.1\n"
 	"5.2.x and 5.1.x assume that you have enough memory for initial functions.\n"
 	"\n"
-	"\t- Line by Line interpretation\n"
 	"\t- Files executed by passing\n"
 	"\t- Working directory support\n"
 	"\t- Built in stack-dump\n"
@@ -79,7 +78,6 @@ static lua_State* L;
 
 // necessary to put this outside of main, print doesn't work
 static int no_libraries = 0;
-static int squelch = 0;
 
 
 
@@ -153,6 +151,7 @@ int main(int argc, char* argv[])
 	int no_file = 0;
 	char* start = 0;
 	int no_additions = 0;
+	int copyright_squelch = 0;
 	
 	int parameters = 0;
 	char** parameters_argv = 0;
@@ -193,7 +192,7 @@ int main(int argc, char* argv[])
 				no_additions = 1;
 				break;
 			case 'c': case 'C':
-				squelch = 1;
+				copyright_squelch = 1;
 				break;
 			case 'n': case 'N':
 				parameters = argc - i - 1;
@@ -245,6 +244,11 @@ int main(int argc, char* argv[])
 		lua_close(gL);
 	}
 	
+	// copyright
+	if(copyright_squelch == 0) {
+		fprintf(stdout, LUA_COPYRIGHT "\n");
+		fprintf(stdout, LUA_CONSOLE_COPYRIGHT);
+	}
 	
 	// if there is nothing to do, then exit, as there is nothing left to do
 	if(no_file == 1) {
@@ -256,7 +260,6 @@ int main(int argc, char* argv[])
 	// add additions
 	if(no_additions == 0)
 		additions_add(L);
-	
 	
 	// load function into protected mode (pcall)
 	int status = start_protective_mode(&lua_main_dofile, argv[1], parameters_argv, parameters);

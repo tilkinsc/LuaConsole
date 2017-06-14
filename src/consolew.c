@@ -38,7 +38,6 @@
 #define PRIMARY_BUFFER_SIZE 1025
 #define SECONDARY_BUFFER_SIZE 1033
 
-
 // internal enums, represent lua error category
 typedef enum LuaConsoleError {
 	INTERNAL_ERROR = 0,
@@ -49,7 +48,7 @@ typedef enum LuaConsoleError {
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua Console | Version: 5/6/2017\n"
+	"Lua Console | Version: 6/13/2017\n"
 	LUA_COPYRIGHT
 	LUA_CONSOLE_COPYRIGHT
 	"\n"
@@ -78,12 +77,11 @@ const char HELP_MESSAGE[] =
 static lua_State* L;
 
 
-// variable to end line by line iterpretation loop
+// variable to end line by line iterpretation loop, for adaption
 static int should_close = 0;
 
 // necessary to put this outside of main, print doesn't work
 static int no_libraries = 0;
-static int squelch = 0;
 
 
 
@@ -121,11 +119,6 @@ static int lua_main_postexist(lua_State* L) {
 	if(buffer2 == 0) {
 		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
 		exit(EXIT_FAILURE);
-	}
-	
-	if(squelch == 0) {
-		printf(LUA_COPYRIGHT "\n");
-		printf(LUA_CONSOLE_COPYRIGHT);
 	}
 	
 	int status = 0;
@@ -238,6 +231,7 @@ int main(int argc, char* argv[])
 	int no_file = 0;
 	char* start = 0;
 	int no_additions = 0;
+	int copyright_squelch = 0;
 	
 	int parameters = 0;
 	char** parameters_argv = 0;
@@ -283,7 +277,7 @@ int main(int argc, char* argv[])
 				no_additions = 1;
 				break;
 			case 'c': case 'C':
-				squelch = 1;
+				copyright_squelch = 1;
 				break;
 			case 'n': case 'N':
 				parameters = argc - i - 1;
@@ -335,6 +329,12 @@ int main(int argc, char* argv[])
 		lua_close(gL);
 	}
 	
+	// copyright
+	if(copyright_squelch == 0) {
+		fprintf(stdout, LUA_COPYRIGHT "\n");
+		fprintf(stdout, LUA_CONSOLE_COPYRIGHT);
+	}
+	
 	
 	// if there is nothing to do, then exit, as there is nothing left to do
 	if(no_file == 1 && post_exist != 1) {
@@ -346,7 +346,6 @@ int main(int argc, char* argv[])
 	// add additions
 	if(no_additions == 0)
 		additions_add(L);
-	
 	
 	// load function into protected mode (pcall)
 	int status = 0;
