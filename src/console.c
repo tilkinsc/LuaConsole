@@ -96,7 +96,7 @@ static void print_error(LuaConsoleError error) {
 		printf("(Runtime)");
 		break;
 	}
-	int top = lua_gettop(L);
+	size_t top = lua_gettop(L);
 	fprintf(stderr, " | Stack Top: %d | %s\n", lua_gettop(L), msg);
 	if(top > 1) // other than error message
 		stack_dump(L);
@@ -122,12 +122,12 @@ static int lua_main_dofile(lua_State* L) {
 
 
 // all-in-one function to handle file and line by line interpretation
-int start_protective_mode(lua_CFunction func, const char* file, char** parameters_argv, int param_len) {
+int start_protective_mode(lua_CFunction func, const char* file, char** parameters_argv, size_t param_len) {
 	lua_pushcclosure(L, func, 0); /* possible out of memory error in 5.2/5.1 */
 	lua_pushlstring(L, file, strlen(file)); /* possible out of memory error in 5.2/5.1 */
 	if(param_len != 0) { // load parameters in
 		lua_createtable(L, param_len, 0);
-		int i;
+		size_t i;
 		for (i=0; i<param_len; i++) {
 			lua_pushinteger(L, i+1);
 			lua_pushlstring(L, parameters_argv[i], strlen(parameters_argv[i]));
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 	int no_additions = 0;
 	int copyright_squelch = 0;
 	
-	int parameters = 0;
+	size_t parameters = 0;
 	char** parameters_argv = 0;
 	
 	// handle arguments
@@ -163,8 +163,8 @@ int main(int argc, char* argv[])
 		// don't try to execute file if it isn't first argument
 		if(argv[1][0] == '-')
 			no_file = 1;
-		int i;
-		for (i=1; i<argc; i++) {
+		size_t i;
+		for (i=1; i<(size_t)argc; i++) {
 			// if we have args around, break
 			if(parameters_argv != 0)
 				break;
