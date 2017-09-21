@@ -13,15 +13,34 @@
  * 
  */
 
-#if defined(__linux__) || defined(__unix__)
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
+// unsupported feature, defined to prepare for future
+#define USE_ADDITIONS
+
+#define PRIMARY_BUFFER_SIZE		(1024 + 1)
+#define SECONDARY_BUFFER_SIZE	(1032 + 1)
+
+#define DEFINES_INIT			4
+#define DEFINES_EXPANSION		4
+
+#if defined(linux) || defined(__linux__) || defined(__linux)
+#	include <unistd.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#elif defined(unix) || defined(__unix__) || defined(__unix)
+#	include <unistd.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#elif defined(__APPLE__) || defined(__MACH__)
+#	include <unistd.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#elif defined(_WIN32) || defined(_WIN64)
+#	include <windows.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#	include <dirent.h>
 #else
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <dirent.h>
+#	error "Not familiar. Set up headers accordingly, or -D__linux__ or -D__APPLE__ or -D_WIN32"
 #endif
 
 #include <string.h>
@@ -30,13 +49,13 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
-#include "additions.h"
+#if defined(USE_ADDITIONS)
+#	include "additions.h"
+#endif
 
 
-#define LUA_CONSOLE_COPYRIGHT "LuaConsole Copyright MIT (C) 2017 Hydroque\n"
+#define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright MIT (C) 2017 Hydroque\n"
 
-#define PRIMARY_BUFFER_SIZE 1025
-#define SECONDARY_BUFFER_SIZE 1033
 
 // internal enums, represent lua error category
 typedef enum LuaConsoleError {
@@ -68,6 +87,7 @@ const char HELP_MESSAGE[] =
 	"-p \t Has console post exist after script in line by line mode\n"
 	"-a \t Removes the additions\n"
 	"-c \t No copyright on init\n"
+	"-d \t Defines a global variable as value after '='\n"
 	"-n \t Start of parameter section\n"
 	"-? \t Displays this help message\n";
 
@@ -225,17 +245,20 @@ int start_protective_mode(lua_CFunction func, const char* file, char** parameter
 // handles arguments, cwd, loads necessary data, executes lua
 int main(int argc, char* argv[])
 {
-	int print_version = 0;
-	int change_start = 0;
-	int post_exist = 0;
-	int no_file = 0;
-	char* start = 0;
-	int no_additions = 0;
-	int copyright_squelch = 0;
+	static int print_version = 0;
+	static int change_start = 0;
+	static int post_exist = 0;
+	static int no_file = 0;
+	static char* start = 0;
+	static int no_additions = 0;
+	static int copyright_squelch = 0;
 	
-	size_t parameters = 0;
-	char** parameters_argv = 0;
+	static size_t parameters = 0;
+	static char** parameters_argv = 0;
 	
+	static size_t globals = 0;
+	static size_t globals_argv_len = 0;
+	static char** globals_argv = 0;
 	
 	// handle arguments
 	if(argc == 1) { // post-exist if !(arguments > 1)
@@ -279,8 +302,28 @@ int main(int argc, char* argv[])
 			case 'c': case 'C':
 				copyright_squelch = 1;
 				break;
+			case 'd': case 'D':
+				if(globals_argv == 0) {
+					globals_argv = malloc(DEFINES_INIT * sizeof(char*));
+					if(globals_argv == 0) {
+						fprintf(stderr, "%s\n", "[1] Out of memory");
+						return EXIT_FAILURE;
+					}
+					globals_argv_len = DEFINES_INIT;
+				}
+				if(globals == globals_argv_len) {
+					globals_argv_len += DEFINES_EXPANSION;
+					globals_argv = realloc(globals_argv, (globals_argv_len + DEFINES_EXPANSION) * sizeof(char*));
+					if(globals_argv == 0) {
+						fprintf(stderr, "%s\n", "[1] Out of memory");
+						return EXIT_FAILURE;
+					}
+				}
+				globals_argv[globals] = argv[i];
+				globals++;
+				break;
 			case 'n': case 'N':
-				parameters = argc - i - 1;
+				parameters = (argc - i) - 1;
 				parameters_argv = &(argv[i+1]);
 				break;
 			case '?':
@@ -302,10 +345,34 @@ int main(int argc, char* argv[])
 	// initiate lua
 	L = luaL_newstate();
 	if(L == 0) {
-		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
+		fprintf(stderr, "%s\n", "Lua Allocation Failed: Out of Memory");
 		return EXIT_FAILURE;
 	}
 	
+	// initiate global variables set up, needs solidifed
+	if(globals != 0) {
+		// this is a hack, need to switch to strtok that doesn't modify original string
+		for (size_t i=0; i<globals; i++) {
+			size_t len = strlen(globals_argv[i] + 2);
+			char* cpy = calloc(len + 1, 1);
+			memcpy(cpy, globals_argv[i] + 2, len + 1);
+			
+			char* temp;
+			char* left;
+			char* right;
+			
+			left = strtok_r(globals_argv[i] + 2, "=", &temp);
+			right = strtok_r(NULL, "\0", &temp);
+			
+			// TODO: check if argument has no =, therefore invalid and error
+			
+			lua_pushlstring(L, right, strlen(right));
+			lua_setglobal(L, left);
+			
+			free(cpy);
+		}
+		free(globals_argv);
+	}
 	
 	// initiate the libraries
 	if(no_libraries == 0)
@@ -354,6 +421,8 @@ int main(int argc, char* argv[])
 			status = start_protective_mode(&lua_main_dofile, argv[1], parameters_argv, parameters);
 		status = start_protective_mode(&lua_main_postexist, NULL, parameters_argv, parameters);
 	} else status = start_protective_mode(&lua_main_dofile, argv[1], parameters_argv, parameters);
+	
+	// free resources
 	lua_close(L);
 	
 	return status;
