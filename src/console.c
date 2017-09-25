@@ -280,6 +280,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 	
+	
 	// initiate global variables set up
 	if(globals != 0) {
 		for (size_t i=0; i<globals; i++) {
@@ -295,6 +296,7 @@ int main(int argc, char* argv[])
 		}
 		free(globals_argv);
 	}
+	
 	
 	// initiate the libraries
 	if(no_libraries == 0)
@@ -318,11 +320,13 @@ int main(int argc, char* argv[])
 		lua_close(gL);
 	}
 	
+	
 	// copyright
 	if(copyright_squelch == 0) {
 		fprintf(stdout, LUA_COPYRIGHT "\n");
 		fprintf(stdout, LUA_CONSOLE_COPYRIGHT);
 	}
+	
 	
 	// if there is nothing to do, then exit, as there is nothing left to do
 	if(no_file == 1) {
@@ -334,6 +338,7 @@ int main(int argc, char* argv[])
 	// add additions
 	if(no_additions == 0)
 		additions_add(L);
+	
 	
 	// load function into protected mode (pcall)
 	int status = start_protective_mode(&lua_main_dofile, argv[1], parameters_argv, parameters);
