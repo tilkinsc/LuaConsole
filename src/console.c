@@ -162,6 +162,22 @@ int start_protective_mode(lua_CFunction func, const char* file, char** parameter
 	return EXIT_SUCCESS;
 }
 
+// returns a malloc'd string with each split item being seperated by \0
+char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
+	char* cpy = malloc(len);
+	memcpy(cpy, str1, len);
+	
+	for (size_t i=0; i<len-1; i++) {
+		if(str1[i] == lookout) {
+			cpy[i] = '\0';
+			max--;
+		}
+		if(max == 0)
+			break;
+	}
+	return cpy;
+}
+
 // handles arguments, cwd, loads necessary data, executes lua
 int main(int argc, char* argv[])
 {
@@ -264,27 +280,18 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 	
-	// initiate global variables set up, needs solidifed
+	// initiate global variables set up
 	if(globals != 0) {
-		// this is a hack, need to switch to strtok that doesn't modify original string
 		for (size_t i=0; i<globals; i++) {
-			size_t len = strlen(globals_argv[i] + 2);
-			char* cpy = calloc(len + 1, 1);
-			memcpy(cpy, globals_argv[i] + 2, len + 1);
+			char* globals_D_offset = globals_argv[i] + 2;
 			
-			char* temp;
-			char* left;
-			char* right;
+			char* arg1 = strsplit(globals_D_offset, '=', strlen(globals_D_offset) + 1, 2);
+			char* arg2 = arg1 + (strlen(arg1) + 1);
 			
-			left = strtok_r(globals_argv[i] + 2, "=", &temp);
-			right = strtok_r(NULL, "\0", &temp);
+			lua_pushlstring(L, arg2, strlen(arg2));
+			lua_setglobal(L, arg1);
 			
-			// TODO: check if argument has no =, therefore invalid and error
-			
-			lua_pushlstring(L, right, strlen(right));
-			lua_setglobal(L, left);
-			
-			free(cpy);
+			free(arg1);
 		}
 		free(globals_argv);
 	}
