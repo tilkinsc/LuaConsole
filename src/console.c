@@ -13,9 +13,6 @@
  * 
  */
 
-// unsupported feature, defined to prepare for future
-#define USE_ADDITIONS
-
 #define PRIMARY_BUFFER_SIZE		(1024 + 1)
 #define SECONDARY_BUFFER_SIZE	(1032 + 1)
 
@@ -40,7 +37,7 @@
 #	include <stdlib.h>
 #	include <dirent.h>
 #else
-#	error "Not familiar. Set up headers accordingly, or -D__linux__ or -D__APPLE__ or -D_WIN32"
+#	error "Not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
 #endif
 
 #include <string.h>
@@ -49,7 +46,7 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
-#if defined(USE_ADDITIONS)
+#if defined(LUACON_ADDITIONS)
 #	include "additions.h"
 #endif
 
@@ -67,7 +64,7 @@ typedef enum LuaConsoleError {
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua Console | Version: 6/13/2017\n"
+	"Lua Console | Version: 9/26/2017\n"
 	LUA_COPYRIGHT
 	LUA_CONSOLE_COPYRIGHT
 	"\n"
@@ -76,14 +73,18 @@ const char HELP_MESSAGE[] =
 	"\n"
 	"\t- Files executed by passing\n"
 	"\t- Working directory support\n"
-	"\t- Built in stack-dump\n"
+	#if defined(LUACON_ADDITIONS)
+		"\t- Built in stack-dump\n"
+	#endif
 	"\n"
 	"Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-a] [-c] [-?] [-n]{parameter1 ...} \n"
 	"\n"
 	"-v \t Prints the Lua version in use\n"
 	"-e \t Prevents lua core libraries from loading\n"
 	"-s \t Issues a new root path\n"
-	"-a \t Removes the additions\n"
+	#if defined(LUACON_ADDITIONS)
+		"-a \t Removes the additions\n"
+	#endif
 	"-c \t No copyright on init\n"
 	"-d \t Defines a global variable as value after '='\n"
 	"-n \t Start of parameter section\n"
@@ -116,9 +117,11 @@ static void print_error(LuaConsoleError error) {
 		break;
 	}
 	size_t top = lua_gettop(L);
-	fprintf(stderr, " | Stack Top: %d | %s\n", lua_gettop(L), msg);
-	if(top > 1) // other than error message
-		stack_dump(L);
+	fprintf(stderr, " | Stack Top: %Iu | %s\n", top, msg);
+	#if defined(LUACON_ADDITIONS)
+		if(top > 1) // other than error message
+			stack_dump(L);
+	#endif
 	lua_pop(L, 1);
 }
 
@@ -167,6 +170,8 @@ char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 	char* cpy = malloc(len);
 	memcpy(cpy, str1, len);
 	
+	size_t temp_max = max;
+	
 	for (size_t i=0; i<len-1; i++) {
 		if(str1[i] == lookout) {
 			cpy[i] = '\0';
@@ -174,6 +179,10 @@ char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 		}
 		if(max == 0)
 			break;
+	}
+	if(temp_max == max) {
+		free(cpy);
+		return 0;
 	}
 	return cpy;
 }
@@ -185,7 +194,9 @@ int main(int argc, char* argv[])
 	static int change_start = 0;
 	static int no_file = 0;
 	static char* start = 0;
-	static int no_additions = 0;
+	#if defined(LUACON_ADDITIONS)
+		static int no_additions = 0;
+	#endif
 	static int copyright_squelch = 0;
 	
 	static size_t parameters = 0;
@@ -227,9 +238,11 @@ int main(int argc, char* argv[])
 				change_start = 1;
 				start = argv[i+1];
 				break;
-			case 'a': case 'A':
-				no_additions = 1;
-				break;
+			#if defined(LUACON_ADDITIONS)
+				case 'a': case 'A':
+					no_additions = 1;
+					break;
+			#endif
 			case 'c': case 'C':
 				copyright_squelch = 1;
 				break;
@@ -286,7 +299,13 @@ int main(int argc, char* argv[])
 		for (size_t i=0; i<globals; i++) {
 			char* globals_D_offset = globals_argv[i] + 2;
 			
-			char* arg1 = strsplit(globals_D_offset, '=', strlen(globals_D_offset) + 1, 2);
+			char* m_args = strsplit(globals_D_offset, '=', strlen(globals_D_offset) + 1, 2);
+			if(m_args == 0) {
+				fprintf(stderr, "Error: Incorrect -D specified. Use format 'name=value'.\n");
+				return EXIT_FAILURE;
+			}
+			
+			char* arg1 = m_args;
 			char* arg2 = arg1 + (strlen(arg1) + 1);
 			
 			lua_pushlstring(L, arg2, strlen(arg2));
@@ -335,9 +354,11 @@ int main(int argc, char* argv[])
 	}
 	
 	
-	// add additions
-	if(no_additions == 0)
-		additions_add(L);
+	#if defined(LUACON_ADDITIONS)
+		// add additions
+		if(no_additions == 0)
+			additions_add(L);
+	#endif
 	
 	
 	// load function into protected mode (pcall)

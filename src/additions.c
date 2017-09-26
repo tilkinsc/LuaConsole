@@ -5,16 +5,26 @@
  * 
  */
 
-
-#if defined(__linux__) || defined(__unix__)
-#include <unistd.h>
+#if defined(linux) || defined(__linux__) || defined(__linux)
+#	include <unistd.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#elif defined(unix) || defined(__unix__) || defined(__unix)
+#	include <unistd.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#elif defined(__APPLE__) || defined(__MACH__)
+#	include <unistd.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#elif defined(_WIN32) || defined(_WIN64)
+#	include <windows.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#	include <dirent.h>
 #else
-#include <dirent.h>
+#	error "Not familiar. Set up headers accordingly, or -D__linux__ or -D__APPLE__ or -D_WIN32"
 #endif
-
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "additions.h"
 
@@ -24,9 +34,9 @@
 
 
 #ifdef _WIN32
-#define CLEAR_CONSOLE "cls"
+#	define CLEAR_CONSOLE "cls"
 #else
-#define CLEAR_CONSOLE "clear"
+#	define CLEAR_CONSOLE "clear"
 #endif
 
 
