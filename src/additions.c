@@ -23,7 +23,7 @@
 #	include <stdlib.h>
 #	include <dirent.h>
 #else
-#	error "Not familiar. Set up headers accordingly, or -D__linux__ or -D__APPLE__ or -D_WIN32"
+#	error "Not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
 #endif
 
 #include "additions.h"
