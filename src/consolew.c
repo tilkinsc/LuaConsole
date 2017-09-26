@@ -135,12 +135,12 @@ static void print_error(LuaConsoleError error) {
 static int lua_main_postexist(lua_State* L) {
 	char* buffer = malloc(PRIMARY_BUFFER_SIZE);
 	if(buffer == 0) {
-		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
+		fprintf(stderr, "%s\n", "Error: Out of memory.");
 		exit(EXIT_FAILURE);
 	}
 	char* buffer2 = malloc(SECONDARY_BUFFER_SIZE);
 	if(buffer2 == 0) {
-		fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
+		fprintf(stderr, "%s\n", "Error: Out of memory.");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -248,6 +248,10 @@ int start_protective_mode(lua_CFunction func, const char* file, char** parameter
 // returns a malloc'd string with each split item being seperated by \0
 char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 	char* cpy = malloc(len);
+	if(cpy == 0) {
+		fprintf(stderr, "Error: Out of memory.\n");
+		return 0;
+	}
 	memcpy(cpy, str1, len);
 	
 	size_t temp_max = max;
@@ -261,6 +265,7 @@ char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 			break;
 	}
 	if(temp_max == max) {
+		fprintf(stderr, "Error: Incorrect -D specified. Use format 'name=value'.\n");
 		free(cpy);
 		return 0;
 	}
@@ -335,7 +340,7 @@ int main(int argc, char* argv[])
 				if(globals_argv == 0) {
 					globals_argv = malloc(DEFINES_INIT * sizeof(char*));
 					if(globals_argv == 0) {
-						fprintf(stderr, "%s\n", "[1] Out of memory");
+						fprintf(stderr, "%s\n", "Error: Out of memory.");
 						return EXIT_FAILURE;
 					}
 					globals_argv_len = DEFINES_INIT;
@@ -344,7 +349,7 @@ int main(int argc, char* argv[])
 					globals_argv_len += DEFINES_EXPANSION;
 					globals_argv = realloc(globals_argv, (globals_argv_len + DEFINES_EXPANSION) * sizeof(char*));
 					if(globals_argv == 0) {
-						fprintf(stderr, "%s\n", "[1] Out of memory");
+						fprintf(stderr, "%s\n", "Error: Out of memory.");
 						return EXIT_FAILURE;
 					}
 				}
@@ -365,7 +370,7 @@ int main(int argc, char* argv[])
 	
 	// make sure to start in the requested directory, if any
 	if(change_start == 1 && chdir(start) == -1) {
-		fprintf(stderr, "%s\n", "Invalid start directory supplied");
+		fprintf(stderr, "%s\n", "Error: Invalid start directory supplied.");
 		fprintf(stdout, "%s\n", HELP_MESSAGE);
 		return EXIT_FAILURE;
 	}
@@ -374,7 +379,7 @@ int main(int argc, char* argv[])
 	// initiate lua
 	L = luaL_newstate();
 	if(L == 0) {
-		fprintf(stderr, "%s\n", "Lua Allocation Failed: Out of Memory");
+		fprintf(stderr, "%s\n", "Lua Allocation Error: Out of memory.");
 		return EXIT_FAILURE;
 	}
 	
@@ -385,10 +390,8 @@ int main(int argc, char* argv[])
 			char* globals_D_offset = globals_argv[i] + 2;
 			
 			char* m_args = strsplit(globals_D_offset, '=', strlen(globals_D_offset) + 1, 2);
-			if(m_args == 0) {
-				fprintf(stderr, "Error: Incorrect -D specified. Use format 'name=value'.\n");
+			if(m_args == 0)
 				return EXIT_FAILURE;
-			}
 			
 			char* arg1 = m_args;
 			char* arg2 = arg1 + (strlen(arg1) + 1);
@@ -411,7 +414,7 @@ int main(int argc, char* argv[])
 	if(print_version == 1) {
 		lua_State* gL = luaL_newstate();
 		if(gL == 0) {
-			fprintf(stderr, "%s\n", "Allocation Failed: Out of Memory");
+			fprintf(stderr, "%s\n", "Error: Out of memory.");
 			return EXIT_FAILURE;
 		}
 		
