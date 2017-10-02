@@ -64,8 +64,9 @@ typedef enum LuaConsoleError {
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua Console | Version: 9/26/2017\n"
+	"Lua Console | Version: 10/02/2017\n"
 	LUA_COPYRIGHT
+	"\n"
 	LUA_CONSOLE_COPYRIGHT
 	"\n"
 	"Supports Lua5.3, Lua5.2, Lua5.1\n"
@@ -73,8 +74,9 @@ const char HELP_MESSAGE[] =
 	"\n"
 	"\t- Line by Line interpretation\n"
 	"\t- Files executed by passing\n"
-	"\t- Working directory support\n"
+	"\t- Global variable defintions\n"
 	#if defined(LUACON_ADDITIONS)
+		"\t- Working directory support\n"
 		"\t- Built in stack-dump\n"
 	#endif
 	"\n"
@@ -85,7 +87,7 @@ const char HELP_MESSAGE[] =
 	"-s \t Issues a new root path\n"
 	"-p \t Has console post exist after script in line by line mode\n"
 	#if defined(LUACON_ADDITIONS)
-		"-a \t Removes the additions\n"
+		"-a \t Disables the additions\n"
 	#endif
 	"-c \t No copyright on init\n"
 	"-d \t Defines a global variable as value after '='\n"
@@ -265,11 +267,20 @@ char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 			break;
 	}
 	if(temp_max == max) {
-		fprintf(stderr, "Error: Incorrect -D specified. Use format 'name=value'.\n");
 		free(cpy);
 		return 0;
 	}
 	return cpy;
+}
+
+// counts the number of 'char c' occurances in a string
+size_t strcnt(const char* str1, char c) {
+	size_t count = 0;
+	while(*str1 != '\0') {
+		count += (*str1 == c ? 1 : 0);
+		str1++;
+	}
+	return count;
 }
 
 // handles arguments, cwd, loads necessary data, executes lua
@@ -337,7 +348,7 @@ int main(int argc, char* argv[])
 				copyright_squelch = 1;
 				break;
 			case 'd': case 'D':
-				if(globals_argv == 0) {
+				if(globals_argv == 0) { // reserve default space for globals
 					globals_argv = malloc(DEFINES_INIT * sizeof(char*));
 					if(globals_argv == 0) {
 						fprintf(stderr, "%s\n", "Error: Out of memory.");
@@ -345,7 +356,7 @@ int main(int argc, char* argv[])
 					}
 					globals_argv_len = DEFINES_INIT;
 				}
-				if(globals == globals_argv_len) {
+				if(globals == globals_argv_len) { // expand default space if needed
 					globals_argv_len += DEFINES_EXPANSION;
 					globals_argv = realloc(globals_argv, (globals_argv_len + DEFINES_EXPANSION) * sizeof(char*));
 					if(globals_argv == 0) {
@@ -390,16 +401,66 @@ int main(int argc, char* argv[])
 			char* globals_D_offset = globals_argv[i] + 2;
 			
 			char* m_args = strsplit(globals_D_offset, '=', strlen(globals_D_offset) + 1, 2);
-			if(m_args == 0)
+			if(m_args == 0) {
+				fprintf(stderr, "Error: Incorrect -D specified. Use format 'name=value'.\n");
 				return EXIT_FAILURE;
-			
+			}
 			char* arg1 = m_args;
 			char* arg2 = arg1 + (strlen(arg1) + 1);
+			
+			// check for .'s to nest in table
+			size_t dot_count = strcnt(arg1, '.');
+			if(dot_count != 0) {
+				dot_count++; // counts number of .'s, not splits
+				char** args = malloc(dot_count * sizeof(char*));
+				if(args == 0) {
+					fprintf(stderr, "%s\n", "Error: Out of memory.");
+					return EXIT_FAILURE;
+				}
+				
+				char* d_args = strsplit(arg1, '.', strlen(arg1) + 1, -1);
+				if(d_args == 0) {
+					fprintf(stderr, "%s\n", "Error: Incorrect -D specified. Use format 'name.sub=value'.\n");
+					return EXIT_FAILURE;
+				}
+				
+				size_t offset = 0;
+				for (size_t l=0; l<dot_count; l++) {
+					args[l] = d_args + offset;
+					offset += (strlen(args[l]) + 1);
+				}
+				
+				lua_getglobal(L, args[0]);
+				int istab = lua_istable(L, -1);
+				if(istab == 0) {
+					lua_pop(L, 1);
+					lua_newtable(L);
+				}
+				for (size_t l=1; l<dot_count - 1; l++) {
+					lua_getfield(L, -1, args[l]);
+					if(lua_istable(L, -1) == 0) {
+						lua_pop(L, 1);
+						lua_newtable(L);
+						lua_setfield(L, -2, args[l]);
+						lua_getfield(L, -1, args[l]);
+					}
+				}
+				lua_pushlstring(L, arg2, strlen(arg2));
+				lua_setfield(L, -2, args[dot_count - 1]);
+				lua_pop(L, dot_count-2);
+				if(istab == 0)
+					lua_setglobal(L, args[0]);
+				
+				free(d_args);
+				free(args);
+				free(m_args);
+				continue;
+			}
 			
 			lua_pushlstring(L, arg2, strlen(arg2));
 			lua_setglobal(L, arg1);
 			
-			free(arg1);
+			free(m_args);
 		}
 		free(globals_argv);
 	}
