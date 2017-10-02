@@ -47,7 +47,7 @@ Put luaw.exe into C:\Windows\System32 and use resource hacker program (3rd party
 - see a cool icon on all your .lua files
 - get a cool icon on your .exe
 - (can add ;.LUA to EXTS env variable so you don't have to type in full name to run the file, eg "run" instead of "run.lua")
-- call files like this: `luafile.lua -Dtest=5 -p -n a b c` (which runs luafile.lua with luaw.exe, defines global test = 5, and sets args to {a, b, c})
+- call files like this: `luafile.lua -Dtest=5 -p -n a b c` (which runs luafile.lua with luaw.exe, defines global test = 5, and sets args to {a, b, c}, and finally post-exists to use the interpretor)
 
 ```reg
 Windows Registry Editor Version 5.00
