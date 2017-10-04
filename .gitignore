@@ -1,5 +1,7 @@
 /.settings
 /.git
 
-/src/*.o
-/src/*.exe
+/obj/*.o
+/bin/*
+/bin/Debug/*
+/bin/Release/*
