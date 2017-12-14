@@ -2,6 +2,12 @@
 
 A simple, powerful lua console with the intent of replacing CMD and Terminal + Lua's source console
 
+## TODO
+* Add package manager support which people like to use
+* Move additions to separate global table 'add'
+* Ensure that it builds on linux and all includes are there and used
+* Triple check buffer overflows and mem alignment and memleaks
+
 # About
 
 Lua Console | Version: 9/26/2017
