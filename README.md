@@ -38,9 +38,33 @@ For example, <br>
 >1:(Number):1 <br>
 >----------- Stack Dump Finished ----------- <br>
 
-This sure beats `print(type(data), data)` calls, and can be used to detect anything left on the stack in C. To add your own C functions, inherit the project and modify the additions.c file only.
+This sure beats `print(type(data), data)` calls, and can be used to detect anything left on the stack in C. To add your own C functions, inherit the project and modify the additions.c file only. Another method to adding C functions is creating a similar dll file:
+```
+#include <stdio.h>
 
-Added very comprehensive error feedback, which tells you about the stack (stack dumps if not just the error is on the stack), the type of error (syntax/runtime), and the regular lua feedback string with the line number sammich'd between two colons.
+#include "lua.h"
+
+#define DLL_EXPORT __declspec(dllexport)
+#define LUA_DLL_EXPORT __declspec(dllexport) int
+
+LUA_DLL_EXPORT luaopen_testdll(lua_State *L) {
+	// TODO: add things to environment
+  puts("Loaded!")
+	return 0;
+}
+```
+This is how LuaRocks does it, but they have file formats and containers. Everything LuaRocks compiles down to a dll or two, gets loaded, then taken over by whatever lua script loaded it. Then just compile and run load it in lua:
+```
+gcc -g0 -O2 -Wall -c testdll.c
+gcc -g0 -O2 -Wall -shared -o testdll.dll testdll.o
+```
+```
+testdll = package.loadlib("testdll.dll", "luaopen_testdll")
+print(testdll) -> function
+testdll()  -> Loaded!
+```
+
+Added very comprehensive error feedback, which tells you about the stack (stack dumps, too, if not just the error is on the stack), the type of error (syntax/runtime), and the regular lua feedback string with the line number sammich'd between two colons.
 
 For example, <br>
 >\>. <br>
