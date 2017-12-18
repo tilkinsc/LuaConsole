@@ -40,16 +40,16 @@ For example, <br>
 
 This sure beats `print(type(data), data)` calls, and can be used to detect anything left on the stack in C. To add your own C functions, inherit the project and modify the additions.c file only. Another method to adding C functions is creating a similar dll file:
 ```
-#include <stdio.h>
 
+#include <stdio.h>
 #include "lua.h"
 
-#define DLL_EXPORT __declspec(dllexport)
-#define LUA_DLL_EXPORT __declspec(dllexport) int
+#define DLL_EXPORT	__declspec(dllexport)
+#define LUA_DLL_EXPORT	DLL_EXPORT int
 
 LUA_DLL_EXPORT luaopen_testdll(lua_State *L) {
-	// TODO: add things to environment
-  puts("Loaded!")
+	// TODO: load things into the lua_State
+	puts("Loaded successfully!");
 	return 0;
 }
 ```
