@@ -2,6 +2,7 @@
 /.git
 
 /obj/*.o
+/src/*.o
 /bin/*
 /bin/Debug/*
 /bin/Release/*
