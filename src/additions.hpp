@@ -6,7 +6,6 @@
 extern "C" {
 #endif
 
-// I don't like this include here
 #include "lua.h" 
 
 int stack_dump(lua_State* L);

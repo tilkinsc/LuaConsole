@@ -11,7 +11,7 @@ local tab2arr = function(tab, bolster)
 end
 
 build_func.gcc_c = function(windows, g, O, warnings, extrawarn, extra, defines, includesd, librariesd, sources, preprocess)
-	local str = "gcc"
+	local str = gcc_name ..
 		.. (windows and " -mwindows" or "")
 		.. (g and (" -g" .. g) or "")
 		.. (O and (" -O" .. O) or "")
@@ -29,7 +29,7 @@ end
 
 
 build_func.gcc_l = function(windows, g, O, warnings, extrawarn, defines, extra, includesd, librariesd, exe_name, objects, libs, preprocess)
-	local str = "gcc"
+	local str = gcc_name ..
 		.. (windows and " -mwindows" or "")
 		.. (g and (" -g" .. g) or "")
 		.. (O and (" -O" .. O) or "")

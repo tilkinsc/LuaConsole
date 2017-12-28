@@ -4,6 +4,7 @@
 --]]
 
 gcc = {
+	gcc_name = "gcc";
 	debug = true;
 	warnings = " -Wall";
 	windows = false;
