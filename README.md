@@ -71,7 +71,7 @@ For example, <br>
 >(Syntax) | Stack Top: 1 | [string "."]:1: unexpected symbol near '.' <br>
 
 # Using with LuaRocks
-(Windows MinGW)[https://github.com/Hydroque/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW]
+[Windows MinGW](https://github.com/Hydroque/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW)
 
 # Bonus
 
