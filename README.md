@@ -3,7 +3,6 @@
 A simple, powerful lua console with the intent of replacing CMD and Terminal + Lua's source console
 
 ### TODO
-* Add package manager support which people like to use
 * Move additions to separate global table 'add'
 * Ensure that it builds on linux and all includes are there and used
 * Triple check buffer overflows and mem alignment and memleaks
@@ -62,7 +61,7 @@ gcc -g0 -O2 -Wall -shared -o testdll.dll testdll.o
 ```
 testdll = package.loadlib("testdll.dll", "luaopen_testdll")
 print(testdll) -> function
-testdll()  -> Loaded!
+testdll()  -> Loaded successfully!
 ```
 
 Added very comprehensive error feedback, which tells you about the stack (stack dumps, too, if not just the error is on the stack), the type of error (syntax/runtime), and the regular lua feedback string with the line number sammich'd between two colons.
@@ -70,6 +69,9 @@ Added very comprehensive error feedback, which tells you about the stack (stack 
 For example, <br>
 >\>. <br>
 >(Syntax) | Stack Top: 1 | [string "."]:1: unexpected symbol near '.' <br>
+
+# Using with LuaRocks
+[Windows MinGW](https://github.com/Hydroque/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW)
 
 # Bonus
 
