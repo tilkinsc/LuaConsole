@@ -124,7 +124,7 @@ static void print_error(LuaConsoleError error) {
 		break;
 	}
 	size_t top = lua_gettop(L);
-	fprintf(stderr, " | Stack Top: %Iu | %s\n", top, msg);
+	fprintf(stderr, " | Stack Top: %zu | %s\n", top, msg);
 	#if defined(LUACON_ADDITIONS)
 		if(top > 1) // other than error message
 			stack_dump(L);
@@ -159,7 +159,7 @@ static int lua_main_postexist(lua_State* L) {
 		buffer[strlen(buffer)-1] = '\0'; // remove \n
 		snprintf(buffer2, SECONDARY_BUFFER_SIZE - 1, "return %s;", buffer);
 		
-		// do first test
+		// load first test
 		status = luaL_loadstring(L, buffer2);
 		if(status != 0) {
 			lua_pop(L, 1);
@@ -183,7 +183,7 @@ static int lua_main_postexist(lua_State* L) {
 			lua_pop(L, 1);
 		}
 		
-		// do originally inserted code
+		// load originally inserted code
 		status = luaL_loadstring(L, buffer);
 		if(status != 0) {
 			print_error(SYNTAX_ERROR);

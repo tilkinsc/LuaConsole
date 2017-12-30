@@ -2,16 +2,16 @@
 local build_func = {}
 
 local tab2arr = function(tab, bolster)
-	bolseter = bolster and bolster or ""
+	bolster = bolster and bolster or ""
 	local str = ""
 	for i, v in pairs(tab)do
-		str = str .. (bolseter or " ") .. v
+		str = str .. (bolster or " ") .. v
 	end
 	return str
 end
 
 build_func.gcc_c = function(windows, g, O, warnings, extrawarn, extra, defines, includesd, librariesd, sources, preprocess)
-	local str = gcc_name ..
+	local str = gcc.gcc_name
 		.. (windows and " -mwindows" or "")
 		.. (g and (" -g" .. g) or "")
 		.. (O and (" -O" .. O) or "")
@@ -29,7 +29,7 @@ end
 
 
 build_func.gcc_l = function(windows, g, O, warnings, extrawarn, defines, extra, includesd, librariesd, exe_name, objects, libs, preprocess)
-	local str = gcc_name ..
+	local str = gcc.gcc_name
 		.. (windows and " -mwindows" or "")
 		.. (g and (" -g" .. g) or "")
 		.. (O and (" -O" .. O) or "")

@@ -5,8 +5,11 @@ require("build_setup")
 
 -- things to compile
 local compilation_units = {
-	"console.c", "consolew.c", "additions.c"
+	"console.c", "consolew.c", "additions.c", "darr.c"
 }
+
+local linker_units_1 = {"console.o", "additions.o", "darr.o"}
+local linker_units_2 = {"consolew.o", "additions.o", "darr.o"}
 
 
 -- compile and link strings
@@ -34,7 +37,7 @@ local linker_string_1w = build_func.gcc_l(
 					gcc.include_dir,
 					gcc.library_dir,
 					linker_string_1n,
-					{"console.o", "additions.o"},
+					linker_units_1,
 					gcc.libraries)
 
 local linker_string_2n = "luaw.exe"
@@ -49,7 +52,7 @@ local linker_string_2w = build_func.gcc_l(
 					gcc.include_dir,
 					gcc.library_dir,
 					linker_string_2n,
-					{"consolew.o", "additions.o"},
+					linker_units_2,
 					gcc.libraries)
 
 -- compilation
@@ -57,7 +60,7 @@ print(">>> Compiling for " .. (gcc.debug and "DEBUG" or "RELEASE"))
 print(">", compiler_string)
 os.execute(compiler_string)
 print(">>> Moving object files into /obj")
-os.execute(move("*.o", "obj"))
+os.execute(move_v("*.o", "obj"))
 
 -- lua.exe
 print(">>> Linking " .. linker_string_1n)

@@ -33,7 +33,7 @@
 #include "lauxlib.h"
 
 
-#ifdef _WIN32
+#ifdef defined(_WIN32) || defined(_WIN64)
 #	define CLEAR_CONSOLE "cls"
 #else
 #	define CLEAR_CONSOLE "clear"

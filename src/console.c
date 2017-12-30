@@ -119,7 +119,7 @@ static void print_error(LuaConsoleError error) {
 		break;
 	}
 	size_t top = lua_gettop(L);
-	fprintf(stderr, " | Stack Top: %Iu | %s\n", top, msg);
+	fprintf(stderr, " | Stack Top: %zu | %s\n", top, msg);
 	#if defined(LUACON_ADDITIONS)
 		if(top > 1) // other than error message
 			stack_dump(L);
