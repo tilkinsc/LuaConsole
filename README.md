@@ -61,7 +61,7 @@ gcc -g0 -O2 -Wall -shared -o testdll.dll testdll.o
 ```
 testdll = package.loadlib("testdll.dll", "luaopen_testdll")
 print(testdll) -> function
-testdll()  -> Loaded!
+testdll()  -> Loaded successfully!
 ```
 
 Added very comprehensive error feedback, which tells you about the stack (stack dumps, too, if not just the error is on the stack), the type of error (syntax/runtime), and the regular lua feedback string with the line number sammich'd between two colons.
