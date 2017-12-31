@@ -30,6 +30,11 @@ fi
 mkdir -p $root
 mkdir -p $root/res
 
+chmod +x lua
+chmod +x luaw
+chmod +x lua_add
+chmod +x luaw_add
+
 mv *.o $objdir
 mv lua $root
 mv luaw $root
