@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-root=../bin/debug
+root=../bin/release
 objdir=../obj
 resdir=../res
 
