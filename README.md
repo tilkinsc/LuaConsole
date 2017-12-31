@@ -4,7 +4,6 @@ A simple, powerful lua console with the intent of replacing CMD and Terminal + L
 
 ### TODO
 * Move additions to separate global table 'add'
-* Ensure that it builds on linux and all includes are there and used
 * Triple check buffer overflows and mem alignment and memleaks
 * Add `-l string` option to allow dll's to be loaded easier
 
@@ -72,37 +71,8 @@ For example, <br>
 
 # Using with LuaRocks
 [Windows MinGW](https://github.com/Hydroque/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW)
+[Linux GCC](https://github.com/Hydroque/LuaConsole/wiki/LuaRocks-Support-Linux-GCC)
+[Mac GCC](https://github.com/Hydroque/LuaConsole/wiki/LuaRocks-Support-Mac-GCC)
 
 # Bonus
-
-Put luaw.exe into C:\Windows\System32 and use resource hacker program (3rd party program) to put an icon into your .exe at -1, and enjoy this context menu edit (as well as graphics with the .reg script below). Use at your own discression. I can't be held accountable for you breaking your system, as registry is pretty delicate. This was written for windows 7, so it may differ in 10 except for XP.
-- allows to be in the common path
-- see a cool icon on all your .lua files
-- get a cool icon on your .exe
-- (can add ;.LUA to EXTS env variable so you don't have to type in full name to run the file, eg "run" instead of "run.lua")
-- call files like this: `luafile.lua -Dtest=5 -p -n a b c` (which runs luafile.lua with luaw.exe, defines global test = 5, and sets args to {a, b, c}, and finally post-exists to use the interpretor)
-
-```reg
-Windows Registry Editor Version 5.00
-
-[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe]
-
-[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe\DefaultIcon]
-@="C:\\windows\\System32\\luaw.exe,-1"
-
-[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe\shell]
-
-[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe\shell\open]
-
-[HKEY_CURRENT_USER\Software\Classes\Applications\luaw.exe\shell\open\command]
-@="\"C:\\Windows\\System32\\luaw.exe\" \"%1\" %*"
-
-[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.lua]
-
-[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.lua\OpenWithList]
-"a"="luaw.exe"
-"MRUList"="a"
-
-[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.lua\UserChoice]
-"Progid"="Applications\\luaw.exe"
-```
+[Windows Bonus Flashy Icons and Ease of Open](https://github.com/Hydroque/LuaConsole/wiki/Windows-Bonus---Flashy-Icons-and-Ease-of-Open)
