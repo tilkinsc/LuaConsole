@@ -491,7 +491,7 @@ int main(int argc, char* argv[])
 	
 	// copyright
 	if(copyright_squelch == 0) {
-		fputs(LUA_COPYRIGHT, stdout);
+		fputs(LUA_COPYRIGHT "\n", stdout);
 		fputs(LUA_CONSOLE_COPYRIGHT, stdout);
 	}
 	
