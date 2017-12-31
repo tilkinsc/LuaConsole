@@ -109,13 +109,13 @@ static void print_error(LuaConsoleError error) {
 	const char* msg = lua_tostring(L, 1);
 	switch(error) {
 	case INTERNAL_ERROR:
-		printf("(Internal)");
+		fprintf(stderr, "(Internal)");
 		break;
 	case SYNTAX_ERROR:
-		printf("(Syntax)");
+		fprintf(stderr, "(Syntax)");
 		break;
 	case RUNTIME_ERROR:
-		printf("(Runtime)");
+		fprintf(stderr, "(Runtime)");
 		break;
 	}
 	size_t top = lua_gettop(L);
@@ -171,7 +171,7 @@ int start_protective_mode(lua_CFunction func, const char* file, char** parameter
 char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 	char* cpy = malloc(len);
 	if(cpy == 0) {
-		fprintf(stderr, "Error: Out of memory.\n");
+		fputs("Error: Out of memory.", stderr);
 		return 0;
 	}
 	memcpy(cpy, str1, len);
@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
 				if(globals_argv == 0) { // reserve default space for globals
 					globals_argv = malloc(DEFINES_INIT * sizeof(char*));
 					if(globals_argv == 0) {
-						fprintf(stderr, "%s\n", "Error: Out of memory.");
+						fputs("Error: Out of memory.", stderr);
 						return EXIT_FAILURE;
 					}
 					globals_argv_len = DEFINES_INIT;
@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
 					globals_argv_len += DEFINES_EXPANSION;
 					globals_argv = realloc(globals_argv, (globals_argv_len + DEFINES_EXPANSION) * sizeof(char*));
 					if(globals_argv == 0) {
-						fprintf(stderr, "%s\n", "Error: Out of memory.");
+						fputs("Error: Out of memory.", stderr);
 						return EXIT_FAILURE;
 					}
 				}
@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
 				parameters_argv = &(argv[i+1]);
 				break;
 			case '?':
-				fprintf(stdout, "%s\n", HELP_MESSAGE);
+				fputs(HELP_MESSAGE, stdout);
 				return EXIT_SUCCESS;
 			}
 		}
@@ -296,8 +296,8 @@ int main(int argc, char* argv[])
 	
 	// make sure to start in the requested directory, if any
 	if(change_start == 1 && chdir(start) == -1) {
-		fprintf(stderr, "%s\n", "Error: Invalid start directory supplied.");
-		fprintf(stdout, "%s\n", HELP_MESSAGE);
+		fputs("Error: Invalid start directory supplied.", stderr);
+		fputs(HELP_MESSAGE, stdout);
 		return EXIT_FAILURE;
 	}
 	
@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
 	// initiate lua
 	L = luaL_newstate();
 	if(L == 0) {
-		fprintf(stderr, "%s\n", "Lua Allocation Error: Out of Memory.");
+		fputs("Lua Allocation Error: Out of Memory.", stderr);
 		return EXIT_FAILURE;
 	}
 	
@@ -317,7 +317,7 @@ int main(int argc, char* argv[])
 			
 			char* m_args = strsplit(globals_D_offset, '=', strlen(globals_D_offset) + 1, 2);
 			if(m_args == 0) {
-				fprintf(stderr, "Error: Incorrect -D specified. Use format 'name=value'.\n");
+				fputs("Error: Incorrect -D specified. Use format 'name=value'.", stderr);
 				return EXIT_FAILURE;
 			}
 			char* arg1 = m_args;
@@ -329,13 +329,13 @@ int main(int argc, char* argv[])
 				dot_count++; // counts number of .'s, not splits
 				char** args = malloc(dot_count * sizeof(char*));
 				if(args == 0) {
-					fprintf(stderr, "%s\n", "Error: Out of memory.");
+					fputs("Error: Out of memory.", stderr);
 					return EXIT_FAILURE;
 				}
 				
 				char* d_args = strsplit(arg1, '.', strlen(arg1) + 1, -1);
 				if(d_args == 0) {
-					fprintf(stderr, "%s\n", "Error: Incorrect -D specified. Use format 'name.sub=value'.\n");
+					fputs("Error: Incorrect -D specified. Use format 'name.sub=value'.", stderr);
 					return EXIT_FAILURE;
 				}
 				
@@ -390,7 +390,7 @@ int main(int argc, char* argv[])
 	if(print_version == 1) {
 		lua_State* gL = luaL_newstate();
 		if(gL == 0) {
-			fprintf(stderr, "%s\n", "Error: Out of memory.");
+			fputs("Error: Out of memory.", stderr);
 			return EXIT_FAILURE;
 		}
 		
@@ -398,7 +398,7 @@ int main(int argc, char* argv[])
 		
 		// print lua version
 		lua_getglobal(gL, "_VERSION");
-		fprintf(stdout, "%s\n", lua_tostring(gL, 1));
+		fputs(lua_tostring(gL, 1), stdout);
 		lua_pop(gL, 1);
 		lua_close(gL);
 	}
@@ -406,8 +406,8 @@ int main(int argc, char* argv[])
 	
 	// copyright
 	if(copyright_squelch == 0) {
-		fprintf(stdout, LUA_COPYRIGHT "\n");
-		fprintf(stdout, LUA_CONSOLE_COPYRIGHT);
+		fputs(LUA_COPYRIGHT, stdout);
+		fputs(LUA_CONSOLE_COPYRIGHT, stdout);
 	}
 	
 	

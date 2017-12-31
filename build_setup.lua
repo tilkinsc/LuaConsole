@@ -13,7 +13,7 @@ gcc = {
 	include_dir = " -I. -Iinclude";
 	library_dir = " -L. -Llib -Ldll";
 	extras = "";
-	defines = " -DLUACON_ADDITIONS";
+	defines = " -DLUACON_ADDITIONS -D__USE_MINGW_ANSI_STDIO=1";
 }
 gcc.g = gcc.debug and 3 or 0
 gcc.O = gcc.debug and 0 or 2
