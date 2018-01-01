@@ -3,6 +3,7 @@
 A simple, powerful lua console with the intent of replacing CMD and Terminal + Lua's source console
 
 ### TODO
+* Make the loading of additions a separate package .dll, gets rid of a lot of complexity
 * Move additions to separate global table 'add'
 * Triple check buffer overflows and mem alignment and memleaks, as well as iffy -1 versus 1 when using lua_*
 
