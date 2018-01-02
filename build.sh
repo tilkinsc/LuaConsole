@@ -5,47 +5,41 @@ objdir=../obj
 resdir=../res
 
 cd src
-
-# Compile everything release w/ additions
-gcc -std=gnu99 -Wall -O2 -g0 -DLUACON_ADDITIONS -c console.c consolew.c additions.c
-
-# Link luaw
-gcc -std=gnu99 -s -Wall -O2 -g0 -o lua_add console.o additions.o -Wl,-E -ldl -lm -llua
-
-# Link lua
-gcc -std=gnu99 -s -Wall -O2 -g0 -o luaw_add consolew.o additions.o -Wl,-E -ldl -lm -llua
-
-# Compile everything release w/o additions
-gcc -std=gnu99 -Wall -O2 -g0 -c console.c consolew.c
-
-# Link luaw
-gcc -std=gnu99 -s -Wall -O2 -g0 -o lua console.o -Wl,-E -ldl -lm -llua
-
-# Link lua
-gcc -std=gnu99 -s -Wall -O2 -g0 -o luaw consolew.o -Wl,-E -ldl -lm -llua
-
-if [ -d $root ]; then
-	rm -r --one-file-system -r -d $root
-fi
-mkdir -p $root
-mkdir -p $root/res
-
-chmod +x lua
-chmod +x luaw
-chmod +x lua_add
-chmod +x luaw_add
-
-mv *.o $objdir
-mv lua $root
-mv luaw $root
-mv lua_add $root
-mv luaw_add $root
-cp -r $resdir/* $root/res
-
-cd $root
-
-strip --strip-all lua_add
-strip --strip-all luaw_add
-strip --strip-all lua
-strip --strip-all luaw
+	
+	if [ -d $root ]; then
+		rm -r --one-file-system -r -d $root
+	fi
+	mkdir -p $root
+	mkdir -p $root/res
+	
+	
+	# Compile everything release w/ additions
+	gcc -Wall -O2 -g0 -L. -Llib -Ldll -Iinclude -DLUACON_ADDITIONS -c console.c consolew.c additions.c darr.c
+	
+	# Create luaadd.so luaadd.so.a
+	gcc -s -shared -Wl,-E,--out-implib,libluaadd.so.a -fPIC -O2 -g0 -Wall -L. -Ldll -Iinclude -o luaadd.so additions.o -llua53.so
+	
+	# Link luaw
+	gcc -s -Wl,-E -Wall -O2 -g0 -L. -Llib -Ldll -Iinclude -o lua console.o darr.o -lluaadd.so -llua53.so -lm
+	
+	# Link lua
+	gcc -s -Wl,-E -Wall -O2 -g0 -o luaw consolew.o darr.o -lluaadd.so -llua53.so -lm
+	
+	
+	chmod +x lua
+	chmod +x luaw
+	
+	
+	mv *.so $root
+	mv *.o $objdir
+	mv *.a $objdir
+	mv lua $root
+	mv luaw $root
+	cp -r $resdir/* $root/res
+	
+	
+	strip --strip-all lua
+	strip --strip-all luaw
+	
+cd ..
 
