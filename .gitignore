@@ -2,7 +2,6 @@
 /.git
 
 /obj/*.o
+/obj/*.a
 /src/*.o
 /bin/*
-/bin/Debug/*
-/bin/Release/*
