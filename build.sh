@@ -10,7 +10,7 @@ cd src
 gcc -std=gnu99 -Wall -O2 -g0 -DLUACON_ADDITIONS -c console.c consolew.c additions.c
 
 # Link luaw
-gcc -std=gnu99 -s -Wall -O2 -g0 -o lua_add console.o additions.o -Wl,-E -ldl  -lm -llua
+gcc -std=gnu99 -s -Wall -O2 -g0 -o lua_add console.o additions.o -Wl,-E -ldl -lm -llua
 
 # Link lua
 gcc -std=gnu99 -s -Wall -O2 -g0 -o luaw_add consolew.o additions.o -Wl,-E -ldl -lm -llua
