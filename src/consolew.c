@@ -499,7 +499,7 @@ int main(int argc, char* argv[])
 	#if defined(LUACON_ADDITIONS)
 		// add additions
 		if(no_additions == 0 && (no_file == 0 || post_exist == 1))
-			additions_add(L);
+			luaopen_additionsdll(L);
 	#endif
 	
 	

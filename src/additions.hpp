@@ -1,19 +1,13 @@
 
-#ifndef ADDITIONS_H_
-#define ADDITIONS_H_
+#pragma once
 
 #if defined(__cplusplus)
-extern "C" {
+	extern "C" {
 #endif
 
-#include "lua.h" 
-
-int stack_dump(lua_State* L);
-
-void additions_add(lua_State* L);
+#include "additions.h"
 
 #if defined(__cplusplus)
-}
+	}
 #endif
 
-#endif

@@ -1,11 +1,18 @@
 
-#ifndef ADDITIONS_H_
-#define ADDITIONS_H_
+#pragma once
 
-#include "lua.h"
+#if defined(LUACON_ADDITIONS)
 
-int stack_dump(lua_State* L);
+#	include "lua.h"
 
-void additions_add(lua_State* L);
+#	define LUA_DLL			__declspec(dllexport)
+#	define LUA_DLL_ENTRY 	LUA_DLL int
+
+
+LUA_DLL int stack_dump(lua_State* L);
+
+LUA_DLL_ENTRY luaopen_additionsdll(lua_State* L);
+
 
 #endif
+
