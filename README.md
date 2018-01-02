@@ -1,10 +1,9 @@
 # LuaConsole
 
-A simple, powerful lua console with the intent of replacing CMD and Terminal + Lua's source console
+A simple, powerful lua console with the intent of replacing CMD and Terminal + Lua's source console  
+Works on Linux, Windows, and Mac.  
 
 ### TODO
-* Make the loading of additions a separate package .dll, gets rid of a lot of complexity
-* Move additions to separate global table 'add'
 * Triple check buffer overflows and mem alignment and memleaks, as well as iffy -1 versus 1 when using lua_*
 
 # About
@@ -41,7 +40,7 @@ Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-Dvar=val]
 -?       Displays this help message
 ```
 
-A console whose code is much easier to look at and handle than the one provided native with Lua. Has more functionality with native lua console. Supports everything Lua's console does except multiline support in-post-exist. Runs compiled source without a problem. Use -? to get a list of the switches above (different depending on how you build it). Works on Linux, Windows, and Mac. Support for LuaRocks is in the wiki. Want to contribute? Submit a pull request. Want to report a bug? Start an issue. Ideas? Start an issue.
+A console whose code is much easier to look at and handle than the one provided native with Lua. Has more functionality with native lua console. Supports everything Lua's console does except multiline support in-post-exist. Runs compiled source without a problem. Use -? to get a list of the switches above (different depending on how you build it). Support for LuaRocks is in the wiki. Want to contribute? Submit a pull request. Want to report a bug? Start an issue. Ideas? Start an issue.
 
 # Additions
 
@@ -58,7 +57,7 @@ For example, <br>
 >1:(Number):1 <br>
 >----------- Stack Dump Finished ----------- <br>
 
-This sure beats `print(type(data), data)` calls, and can be used to detect anything left on the stack in C. To add your own C functions, inherit the project and modify the additions.c file only. Another method to adding C functions is creating a similar dll file:
+This sure beats `print(type(data), data)` calls, and can be used to detect anything left on the stack in C. To add your own C functions, inherit the project and modify the additions.c file only. Another method to adding C functions is creating a similar dll/so file:
 ```
 #include <stdio.h>
 #include "lua.h"
@@ -72,7 +71,7 @@ LUA_DLL_EXPORT luaopen_testdll(lua_State *L) {
 	return 0;
 }
 ```
-This is how LuaRocks does it, but they have file formats and containers. Everything LuaRocks compiles down to a dll or two, gets loaded, then taken over by whatever lua script loaded it. Then just compile and run it in lua:
+This is how LuaRocks does it, but they have file formats and containers. Everything LuaRocks compiles down to a dll/so or two, gets loaded, then taken over by whatever lua script loaded it. Then just compile and run it in lua:
 ```
 gcc -g0 -O2 -Wall -c testdll.c
 gcc -g0 -O2 -Wall -shared -o testdll.dll testdll.o
@@ -87,7 +86,7 @@ Added very comprehensive error feedback, which tells you about the stack (stack 
 
 For example, <br>
 >\>. <br>
->(Syntax) | Stack Top: 1 | Example_Error.lua | [string "."]:1: unexpected symbol near '.' <br>
+>(Syntax) | Stack Top: 1 | TTY | [string "."]:1: unexpected symbol near '.' <br>
 
 # Using with LuaRocks
 [Windows MinGW](https://github.com/Hydroque/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW)  
