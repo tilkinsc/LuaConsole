@@ -108,7 +108,7 @@ const char HELP_MESSAGE[] =
 
 
 // one environment per process
-static lua_State* L = 0;
+static lua_State* L = NULL;
 
 
 // variable to end line by line iterpretation loop, for adaption
@@ -147,12 +147,12 @@ static void print_error(LuaConsoleError error, const char* file) {
 // handles line by line interpretation
 static int lua_main_postexist(lua_State* L) {
 	char* buffer = malloc(PRIMARY_BUFFER_SIZE);
-	if(buffer == 0) {
+	if(buffer == NULL) {
 		fputs("Error: Out of memory.", stderr);
 		exit(EXIT_FAILURE);
 	}
 	char* buffer2 = malloc(SECONDARY_BUFFER_SIZE);
-	if(buffer2 == 0) {
+	if(buffer2 == NULL) {
 		fputs("Error: Out of memory.", stderr);
 		exit(EXIT_FAILURE);
 	}
@@ -208,8 +208,8 @@ static int lua_main_postexist(lua_State* L) {
 		}
 	}
 	
-	free(buffer);
 	free(buffer2);
+	free(buffer);
 	
 	return 0;
 }
@@ -231,8 +231,7 @@ static int lua_main_dofile(lua_State* L) {
 
 void lua_load_parameters(char** parameters_argv, size_t param_len) {
 	lua_createtable(L, param_len, 0);
-	size_t i;
-	for(i=0; i<param_len; i++) {
+	for(size_t i=0; i<param_len; i++) {
 		lua_pushinteger(L, i+1);
 		lua_pushlstring(L, parameters_argv[i], strlen(parameters_argv[i]));
 		lua_settable(L, -3);
@@ -245,7 +244,7 @@ void lua_load_parameters(char** parameters_argv, size_t param_len) {
 int start_protective_mode(lua_CFunction func, const char* file) {
 	lua_pushcclosure(L, func, 0); /* possible out of memory error in 5.2/5.1 */
 	int status = 0;
-	if(file == 0)
+	if(file == NULL)
 		status = lua_pcall(L, 0, 0, 0);
 	else {
 		lua_pushlstring(L, file, strlen(file)); /* possible out of memory error in 5.2/5.1 */
@@ -261,14 +260,13 @@ int start_protective_mode(lua_CFunction func, const char* file) {
 // returns a malloc'd string with each split item being seperated by \0
 char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 	char* cpy = malloc(len);
-	if(cpy == 0) {
+	if(cpy == NULL) {
 		fputs("Error: Out of memory.", stderr);
 		return 0;
 	}
 	memcpy(cpy, str1, len);
 	
 	size_t temp_max = max;
-	
 	for(size_t i=0; i<len-1; i++) {
 		if(str1[i] == lookout) {
 			cpy[i] = '\0';
@@ -302,7 +300,7 @@ int main(int argc, char* argv[])
 	static int change_start = 0;
 	static int post_exist = 0;
 	static int no_file = 0;
-	static char* start = 0;
+	static char* start = NULL;
 	#if defined(LUACON_ADDITIONS)
 		static int no_additions = 0;
 	#endif
@@ -310,11 +308,11 @@ int main(int argc, char* argv[])
 	static int delay_parameters = 0;
 	
 	static size_t parameters = 0;
-	static char** parameters_argv = 0;
+	static char** parameters_argv = NULL;
 	
-	static Array* globals = 0;
+	static Array* globals = NULL;
 	
-	static Array* libraries = 0;
+	static Array* libraries = NULL;
 	
 	// handle arguments
 	if(argc == 1) { // post-exist if !(arguments > 1)
@@ -324,10 +322,9 @@ int main(int argc, char* argv[])
 		// don't try to execute file if it isn't first argument
 		if(argv[1][0] == '-')
 			no_file = 1;
-		size_t i;
-		for(i=1; i<(size_t)argc; i++) {
+		for(size_t i=1; i<(size_t)argc; i++) {
 			// if we have args around, break
-			if(parameters_argv != 0)
+			if(parameters_argv != NULL)
 				break;
 			// don't parse non-switches
 			switch(argv[i][0]) {
@@ -361,12 +358,12 @@ int main(int argc, char* argv[])
 				copyright_squelch = 1;
 				break;
 			case 'd': case 'D':
-				if(globals == 0)
+				if(globals == NULL)
 					globals = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(char*));
 				array_push(globals, argv[i]);
 				break;
 			case 'l': case 'L':
-				if(libraries == 0)
+				if(libraries == NULL)
 					libraries = array_new(LIBRARIES_INIT, LIBRARIES_EXPANSION, sizeof(char*));
 				array_push(libraries, argv[i]);
 				break;
@@ -395,14 +392,14 @@ int main(int argc, char* argv[])
 	
 	// initiate lua
 	L = luaL_newstate();
-	if(L == 0) {
+	if(L == NULL) {
 		fputs("Lua Allocation Error: Out of memory.", stderr);
 		return EXIT_FAILURE;
 	}
 	
 	
 	// initiate global variables set up
-	if(globals != 0) {
+	if(globals != NULL) {
 		for(size_t i=0; i<globals->size; i++) {
 			char* str = (char*) array_get(globals, i) + 2;
 			
@@ -477,7 +474,7 @@ int main(int argc, char* argv[])
 	// print out the version, new state because no_libraries can be 1
 	if(print_version == 1) {
 		lua_State* gL = luaL_newstate();
-		if(gL == 0) {
+		if(gL == NULL) {
 			fputs("Error: Out of memory.", stderr);
 			return EXIT_FAILURE;
 		}
@@ -512,7 +509,7 @@ int main(int argc, char* argv[])
 	
 	
 	// do passed libraries/modules
-	if(libraries != 0) {
+	if(libraries != NULL) {
 		for(size_t i=0; i<libraries->size; i++) {
 			const char* str = (char*) array_get(libraries, i) + 2;
 			if(luaL_loadfile(L, str) != 0) {
