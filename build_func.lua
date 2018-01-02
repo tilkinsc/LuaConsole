@@ -90,6 +90,33 @@ gcc_so = function(lib_name, g, O, warnings, extrawarn, defines, extra, includesd
 end
 
 
+check_cache = function(target, pref1, pref2, endtype)
+	local invalid_cache = {}
+	for i, v in next, target do
+		local cu = io.mtime(pref1 .. v)
+		local obj = io.mtime(pref2 .. v:sub(0,-1 - #endtype) .. endtype)
+		if(cu ~= nil)then
+			if(obj == nil or cu > obj)then
+				table.insert(invalid_cache, v)
+			end
+		end
+	end
+	return invalid_cache
+end
+
+check_bin_cache = function(binaries, pref1, pref2, target)
+	for i, v in next, target do
+		for l, g in next, binaries do
+			local obj = io.mtime(pref1 .. v)
+			local bin = io.mtime(pref2 .. g)
+			if(bin == nil or obj > bin)then
+				return true
+			end
+		end
+	end
+	return false
+end
+
 
 compiler_exec = function(target, str)
 	print(">>> Compiling for `" .. target .. "`")
@@ -112,7 +139,7 @@ end
 
 strip_targ = function(target)
 	print(">>> Stripping `" .. target .. "`")
-	os.execute("strip " .. enc_exe)
+	os.execute("strip " .. enc_exe(target))
 end
 
 migrate_binaries = function(install_path, binaries)

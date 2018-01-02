@@ -11,10 +11,24 @@ require("build_func")
 require("build_setup")
 
 
-local targ_compile_units = {
-	"console.c", "consolew.c", "darr.c";
-	"additions.c";
-}
+
+local targ_dir = (gcc.debug and "DEBUG" or "RELEASE")
+
+local targ_exe = {enc_exe("lua"), enc_exe("luaw")}
+local targ_dll = {enc_dll("luaadd")}
+local targ_units1 = {"console.c", "consolew.c", "darr.c"}
+local targ_units2 = {"additions.c"}
+
+local targ_compile_units1 = check_cache(targ_units1, "src/", "obj/", "o")
+local targ_compile_units2 = check_cache(targ_units2, "src/", "obj/", "o")
+local targ_end = check_cache({"libluaadd.dll.a"}, "obj/", "obj/", "a")
+
+local exe_test = 
+	   check_bin_cache(targ_exe, "src/", install_path .. "\\", targ_units1)
+	or check_bin_cache(targ_exe, "src/", install_path .. "\\", targ_units2)
+	or check_bin_cache(targ_dll, "src/", install_path .. "\\", targ_units1)
+	or check_bin_cache(targ_dll, "src/", install_path .. "\\", targ_units2)
+
 
 
 local std_libs = enc_dll(" -llua53") .. choose_opt("", " -lm -ldl", " -lm -ldl")
@@ -36,8 +50,9 @@ local targ_luaw_exe_o = {"consolew.o", "darr.o"}
 local targ_lua_exe_libs = std_libs .. " -lluaadd.dll"
 
 
+
 -- compile string
-local compile_str = gcc_c(
+local compile_str1 = gcc_c(
 		gcc.g,
 		gcc.O,
 		gcc.warnings,
@@ -46,9 +61,19 @@ local compile_str = gcc_c(
 		gcc.ccextras,
 		gcc.include_dir,
 		gcc.library_dir,
-		targ_compile_units)
-
-
+		targ_compile_units1)
+		
+local compile_str2 = gcc_c(
+		gcc.g,
+		gcc.O,
+		gcc.warnings,
+		gcc.extra_warnings,
+		gcc.defines,
+		gcc.ccextras,
+		gcc.include_dir,
+		gcc.library_dir,
+		targ_compile_units2)
+		
 -- generate dll/so string
 local linker_str_dll1 = choose_gcc_dll()(
 		targ_luaadd_dll_a,
@@ -94,29 +119,36 @@ local linker_str_exe2 = gcc_l(
 		targ_lua_exe_libs)
 
 
+
 -- compile
-compiler_exec((gcc.debug and "DEBUG" or "RELEASE"), compile_str)
-
--- cleanup
-obj_transfer()
-
--- link dll
-linker_exec(enc_dll("libluaadd") .. ".a" .. enc_dll(" luaadd"), linker_str_dll1)
-
--- cleanup
-obj_transfer()
-
--- link exe
-linker_exec("lua", linker_str_exe1)
-linker_exec("luaw", linker_str_exe2)
-
-
--- strip redundancy
-if(not gcc.debug)then
-	strip_targ(enc_exe("lua"))
-	strip_targ(enc_exe("luaw"))
+if(#targ_compile_units1 > 0 or exe_test or force)then
+	compiler_exec(targ_dir, compile_str1)
+	obj_transfer()
+end
+if(#targ_compile_units2 > 0 or exe_test or force)then
+	compiler_exec(targ_dir, compile_str2)
+	obj_transfer()
 end
 
--- setup
-migrate_binaries(install_path, {enc_exe("lua"), enc_exe("luaw"), enc_dll("luaadd")})
+
+if(#targ_compile_units1 + #targ_compile_units2 > 0 or exe_test or force)then
+	-- link dll
+	linker_exec(enc_dll("libluaadd") .. ".a" .. enc_dll(" luaadd"), linker_str_dll1)
+	obj_transfer()
+
+	-- link exe
+	linker_exec("lua", linker_str_exe1)
+	linker_exec("luaw", linker_str_exe2)
+	
+	-- strip redundancy
+	if(not gcc.debug)then
+		strip_targ(enc_exe("lua"))
+		strip_targ(enc_exe("luaw"))
+	end
+	
+	-- setup
+	migrate_binaries(install_path, {enc_exe("lua"), enc_exe("luaw"), enc_dll("luaadd")})
+end
+print("Done. Up to date.")
+
 
