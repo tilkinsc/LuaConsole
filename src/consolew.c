@@ -1,18 +1,4 @@
 
-/*
- * Lua.c Console
- * 
- *		- Line by Line interpretation
- *		- Files executed by passing
- *		- Working directory support
- *		- Built in stack-dump
- * Works with:
- *		Lua5.3.x, Lua5.2.x, Lua5.1.x
- * 
- * 5.2.x and 5.1.x assume that you have enough memory to start initial functions.
- * 
- */
-
 #define PRIMARY_BUFFER_SIZE		(1024 + 1)
 #define SECONDARY_BUFFER_SIZE	(1032 + 1)
 

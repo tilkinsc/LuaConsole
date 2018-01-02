@@ -1,9 +1,3 @@
-/*
- * additions.c
- * 
- * Holds the additions functions to the console.
- * 
- */
 
 #if defined(LUACON_ADDITIONS)
 
