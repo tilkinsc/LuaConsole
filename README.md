@@ -3,8 +3,10 @@
 A simple, powerful lua console with the intent of replacing CMD and Terminal + Lua's source console  
 Works on Linux, Windows, and Mac.  
 
-### TODO
-* Triple check buffer overflows and mem alignment and memleaks, as well as iffy -1 versus 1 when using lua_*
+### TODO  
+* Triple check buffer overflows and mem alignment and memleaks, as well as iffy -1 versus 1 when using lua\_\*  
+* Add LuaJIT as an external dependancy and create an overlay for functionality of LuaJIT... pretty much inherit
+* Stack trace on error
 
 # About
 luaw -?  
