@@ -57,7 +57,7 @@ typedef enum LuaConsoleError {
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua Console | Version: 12/31/2017\n"
+	"Lua Console | Version: 1/2/2017\n"
 	LUA_COPYRIGHT
 	"\n"
 	LUA_CONSOLE_COPYRIGHT
@@ -107,28 +107,54 @@ static int no_libraries = 0;
 
 
 // comprehensive error output
-static void print_error(LuaConsoleError error, const char* file) {
-	const char* msg = lua_tostring(L, 1);
+static void print_error(LuaConsoleError error) {
 	switch(error) {
 	case INTERNAL_ERROR:
-		fprintf(stderr, "(Internal)");
+		fprintf(stderr, " (Internal)");
 		break;
 	case SYNTAX_ERROR:
-		fprintf(stderr, "(Syntax)");
+		fprintf(stderr, " (Syntax)");
 		break;
 	case RUNTIME_ERROR:
-		fprintf(stderr, "(Runtime)");
+		fprintf(stderr, " (Runtime)");
 		break;
 	}
+	const char* msg = lua_tostring(L, 1);
 	size_t top = lua_gettop(L);
-	fprintf(stderr, " | Stack Top: %zu | %s | %s\n", top, file, msg);
+	fprintf(stderr, " | Stack Top: %zu | %s\n", top, msg);
+	lua_pop(L, 1);
 	#if defined(LUACON_ADDITIONS)
-		if(top > 1) // other than error message
+		if(top > 1)
 			stack_dump(L);
 	#endif
-	lua_pop(L, 1);
 }
 
+static int lua_print_error(lua_State* L) {
+	const char* msg = lua_tostring(L, -1);
+	luaL_traceback(L, L, "--", 1);
+	size_t top = lua_gettop(L);
+	const char* tb = lua_tostring(L, -1);
+	fprintf(stderr, " (Runtime) | Stack Top: %zu | %s\n %s\n", top, msg, tb);
+	lua_pop(L, 1);
+	lua_pop(L, 1);
+	top = lua_gettop(L);
+	#if defined(LUACON_ADDITIONS)
+		if(top > 1)
+			stack_dump(L);
+	#endif
+	return 0;
+}
+
+
+static int lua_protective_error_call(lua_State* L) {
+	int base = lua_gettop(L);
+	lua_pushcclosure(L, lua_print_error, 0);
+	lua_insert(L, base);
+	int status = lua_pcall(L, 0, 0, base);
+	lua_remove(L, base);
+	lua_pop(L, 1);
+	return status;
+}
 
 // handles line by line interpretation
 static int lua_main_postexist(lua_State* L) {
@@ -183,15 +209,12 @@ static int lua_main_postexist(lua_State* L) {
 		// load originally inserted code
 		status = luaL_loadstring(L, buffer);
 		if(status != 0) {
-			print_error(SYNTAX_ERROR, "TTY");
+			print_error(SYNTAX_ERROR);
 			continue;
 		}
 		
 		// attempt originally inserted code
-		status = lua_pcall(L, 0, 0, 0);
-		if(status != 0) {
-			print_error(RUNTIME_ERROR, "TTY");
-		}
+		lua_protective_error_call(L);
 	}
 	
 	free(buffer2);
@@ -203,15 +226,11 @@ static int lua_main_postexist(lua_State* L) {
 // handles the execution of a file.lua
 static int lua_main_dofile(lua_State* L) {
 	const char* file = lua_tostring(L, 1);
-	lua_pop(L, 1);
 	if(luaL_loadfile(L, file) != 0) {
-		print_error(SYNTAX_ERROR, file);
+		print_error(SYNTAX_ERROR);
 		return 0;
 	}
-	if(lua_pcall(L, 0, 0, 0) != 0) {
-		print_error(RUNTIME_ERROR, file);
-		return 0;
-	}
+	lua_protective_error_call(L);
 	return 0;
 }
 
@@ -229,16 +248,11 @@ void lua_load_parameters(char** parameters_argv, size_t param_len) {
 // all-in-one function to handle file and line by line interpretation
 int start_protective_mode(lua_CFunction func, const char* file) {
 	lua_pushcclosure(L, func, 0); /* possible out of memory error in 5.2/5.1 */
-	int status = 0;
 	if(file == NULL)
-		status = lua_pcall(L, 0, 0, 0);
+		lua_protective_error_call(L);
 	else {
 		lua_pushlstring(L, file, strlen(file)); /* possible out of memory error in 5.2/5.1 */
-		status = lua_pcall(L, 1, 0, 0);
-	}
-	if(status != 0) {
-		print_error(INTERNAL_ERROR, "Nil");
-		return EXIT_FAILURE;
+		lua_protective_error_call(L);
 	}
 	return EXIT_SUCCESS;
 }
@@ -499,13 +513,10 @@ int main(int argc, char* argv[])
 		for(size_t i=0; i<libraries->size; i++) {
 			const char* str = (char*) array_get(libraries, i) + 2;
 			if(luaL_loadfile(L, str) != 0) {
-				print_error(SYNTAX_ERROR, str);
+				print_error(SYNTAX_ERROR);
 				continue;
 			}
-			if(lua_pcall(L, 0, 0, 0) != 0) {
-				print_error(RUNTIME_ERROR, str);
-				continue;
-			}
+			lua_protective_error_call(L);
 		}
 		array_free(libraries);
 	}
