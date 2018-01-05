@@ -81,6 +81,9 @@ assed -l's a tuple, c=give passed file a tuple
 
 A console whose code is much easier to look at and handle than the one provided native with Lua. Has more functionality with native lua console. Supports everything Lua's console does except multiline support in-post-exist. Runs compiled source without a problem. Use -? to get a list of the switches above (different depending on how you build it). Support for LuaRocks is in the wiki. Want to contribute? Submit a pull request. Want to report a bug? Start an issue. Ideas? Start an issue.
 
+# Building
+Just two steps, first one is getting Lua. The other is building LuaConsole. [Here are instructions.](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions) I didn't exactly go into detail, but you can use build.lua with the outdated PUC-Lua interpreter if you edit it and define plat=Windows or plat=Linux or plat=MacOSX before the requires as a global.
+
 # Additions
 
 There is an 'additions' module to this interpreter, which is completely up to the user to utilize. You can temporarily disable them with the -a switch, or even keep them out of your build. Doing so will take away the added `os.getcwd()` and `os.setcwd(string)` and `stackdump(...)` and `os.clear()` functions, which let you set the current working directory and view your stack. A clear function also has been added, which uses the nasty system() call as well as use clear (cls only on windows). Lua Console acts much like a console now that the additions were added. 
