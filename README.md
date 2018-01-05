@@ -123,9 +123,13 @@ testdll()  -> Loaded successfully!
 
 Added very comprehensive error feedback, which tells you about the stack (stack dumps, too, if not just the error is on the stack), the type of error (syntax/runtime), and the regular lua feedback string with the line number sammich'd between two colons. Now with file name!
 
-For example, <br>
->\>. <br>
->(Syntax) | Stack Top: 1 | TTY | [string "."]:1: unexpected symbol near '.' <br>
+For example,  
+> $luaw res/testing.lua  
+> (Runtime) | Stack Top: 1 | res/testing.lua:18: attempt to call a nil value (fie  
+> ld 'whatever')  
+> \-\-  
+> stack traceback:  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;res/testing.lua:18: in main chunk  
 
 # Using with LuaRocks
 [Windows MinGW](https://github.com/Hydroque/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW)  
