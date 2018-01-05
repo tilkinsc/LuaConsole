@@ -1,6 +1,6 @@
 
-#define PRIMARY_BUFFER_SIZE		(1024 + 1)
-#define SECONDARY_BUFFER_SIZE	(1032 + 1)
+#define PRIMARY_REPL_BUFFER_SIZE	(1024 + 1)
+#define SECONDARY_REPL_BUFFER_SIZE	(1032 + 1)
 
 
 #define DEFINES_INIT			4
@@ -57,25 +57,25 @@ typedef enum LuaConsoleError {
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua Console | Version: 1/2/2017\n"
+	"Lua Console | Version: 1/5/2017\n"
 	LUA_COPYRIGHT
 	"\n"
 	LUA_CONSOLE_COPYRIGHT
 	"\n"
 	"Supports Lua5.3, Lua5.2, Lua5.1\n"
-	"5.2.x and 5.1.x assume that you have enough memory for initial functions.\n"
 	"\n"
 	"\t- Line by Line interpretation\n"
 	"\t- Files executed by passing\n"
 	"\t- Global variable defintions\n"
 	"\t- Dynamic module loading\n"
+	"\t- PUC-Lua compatibility support\n"
 	#if defined(LUACON_ADDITIONS)
 		"\t- Working directory support\n"
 		"\t- Built in stack-dump\n"
 		"\t- Console clearing\n"
 	#endif
 	"\n"
-	"Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-Dvar=val] [-Lfilepath.lua] [-b] [-?] [-n]{parameter1 ...} \n"
+	"Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-Dvar=val] [-Lfilepath.lua] [-b[a,b,c]] [-?] [-n]{parameter1 ...} \n"
 	"\n"
 	"-v \t Prints the Lua version in use\n"
 	"-e \t Prevents lua core libraries from loading\n"
@@ -87,7 +87,7 @@ const char HELP_MESSAGE[] =
 	"-c \t No copyright on init\n"
 	"-d \t Defines a global variable as value after '='\n"
 	"-l \t Executes a module before specified script or post-exist\n"
-	"-b \t Load specified parameters by -n before -l modules execute\n"
+	"-b[a,b,c] \t Load parameters arg differently. a=before passed -l's, b=give passed -l's a tuple, c=give passed file a tuple\n"
 	"-n \t Start of parameter section\n"
 	"-? \t Displays this help message\n";
 
@@ -97,17 +97,27 @@ const char HELP_MESSAGE[] =
 static lua_State* L = NULL;
 
 
-// variable to end line by line iterpretation loop, for adaption
-static int should_close = 0;
-
 // necessary to put this outside of main, print doesn't work
 static int no_libraries = 0;
 
+// variable to end line by line iterpretation loop, for adaption
+static int should_close = 0;
 
 
 
-// comprehensive error output
-static void print_error(LuaConsoleError error) {
+// easy macro for error handling
+static inline void check_error_OOM(int cond, int line) {
+	if(cond == 1) {
+		fprintf(stderr, "ERROR: Out of memory! %d\n", line);
+		exit(EXIT_FAILURE);
+	}
+}
+
+
+// handles out-of-lua error messages
+// returns 1 item:
+//		1. error message
+static void print_error(LuaConsoleError error, int offset) {
 	switch(error) {
 	case INTERNAL_ERROR:
 		fprintf(stderr, " (Internal)");
@@ -119,82 +129,68 @@ static void print_error(LuaConsoleError error) {
 		fprintf(stderr, " (Runtime)");
 		break;
 	}
-	const char* msg = lua_tostring(L, 1);
+	const char* msg = lua_tostring(L, -1);
 	size_t top = lua_gettop(L);
-	fprintf(stderr, " | Stack Top: %zu | %s\n", top, msg);
-	lua_pop(L, 1);
+	fprintf(stderr, " | Stack Top: %zu | %s\n", top - offset, msg);
 	#if defined(LUACON_ADDITIONS)
-		if(top > 1)
+		if(top - offset > 1)
 			stack_dump(L);
 	#endif
 }
 
+// handles in-lua runtime error messages
+// returns 1 item:
+//		1. error message
 static int lua_print_error(lua_State* L) {
 	const char* msg = lua_tostring(L, -1);
+	
 	luaL_traceback(L, L, "--", 1);
-	size_t top = lua_gettop(L);
 	const char* tb = lua_tostring(L, -1);
+	lua_pop(L, 1);
+	
+	size_t top = lua_gettop(L);
 	fprintf(stderr, " (Runtime) | Stack Top: %zu | %s\n %s\n", top, msg, tb);
-	lua_pop(L, 1);
-	lua_pop(L, 1);
-	top = lua_gettop(L);
 	#if defined(LUACON_ADDITIONS)
 		if(top > 1)
 			stack_dump(L);
 	#endif
-	return 0;
+	return 1;
 }
 
-
-static int lua_protective_error_call(lua_State* L) {
-	int base = lua_gettop(L);
-	lua_pushcclosure(L, lua_print_error, 0);
-	lua_insert(L, base);
-	int status = lua_pcall(L, 0, 0, base);
-	lua_remove(L, base);
-	lua_pop(L, 1);
-	return status;
-}
 
 // handles line by line interpretation
 static int lua_main_postexist(lua_State* L) {
-	char* buffer = malloc(PRIMARY_BUFFER_SIZE);
-	if(buffer == NULL) {
-		fputs("Error: Out of memory.", stderr);
-		exit(EXIT_FAILURE);
-	}
-	char* buffer2 = malloc(SECONDARY_BUFFER_SIZE);
-	if(buffer2 == NULL) {
-		fputs("Error: Out of memory.", stderr);
-		exit(EXIT_FAILURE);
-	}
+	char* input = malloc(PRIMARY_REPL_BUFFER_SIZE);
+	char* retfmt = malloc(SECONDARY_REPL_BUFFER_SIZE);
+	check_error_OOM(input == NULL || retfmt == NULL, __LINE__);
 	
+	int base = 0;
 	int status = 0;
 	while(should_close != 1) {
 		// reset
 		status = 0;
-		memset(buffer, 0, PRIMARY_BUFFER_SIZE);
-		memset(buffer2, 0, SECONDARY_BUFFER_SIZE);
+		memset(input, 0, PRIMARY_REPL_BUFFER_SIZE);
+		memset(retfmt, 0, SECONDARY_REPL_BUFFER_SIZE);
 		
 		// read
 		fputs(">", stdout);
-		fgets(buffer, PRIMARY_BUFFER_SIZE - 1, stdin);
-		buffer[strlen(buffer)-1] = '\0'; // remove \n
-		snprintf(buffer2, SECONDARY_BUFFER_SIZE - 1, "return %s;", buffer);
+		fgets(input, PRIMARY_REPL_BUFFER_SIZE - 1, stdin);
+		input[strlen(input)-1] = '\0'; // remove \n
+		snprintf(retfmt, SECONDARY_REPL_BUFFER_SIZE - 1, "return %s;", input);
 		
 		// load first test
-		status = luaL_loadstring(L, buffer2);
+		status = luaL_loadstring(L, retfmt);
 		if(status != 0) {
-			lua_pop(L, 1);
+			lua_pop(L, 1); // err msg, useless
 		} else {
-			// attempt first test
+			// attempt first test, return seems to work
 			size_t top = lua_gettop(L);
 			status = lua_pcall(L, 0, LUA_MULTRET, 0);
 			if(status == 0) { // on success
-				top = lua_gettop(L) - top + 1; // ignore function
+				top = lua_gettop(L) - top + 1; // + 1 = ignore pushed function
 				if(top > 0) { // more than 0 arguments returned
 					if(no_libraries == 1) {
-						lua_pop(L, top);
+						lua_pop(L, top); // remove arguments instead of pop with print
 						continue;
 					}
 					lua_getglobal(L, "print");
@@ -203,67 +199,81 @@ static int lua_main_postexist(lua_State* L) {
 				}
 				continue;
 			}
-			lua_pop(L, 1);
+			lua_pop(L, 1); // err msg
 		}
 		
 		// load originally inserted code
-		status = luaL_loadstring(L, buffer);
+		lua_pushcclosure(L, lua_print_error, 0);
+		base = lua_gettop(L);
+		status = luaL_loadstring(L, input);
 		if(status != 0) {
-			print_error(SYNTAX_ERROR);
+			print_error(SYNTAX_ERROR, 1);
+			lua_pop(L, 2); // err msg, err handler
 			continue;
 		}
 		
 		// attempt originally inserted code
-		lua_protective_error_call(L);
+		if((status = lua_pcall(L, 0, 0, base)) != 0) {
+			lua_pop(L, 2); // err msg, err handler
+			continue;
+		}
 	}
 	
-	free(buffer2);
-	free(buffer);
-	
+	free(retfmt);
+	free(input);
 	return 0;
 }
 
-// handles the execution of a file.lua
-static int lua_main_dofile(lua_State* L) {
-	const char* file = lua_tostring(L, 1);
-	if(luaL_loadfile(L, file) != 0) {
-		print_error(SYNTAX_ERROR);
-		return 0;
+
+
+// handle execution of files
+static int start_protective_mode_file(const char* file, char** parameters_argv, size_t param_len) {
+	lua_pushcclosure(L, lua_print_error, 0);
+	int base = lua_gettop(L);
+	int status = 0;
+	if((status = luaL_loadfile(L, file)) != 0) {
+		print_error(SYNTAX_ERROR, 1);
+		lua_pop(L, 2); // err msg, err handler
+		return status;
 	}
-	lua_protective_error_call(L);
+	if(parameters_argv != NULL)
+		for(size_t i=0; i<param_len; i++) {
+			lua_pushlstring(L, parameters_argv[i], strlen(parameters_argv[i]));
+		}
+	if((status = lua_pcall(L, param_len, 0, base)) != 0) {
+		lua_pop(L, 2); // err msg, err handler
+		return status;
+	}
+	lua_pop(L, 1); // err handler
+	return status;
+}
+
+// handle execution of REPL
+static int start_protective_mode_REPL() {
+	lua_pushcclosure(L, lua_main_postexist, 0);
+	lua_pcall(L, 0, 0, 0);
 	return 0;
 }
 
-void lua_load_parameters(char** parameters_argv, size_t param_len) {
+
+
+// load parameters into global arg table
+static void load_parameters(char** parameters_argv, size_t param_len) {
 	lua_createtable(L, param_len, 0);
 	for(size_t i=0; i<param_len; i++) {
 		lua_pushinteger(L, i+1);
 		lua_pushlstring(L, parameters_argv[i], strlen(parameters_argv[i]));
 		lua_settable(L, -3);
 	}
-	lua_setglobal(L, "args");
+	lua_setglobal(L, "arg");
 }
 
 
-// all-in-one function to handle file and line by line interpretation
-int start_protective_mode(lua_CFunction func, const char* file) {
-	lua_pushcclosure(L, func, 0); /* possible out of memory error in 5.2/5.1 */
-	if(file == NULL)
-		lua_protective_error_call(L);
-	else {
-		lua_pushlstring(L, file, strlen(file)); /* possible out of memory error in 5.2/5.1 */
-		lua_protective_error_call(L);
-	}
-	return EXIT_SUCCESS;
-}
 
 // returns a malloc'd string with each split item being seperated by \0
-char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
+static char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 	char* cpy = malloc(len);
-	if(cpy == NULL) {
-		fputs("Error: Out of memory.", stderr);
-		return 0;
-	}
+	check_error_OOM(cpy == NULL, __LINE__);
 	memcpy(cpy, str1, len);
 	
 	size_t temp_max = max;
@@ -283,14 +293,12 @@ char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 }
 
 // counts the number of 'char c' occurances in a string
-size_t strcnt(const char* str1, char c) {
+static size_t strcnt(const char* str1, char c) {
 	size_t count = 0;
-	while(*str1 != '\0') {
-		count += (*str1 == c ? 1 : 0);
-		str1++;
-	}
+	while((*str1 == c && count++) || *str1++ != '\0');
 	return count;
 }
+
 
 
 // handles arguments, cwd, loads necessary data, executes lua
@@ -306,6 +314,8 @@ int main(int argc, char* argv[])
 	#endif
 	static int copyright_squelch = 0;
 	static int delay_parameters = 0;
+	static int tuple_parameters = 0;
+	static int core_tuple_parameters = 0;
 	
 	static size_t parameters = 0;
 	static char** parameters_argv = NULL;
@@ -360,15 +370,29 @@ int main(int argc, char* argv[])
 			case 'd': case 'D':
 				if(globals == NULL)
 					globals = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(char*));
+				check_error_OOM(globals == NULL, __LINE__);
 				array_push(globals, argv[i]);
 				break;
 			case 'l': case 'L':
 				if(libraries == NULL)
 					libraries = array_new(LIBRARIES_INIT, LIBRARIES_EXPANSION, sizeof(char*));
+				check_error_OOM(libraries == NULL, __LINE__);
 				array_push(libraries, argv[i]);
 				break;
 			case 'b': case 'B':
-				delay_parameters = 1;
+				for(size_t j=0; j<strlen(argv[i]) - 2; j++) {
+					switch(argv[i][2+j]){
+						case 'a': case 'A':
+							delay_parameters = 1;
+							break;
+						case 'b': case 'B':
+							tuple_parameters = 1;
+							break;
+						case 'c': case 'C':
+							core_tuple_parameters = 1;
+							break;
+					}
+				}
 				break;
 			case 'n': case 'N':
 				parameters = (argc - i) - 1;
@@ -377,6 +401,9 @@ int main(int argc, char* argv[])
 			case '?':
 				fputs(HELP_MESSAGE, stdout);
 				return EXIT_SUCCESS;
+			default:
+				post_exist = 1;
+				break;
 			}
 		}
 	}
@@ -392,10 +419,7 @@ int main(int argc, char* argv[])
 	
 	// initiate lua
 	L = luaL_newstate();
-	if(L == NULL) {
-		fputs("Lua Allocation Error: Out of memory.", stderr);
-		return EXIT_FAILURE;
-	}
+	check_error_OOM(L == NULL, __LINE__);
 	
 	
 	// initiate global variables set up
@@ -415,10 +439,8 @@ int main(int argc, char* argv[])
 			if(dot_count > 0) {
 				dot_count++;
 				Array* args = array_new(dot_count, 4, sizeof(char*));
-				if(args == 0) {
-					fputs("Error: Out of memory.", stderr);
-					return EXIT_FAILURE;
-				}
+				check_error_OOM(args == NULL, __LINE__);
+				
 				char* d_args = strsplit(arg1, '.', strlen(arg1) + 1, -1);
 				if(d_args == 0) {
 					fputs("Error: Incorrect -D specified. Use format 'name.sub=value'.", stderr);
@@ -434,14 +456,14 @@ int main(int argc, char* argv[])
 				lua_getglobal(L, (char*) array_get(args, 0));
 				int istab = lua_istable(L, -1);
 				if(istab == 0) {
-					lua_pop(L, 1);
+					lua_pop(L, 1); // nil
 					lua_newtable(L);
 				}
 				for(size_t l=1; l<dot_count - 1; l++) {
 					char* argsl = (char*) array_get(args, l);
 					lua_getfield(L, -1, argsl);
 					if(lua_istable(L, -1) == 0) {
-						lua_pop(L, 1);
+						lua_pop(L, 1); // nil
 						lua_newtable(L);
 						lua_setfield(L, -2, argsl);
 						lua_getfield(L, -1, argsl);
@@ -449,7 +471,7 @@ int main(int argc, char* argv[])
 				}
 				lua_pushlstring(L, arg2, strlen(arg2));
 				lua_setfield(L, -2, (char*) array_get(args, dot_count - 1));
-				lua_pop(L, dot_count-2);
+				lua_pop(L, dot_count-2); // root table
 				if(istab == 0)
 					lua_setglobal(L, (char*)array_get(args, 0));
 				array_free(args);
@@ -474,17 +496,13 @@ int main(int argc, char* argv[])
 	// print out the version, new state because no_libraries can be 1
 	if(print_version == 1) {
 		lua_State* gL = luaL_newstate();
-		if(gL == NULL) {
-			fputs("Error: Out of memory.", stderr);
-			return EXIT_FAILURE;
-		}
+		check_error_OOM(gL == NULL, __LINE__);
 		
 		luaL_openlibs(gL);
 		
 		// print lua version
 		lua_getglobal(gL, "_VERSION");
 		fprintf(stdout, "%s\n", lua_tostring(gL, 1));
-		lua_pop(gL, 1);
 		lua_close(gL);
 	}
 	
@@ -505,19 +523,15 @@ int main(int argc, char* argv[])
 	
 	// load parameters early
 	if(delay_parameters == 1)
-		lua_load_parameters(parameters_argv, parameters);
+		load_parameters(parameters_argv, parameters);
 	
 	
 	// do passed libraries/modules
 	if(libraries != NULL) {
-		for(size_t i=0; i<libraries->size; i++) {
-			const char* str = (char*) array_get(libraries, i) + 2;
-			if(luaL_loadfile(L, str) != 0) {
-				print_error(SYNTAX_ERROR);
-				continue;
-			}
-			lua_protective_error_call(L);
-		}
+		for(size_t i=0; i<libraries->size; i++)
+			start_protective_mode_file((char*) array_get(libraries, i) + 2,
+					(tuple_parameters == 1 ? parameters_argv : NULL),
+					(tuple_parameters == 1 ? parameters : 0));
 		array_free(libraries);
 	}
 	
@@ -532,13 +546,17 @@ int main(int argc, char* argv[])
 	// load function into protected mode (pcall)
 	// load parameters late
 	if(delay_parameters == 0)
-		lua_load_parameters(parameters_argv, parameters);
+		load_parameters(parameters_argv, parameters);
 	int status = 0;
 	if(post_exist == 1) {
 		if(no_file == 0)
-			status = start_protective_mode(&lua_main_dofile, argv[1]);
-		status = start_protective_mode(&lua_main_postexist, NULL);
-	} else status = start_protective_mode(&lua_main_dofile, argv[1]);
+			status = start_protective_mode_file(argv[1],
+					(core_tuple_parameters == 1 ? parameters_argv : NULL),
+					(core_tuple_parameters == 1 ? parameters : 0));
+		start_protective_mode_REPL();
+	} else status = start_protective_mode_file(argv[1],
+					(core_tuple_parameters == 1 ? parameters_argv : NULL),
+					(core_tuple_parameters == 1 ? parameters : 0));;
 	
 	
 	// free resources
