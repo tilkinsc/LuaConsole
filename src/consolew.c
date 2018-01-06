@@ -67,18 +67,20 @@ const char HELP_MESSAGE[] =
 	"\t- Built-in stack-dump\n"
 	"\t- Line by Line interpretation\n"
 	"\n"
-	"Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-Dvar=val] [-Lfilepath.lua] [-b[a,b,c]] [-?] [-n]{parameter1 ...} \n"
+	"Usage: luaw.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c]\n"
+	"\t[-Dvar=val] [-Lfilepath.lua] [-b[a,b,c]] [-?] [-n]{parameter1 ...} \n"
 	"\n"
-	"-v \t Prints the Lua version in use\n"
-	"-e \t Prevents lua core libraries from loading\n"
-	"-s \t Issues a new root path\n"
-	"-p \t Has console post exist after script in line by line mode\n"
-	"-c \t No copyright on init\n"
-	"-d \t Defines a global variable as value after '='\n"
-	"-l \t Executes a module before specified script or post-exist\n"
-	"-b[a,b,c] \t Load parameters arg differently. a=before passed -l's, b=give passed -l's a tuple, c=give passed file a tuple\n"
-	"-n \t Start of parameter section\n"
-	"-? \t Displays this help message\n";
+	"-v \t\t Prints the Lua version in use\n"
+	"-e \t\t Prevents lua core libraries from loading\n"
+	"-s \t\t Issues a new root path\n"
+	"-p \t\t Has console post exist after script in line by line mode\n"
+	"-c \t\t No copyright on init\n"
+	"-d \t\t Defines a global variable as value after '='\n"
+	"-l \t\t Executes a module before specified script or post-exist\n"
+	"-b[a,b,c] \t Load parameters arg differently. a=before passed -l's,\n"
+	"\t\t\tb=give passed -l's a tuple, c=give passed file a tuple\n"
+	"-n \t\t Start of parameter section\n"
+	"-? \t\t Displays this help message\n";
 
 
 

@@ -6,6 +6,7 @@ if(plat == nil)then
 	error("Please define plat as Windows, Linux, or MacOSX")
 end
 
+require("luaadd")
 require("build_func")
 
 
