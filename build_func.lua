@@ -53,7 +53,7 @@ end
 gcc_dll = function(lib_name, g, O, warnings, extrawarn, defines, extra, includesd, librariesd, dll_name, objects, libs, preprocess)
 	local str = gcc.gcc_name
 		.. " -shared"
-		.. " -Wl,--out-implib," .. lib_name
+		.. (lib_name and " -Wl,--out-implib," .. lib_name or "")
 		.. (g and (" -g" .. g) or "0")
 		.. (O and (" -O" .. O) or "0")
 		.. (type(warnings) == "table" and tab2arr(warnings) or (warnings or ""))
