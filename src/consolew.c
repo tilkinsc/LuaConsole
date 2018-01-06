@@ -28,7 +28,7 @@
 #	include <stdlib.h>
 #	include <dirent.h>
 #else
-#	error "Not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
+#	error "OS not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
 #endif
 
 #include <string.h>
@@ -38,10 +38,6 @@
 #include "lauxlib.h"
 
 #include "darr.h"
-
-#if defined(LUACON_ADDITIONS)
-#	include "additions.h"
-#endif
 
 
 #define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright MIT (C) 2017 Hydroque\n"
@@ -57,23 +53,19 @@ typedef enum LuaConsoleError {
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua Console | Version: 1/5/2017\n"
+	"Lua Console | Version: 1/6/2017\n"
 	LUA_COPYRIGHT
 	"\n"
 	LUA_CONSOLE_COPYRIGHT
 	"\n"
 	"Supports Lua5.3, Lua5.2, Lua5.1\n"
 	"\n"
-	"\t- Line by Line interpretation\n"
 	"\t- Files executed by passing\n"
 	"\t- Global variable defintions\n"
+	"\t- PUC-Lua and LuaJIT compatible\n"
 	"\t- Dynamic module loading\n"
-	"\t- PUC-Lua compatibility support\n"
-	#if defined(LUACON_ADDITIONS)
-		"\t- Working directory support\n"
-		"\t- Built in stack-dump\n"
-		"\t- Console clearing\n"
-	#endif
+	"\t- Built-in stack-dump\n"
+	"\t- Line by Line interpretation\n"
 	"\n"
 	"Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-Dvar=val] [-Lfilepath.lua] [-b[a,b,c]] [-?] [-n]{parameter1 ...} \n"
 	"\n"
@@ -81,9 +73,6 @@ const char HELP_MESSAGE[] =
 	"-e \t Prevents lua core libraries from loading\n"
 	"-s \t Issues a new root path\n"
 	"-p \t Has console post exist after script in line by line mode\n"
-	#if defined(LUACON_ADDITIONS)
-		"-a \t Disables the additions\n"
-	#endif
 	"-c \t No copyright on init\n"
 	"-d \t Defines a global variable as value after '='\n"
 	"-l \t Executes a module before specified script or post-exist\n"
@@ -113,6 +102,44 @@ static inline void check_error_OOM(int cond, int line) {
 	}
 }
 
+int stack_dump(lua_State *L) {
+	int i = lua_gettop(L);
+	printf("--------------- Stack Dump ----------------\n");
+	while(i) {
+		int t = lua_type(L, i);
+		switch (t) {
+		case LUA_TSTRING:
+			fprintf(stdout, "%d:(String):`%s`\n", i, lua_tostring(L, i));
+			break;
+		case LUA_TBOOLEAN:
+			fprintf(stdout, "%d:(Boolean):%s\n", i, lua_toboolean(L, i) ? "true" : "false");
+			break;
+		case LUA_TNUMBER:
+			fprintf(stdout, "%d:(Number):%g\n", i, lua_tonumber(L, i));
+			break;
+		case LUA_TFUNCTION:
+			fprintf(stdout, "%d:(Function):@%p\n", i, lua_topointer(L, i));
+			break;
+		case LUA_TTABLE:
+			fprintf(stdout, "%d:(Table):@%p\n", i, lua_topointer(L, i));
+			break;
+		case LUA_TUSERDATA:
+			fprintf(stdout, "%d:(Userdata):@%p\n", i, lua_topointer(L, i));
+			break;
+		case LUA_TLIGHTUSERDATA:
+			fprintf(stdout, "%d:(LUserdata):@%p\n", i, lua_topointer(L, i));
+			break;
+		default:
+			fprintf(stdout, "%d:(Object):%s:@%p\n", i, lua_typename(L, t), lua_topointer(L, i));
+			break;
+		}
+		i--;
+	}
+	printf("----------- Stack Dump Finished -----------\n");
+	return 0;
+}
+
+
 
 // handles out-of-lua error messages
 // returns 1 item:
@@ -132,10 +159,8 @@ static void print_error(LuaConsoleError error, int offset) {
 	const char* msg = lua_tostring(L, -1);
 	size_t top = lua_gettop(L);
 	fprintf(stderr, " | Stack Top: %zu | %s\n", top - offset, msg);
-	#if defined(LUACON_ADDITIONS)
-		if(top - offset > 1)
-			stack_dump(L);
-	#endif
+	if(top - offset > 1)
+		stack_dump(L);
 }
 
 // handles in-lua runtime error messages
@@ -150,10 +175,8 @@ static int lua_print_error(lua_State* L) {
 	
 	size_t top = lua_gettop(L);
 	fprintf(stderr, " (Runtime) | Stack Top: %zu | %s\n %s\n", top, msg, tb);
-	#if defined(LUACON_ADDITIONS)
-		if(top > 1)
-			stack_dump(L);
-	#endif
+	if(top > 1)
+		stack_dump(L);
 	return 1;
 }
 
@@ -249,7 +272,7 @@ static int start_protective_mode_file(const char* file, char** parameters_argv, 
 }
 
 // handle execution of REPL
-static int start_protective_mode_REPL() {
+static inline int start_protective_mode_REPL() {
 	lua_pushcclosure(L, lua_main_postexist, 0);
 	lua_pcall(L, 0, 0, 0);
 	return 0;
@@ -258,7 +281,7 @@ static int start_protective_mode_REPL() {
 
 
 // load parameters into global arg table
-static void load_parameters(char** parameters_argv, size_t param_len) {
+static inline void load_parameters(char** parameters_argv, size_t param_len) {
 	lua_createtable(L, param_len, 0);
 	for(size_t i=0; i<param_len; i++) {
 		lua_pushinteger(L, i+1);
@@ -289,11 +312,19 @@ static char* strsplit(const char* str1, const char lookout, size_t len, size_t m
 		free(cpy);
 		return 0;
 	}
+	if(temp_max == 1) {
+		free(cpy);
+		return 0;
+	}
 	return cpy;
 }
 
+static inline char* strnxt(const char* str1) {
+	return (char*) str1 + (strlen(str1) + 1);
+}
+
 // counts the number of 'char c' occurances in a string
-static size_t strcnt(const char* str1, char c) {
+static inline size_t strcnt(const char* str1, char c) {
 	size_t count = 0;
 	while((*str1 == c && count++) || *str1++ != '\0');
 	return count;
@@ -309,9 +340,6 @@ int main(int argc, char* argv[])
 	static int post_exist = 0;
 	static int no_file = 0;
 	static char* start = NULL;
-	#if defined(LUACON_ADDITIONS)
-		static int no_additions = 0;
-	#endif
 	static int copyright_squelch = 0;
 	static int delay_parameters = 0;
 	static int tuple_parameters = 0;
@@ -359,11 +387,6 @@ int main(int argc, char* argv[])
 			case 'p': case 'P':
 				post_exist = 1;
 				break;
-			#if defined(LUACON_ADDITIONS)
-				case 'a': case 'A':
-					no_additions = 1;
-					break;
-			#endif
 			case 'c': case 'C':
 				copyright_squelch = 1;
 				break;
@@ -408,6 +431,10 @@ int main(int argc, char* argv[])
 		}
 	}
 	
+	// query the ability to post-exist
+	if(!_isatty(_fileno(stdin)))
+		post_exist = 0;
+	
 	
 	// make sure to start in the requested directory, if any
 	if(change_start == 1 && chdir(start) == -1) {
@@ -433,7 +460,7 @@ int main(int argc, char* argv[])
 				return EXIT_FAILURE;
 			}
 			char* arg1 = m_args;
-			char* arg2 = arg1 + (strlen(arg1) + 1);
+			char* arg2 = strnxt(arg1);
 			
 			size_t dot_count = strcnt(arg1, '.');
 			if(dot_count > 0) {
@@ -514,13 +541,6 @@ int main(int argc, char* argv[])
 	}
 	
 	
-	#if defined(LUACON_ADDITIONS)
-		// add additions
-		if(no_additions == 0 && (no_file == 0 || post_exist == 1))
-			luaopen_additionsdll(L);
-	#endif
-	
-	
 	// load parameters early
 	if(delay_parameters == 1)
 		load_parameters(parameters_argv, parameters);
@@ -528,10 +548,28 @@ int main(int argc, char* argv[])
 	
 	// do passed libraries/modules
 	if(libraries != NULL) {
-		for(size_t i=0; i<libraries->size; i++)
-			start_protective_mode_file((char*) array_get(libraries, i) + 2,
+		for(size_t i=0; i<libraries->size; i++) {
+			char* name = (char*) array_get(libraries, i) + 2;
+			char* str1 = strsplit(name, '.', strlen(name), 2);
+			if(str1 != 0) {
+				char* str2 = strnxt(str1);
+				if(no_libraries == 0 && (memcmp(str2, "dll", 3) == 0 || memcmp(str2, "so", 2) == 0)) {
+					lua_getglobal(L, "require");
+					lua_pushlstring(L, str1, strlen(str1));
+					int status = 0;
+					if((status = lua_pcall(L, 1, 0, 0)) != 0) {
+						const char* str = lua_tostring(L, -1);
+						lua_pop(L, 1);
+						fprintf(stderr, "%s\n", str);
+					}
+					continue;
+				}
+			}
+			start_protective_mode_file(name,
 					(tuple_parameters == 1 ? parameters_argv : NULL),
 					(tuple_parameters == 1 ? parameters : 0));
+			free(str1);
+		}
 		array_free(libraries);
 	}
 	
