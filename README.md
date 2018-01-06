@@ -13,69 +13,34 @@ Works on Linux, Windows, and Mac.
 * português translation?
 
 # About
-<details><summary>lua -?</summary><p>
-Lua Console | Version: 1/5/2017<br>
-Lua 5.3.4  Copyright (C) 1994-2017 Lua.org, PUC-Rio<br>
-LuaConsole Copyright MIT (C) 2017 Hydroque<br>
-
-Supports Lua5.3, Lua5.2, Lua5.1   
-
-        - Files executed by passing  
-        - Global variable defintions  
-        - Dynamic module loading  
-        - PUC-Lua compatibility support  
-        - Working directory support  
-        - Built in stack-dump  
-        - Console clearing  
-
-Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-Dvar=val]  
-[-Lfilepath.lua] [-b[a,b,c]] [-?] [-n]{parameter1 ...}  
-  
--v       Prints the Lua version in use  
--e       Prevents lua core libraries from loading  
--s       Issues a new root path  
--p       Has console post exist after script in line by line mode  
--a       Disables the additions  
--c       No copyright on init  
--d       Defines a global variable as value after '='  
--l       Executes a module before specified script  
--b[a,b,c]        Load parameters arg differently. a=before passed -l's, b=give p  
-assed -l's a tuple, c=give passed file a tuple  
--n       Start of parameter section  
--?       Displays this help message  
-</p>
-</details>
 <details><summary>luaw -?</summary><p>  
-Lua Console | Version: 1/5/2017<br>
+Lua Console | Version: 1/6/2017<br>
 Lua 5.3.4  Copyright (C) 1994-2017 Lua.org, PUC-Rio<br>
 LuaConsole Copyright MIT (C) 2017 Hydroque<br>
-  
-Supports Lua5.3, Lua5.2, Lua5.1  
-  
-        - Line by Line interpretation  
-        - Files executed by passing  
-        - Global variable defintions  
-        - Dynamic module loading  
-        - PUC-Lua compatibility support  
-        - Working directory support  
-        - Built in stack-dump  
-        - Console clearing  
 
-Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-Dvar=val]  
-[-Lfilepath.lua] [-b[a,b,c]] [-?] [-n]{parameter1 ...}  
+Supports Lua5.3, Lua5.2, Lua5.1<br>
 
--v       Prints the Lua version in use  
--e       Prevents lua core libraries from loading  
--s       Issues a new root path  
--p       Has console post exist after script in line by line mode  
--a       Disables the additions  
--c       No copyright on init  
--d       Defines a global variable as value after '='  
--l       Executes a module before specified script or post-exist  
--b[a,b,c]        Load parameters arg differently. a=before passed -l's, b=give p  
-assed -l's a tuple, c=give passed file a tuple  
--n       Start of parameter section  
--?       Displays this help message  
+        - Files executed by passing<br>
+        - Global variable defintions<br>
+        - PUC-Lua and LuaJIT compatible<br>
+        - Dynamic module loading<br>
+        - Built-in stack-dump<br>
+        - Line by Line interpretation<br>
+
+Usage: luaw.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c]<br>
+        [-Dvar=val] [-Lfilepath.lua] [-b[a,b,c]] [-?] [-n]{parameter1 ...}<br>
+
+-v               Prints the Lua version in use<br>
+-e               Prevents lua core libraries from loading<br>
+-s               Issues a new root path<br>
+-p               Has console post exist after script in line by line mode<br>
+-c               No copyright on init<br>
+-d               Defines a global variable as value after '='<br>
+-l               Executes a module before specified script or post-exist<br>
+-b[a,b,c]        Load parameters arg differently. a=before passed -l's,<br>
+                        b=give passed -l's a tuple, c=give passed file a tuple<br>
+-n               Start of parameter section<br>
+-?               Displays this help message<br>
 </p>
 </details>
 
