@@ -1,43 +1,41 @@
 
-#if defined(LUACON_ADDITIONS)
+#if defined(linux) || defined(__linux__) || defined(__linux)
+#	include <unistd.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#elif defined(unix) || defined(__unix__) || defined(__unix)
+#	include <unistd.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#elif defined(__APPLE__) || defined(__MACH__)
+#	include <unistd.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#elif defined(_WIN32) || defined(_WIN64)
+#	include <windows.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#	include <dirent.h>
+#else
+#	error "Not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
+#endif
 
-#	if defined(linux) || defined(__linux__) || defined(__linux)
-#		include <unistd.h>
-#		include <stdio.h>
-#		include <stdlib.h>
-#	elif defined(unix) || defined(__unix__) || defined(__unix)
-#		include <unistd.h>
-#		include <stdio.h>
-#		include <stdlib.h>
-#	elif defined(__APPLE__) || defined(__MACH__)
-#		include <unistd.h>
-#		include <stdio.h>
-#		include <stdlib.h>
-#	elif defined(_WIN32) || defined(_WIN64)
-#		include <windows.h>
-#		include <stdio.h>
-#		include <stdlib.h>
-#		include <dirent.h>
-#	else
-#		error "Not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
-#	endif
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
-#	include <time.h>
-#	include <sys/types.h>
-#	include <sys/stat.h>
+#include "additions.h"
 
-#	include "additions.h"
-
-#	include "lua.h"
-#	include "lualib.h"
-#	include "lauxlib.h"
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 
-#	if defined(_WIN32) || defined(_WIN64)
-#		define CLEAR_CONSOLE "cls"
-#	else
-#		define CLEAR_CONSOLE "clear"
-#	endif
+#if defined(_WIN32) || defined(_WIN64)
+#	define CLEAR_CONSOLE "cls"
+#else
+#	define CLEAR_CONSOLE "clear"
+#endif
 
 
 static int lua_cwd_getcwd(lua_State* L) {
@@ -101,7 +99,7 @@ static int lua_fstat_time(lua_State* L) {
 
 
 
-int luaopen_additionsdll(lua_State* L) {
+LUA_DLL_ENTRY luaopen_luaadd(lua_State* L) {
 	
 	// stack dump addition
 	lua_pushcfunction(L, stack_dump);
@@ -139,6 +137,4 @@ int luaopen_additionsdll(lua_State* L) {
 	
 	return 0;
 }
-
-#endif
 
