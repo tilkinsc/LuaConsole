@@ -1,4 +1,6 @@
 
+require("luaadd")
+
 print(#arg)
 print(#{...})
 
