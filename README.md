@@ -4,45 +4,88 @@ A simple, powerful lua console with the intent of replacing CMD and Terminal + L
 Works on Linux, Windows, and Mac.  
 
 ### TODO  
-* Triple check buffer overflows and mem alignment and memleaks, as well as iffy -1 versus 1 when using lua\_\*  
-* Add LuaJIT as an external dependancy and create an overlay for functionality of LuaJIT... pretty much inherit
-* Stack trace on error
+* Add LuaJIT as an external dependancy and create an overlay for functionality of LuaJIT... pretty much inherit... probably front end or a modified build to DLL or something idk  
+* Develop the additions package with more standard functions that lua could definitely use... maybe not idk  
+* Optimize REPL \- the code is meh  
+* Play with sigints and longjmps to see if it could bring a cool feature
+* Support multiple lua states on separate threads
+* I wonder if its possible to serialize a lua\_State sufficiently, would be nice to save an env
+* português translation?
 
 # About
-luaw -?  
-```
-Lua Console | Version: 12/31/2017
-Lua 5.3.4  Copyright (C) 1994-2017 Lua.org, PUC-Rio
-LuaConsole Copyright MIT (C) 2017 Hydroque
+<details><summary>lua -?</summary><p>
+Lua Console | Version: 1/5/2017<br>
+Lua 5.3.4  Copyright (C) 1994-2017 Lua.org, PUC-Rio<br>
+LuaConsole Copyright MIT (C) 2017 Hydroque<br>
 
-Supports Lua5.3, Lua5.2, Lua5.1
-5.2.x and 5.1.x assume that you have enough memory for initial functions.
+Supports Lua5.3, Lua5.2, Lua5.1   
 
-        - Line by Line interpretation
-        - Files executed by passing
-        - Global variable defintions
-        - Dynamic module loading
-        - Working directory support
-        - Built in stack-dump
-        - Console clearing
+        - Files executed by passing  
+        - Global variable defintions  
+        - Dynamic module loading  
+        - PUC-Lua compatibility support  
+        - Working directory support  
+        - Built in stack-dump  
+        - Console clearing  
 
-Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-Dvar=val]
-[-Lfilepath.lua] [-b] [-?] [-n]{parameter1 ...}
+Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-Dvar=val]  
+[-Lfilepath.lua] [-b[a,b,c]] [-?] [-n]{parameter1 ...}  
+  
+-v       Prints the Lua version in use  
+-e       Prevents lua core libraries from loading  
+-s       Issues a new root path  
+-p       Has console post exist after script in line by line mode  
+-a       Disables the additions  
+-c       No copyright on init  
+-d       Defines a global variable as value after '='  
+-l       Executes a module before specified script  
+-b[a,b,c]        Load parameters arg differently. a=before passed -l's, b=give p  
+assed -l's a tuple, c=give passed file a tuple  
+-n       Start of parameter section  
+-?       Displays this help message  
+</p>
+</details>
+<details><summary>luaw -?</summary><p>  
+Lua Console | Version: 1/5/2017<br>
+Lua 5.3.4  Copyright (C) 1994-2017 Lua.org, PUC-Rio<br>
+LuaConsole Copyright MIT (C) 2017 Hydroque<br>
+  
+Supports Lua5.3, Lua5.2, Lua5.1  
+  
+        - Line by Line interpretation  
+        - Files executed by passing  
+        - Global variable defintions  
+        - Dynamic module loading  
+        - PUC-Lua compatibility support  
+        - Working directory support  
+        - Built in stack-dump  
+        - Console clearing  
 
--v       Prints the Lua version in use
--e       Prevents lua core libraries from loading
--s       Issues a new root path
--p       Has console post exist after script in line by line mode
--a       Disables the additions
--c       No copyright on init
--d       Defines a global variable as value after '='
--l       Executes a module before specified script or post-exist
--b       Load specified parameters by -n before -l modules execute
--n       Start of parameter section
--?       Displays this help message
-```
+Usage: lua.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c] [-Dvar=val]  
+[-Lfilepath.lua] [-b[a,b,c]] [-?] [-n]{parameter1 ...}  
+
+-v       Prints the Lua version in use  
+-e       Prevents lua core libraries from loading  
+-s       Issues a new root path  
+-p       Has console post exist after script in line by line mode  
+-a       Disables the additions  
+-c       No copyright on init  
+-d       Defines a global variable as value after '='  
+-l       Executes a module before specified script or post-exist  
+-b[a,b,c]        Load parameters arg differently. a=before passed -l's, b=give p  
+assed -l's a tuple, c=give passed file a tuple  
+-n       Start of parameter section  
+-?       Displays this help message  
+</p>
+</details>
 
 A console whose code is much easier to look at and handle than the one provided native with Lua. Has more functionality with native lua console. Supports everything Lua's console does except multiline support in-post-exist. Runs compiled source without a problem. Use -? to get a list of the switches above (different depending on how you build it). Support for LuaRocks is in the wiki. Want to contribute? Submit a pull request. Want to report a bug? Start an issue. Ideas? Start an issue.
+
+# Building
+Just two steps:
+1. get Lua
+2. build LuaConsole
+[Here are instructions.](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions) I didn't exactly go into detail, but you can use build.lua with the outdated PUC-Lua interpreter if you edit it and define `plat=Windows` or `plat=Linux` or `plat=MacOSX` before the requires as a global. Call it extra insult to injury if you want, but its cute.
 
 # Additions
 
@@ -86,9 +129,13 @@ testdll()  -> Loaded successfully!
 
 Added very comprehensive error feedback, which tells you about the stack (stack dumps, too, if not just the error is on the stack), the type of error (syntax/runtime), and the regular lua feedback string with the line number sammich'd between two colons. Now with file name!
 
-For example, <br>
->\>. <br>
->(Syntax) | Stack Top: 1 | TTY | [string "."]:1: unexpected symbol near '.' <br>
+For example,  
+> $luaw res/testing.lua  
+> (Runtime) | Stack Top: 1 | res/testing.lua:18: attempt to call a nil value (fie  
+> ld 'whatever')  
+> \-\-  
+> stack traceback:  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;res/testing.lua:18: in main chunk  
 
 # Using with LuaRocks
 [Windows MinGW](https://github.com/Hydroque/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW)  
