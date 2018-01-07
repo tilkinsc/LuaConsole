@@ -43,13 +43,6 @@
 #define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright MIT (C) 2017 Hydroque\n"
 
 
-// internal enums, represent lua error category
-typedef enum LuaConsoleError {
-	INTERNAL_ERROR = 0,
-	SYNTAX_ERROR = 1,
-	RUNTIME_ERROR = 2,
-} LuaConsoleError;
-
 
 // usage message
 const char HELP_MESSAGE[] = 
@@ -78,7 +71,7 @@ const char HELP_MESSAGE[] =
 	"-d \t\t Defines a global variable as value after '='\n"
 	"-l \t\t Executes a module before specified script or post-exist\n"
 	"-b[a,b,c] \t Load parameters arg differently. a=before passed -l's,\n"
-	"\t\t\tb=give passed -l's a tuple, c=give passed file a tuple\n"
+	"\t\t\tb=before passed -l's as a tuple, c=after -l's to passed file as a tuple\n"
 	"-n \t\t Start of parameter section\n"
 	"-? \t\t Displays this help message\n";
 
@@ -142,6 +135,12 @@ int stack_dump(lua_State *L) {
 }
 
 
+// internal enums, represent lua error category
+typedef enum LuaConsoleError {
+	INTERNAL_ERROR = 0,
+	SYNTAX_ERROR = 1,
+	RUNTIME_ERROR = 2,
+} LuaConsoleError;
 
 // handles out-of-lua error messages
 // returns 1 item:
