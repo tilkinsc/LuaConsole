@@ -4,13 +4,12 @@ A simple, powerful lua console with the intent of replacing CMD and Terminal + L
 Works on Linux, Windows, and Mac.  
 
 ### TODO  
-* Add LuaJIT as an external dependancy and create an overlay for functionality of LuaJIT... pretty much inherit... probably front end or a modified build to DLL or something idk  
+* Recode a lot of luajit.c into consolew.c for superceeding support
+* signal() in all modes so whole program can exit gracefully
 * Develop the additions package with more standard functions that lua could definitely use... maybe not idk  
-* Optimize REPL \- the code is meh  
-* Play with sigints and longjmps to see if it could bring a cool feature
-* Support multiple lua states on separate threads
-* I wonder if its possible to serialize a lua\_State sufficiently, would be nice to save an env
-* português translation?
+* Check with supporting spawning new threads entirely with its own lua_State* (as opposed to coroutines)
+* Check about serializing the environment to jump back in when not luajit (as it should already be supported)
+* português translation ( ͡° ͜ʖ ͡°)
 
 # About
 <details><summary>luaw -?</summary><p>  
