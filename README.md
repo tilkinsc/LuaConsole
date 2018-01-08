@@ -9,7 +9,7 @@ Works on Linux, Windows, and Mac.
 * Develop the additions package with more standard functions that lua could definitely use... maybe not idk  
 * Check with supporting spawning new threads entirely with its own lua_State* (as opposed to coroutines)
 * Check about serializing the environment to jump back in when not luajit (as it should already be supported)
-* português translation (  ͡° ͜ʖ ͡°)
+* português translation (&nbsp;&nbsp; ͡°&nbsp; ͜ʖ&nbsp; ͡°)
 
 # About
 <details><summary>luaw -?</summary><p>  
