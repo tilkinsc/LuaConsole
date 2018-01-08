@@ -13,6 +13,8 @@ Works on Linux, Windows, and Mac.
 
 # About
 <details><summary>luaw -?</summary><p>  
+
+```
 Lua Console | Version: 1/8/2017<br>
 Lua 5.3.4  Copyright (C) 1994-2017 Lua.org, PUC-Rio<br>
 LuaConsole Copyright MIT (C) 2017 Hydroque<br>
@@ -40,8 +42,8 @@ Usage: luaw.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c]<br>
                         b=give passed -l's a tuple, c=give passed file a tuple<br>
 -n               Start of parameter section<br>
 -?               Displays this help message<br>
-</p>
-</details>
+```
+</p></details>
 
 A console whose code is much easier to look at and handle than the one provided native with Lua. Has more functionality with native lua console. Supports everything Lua's console does except multiline support in-post-exist. Runs compiled source without a problem. Use -? to get a list of the switches above (different depending on how you build it). Support for LuaRocks is in the wiki. Want to contribute? Submit a pull request. Want to report a bug? Start an issue. Ideas? Start an issue.
 
