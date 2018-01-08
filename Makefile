@@ -1,4 +1,9 @@
 
+# TODO:
+# - need to handle files from dll well
+# - need to copy *.dll to bin/Debug or bin/Release
+# - make sure to exclude all dummy files except those in res
+
 ifeq ($(PLAT), )
 	$(error Please define PLAT= `Windows`, `Unix`)
 endif
@@ -73,10 +78,10 @@ luaw: $(LUAW_OBJS)
 
 
 test:
-	@$(CP) $(RDIR)\* $(BIN_DIR)\$(RDIR)
+	-$(CP) $(RDIR)\* $(BIN_DIR)\$(RDIR)
 
 
 .PHONY: clean
 
 clean:
-	@$(RM) $(ODIR)/*.o
+	-$(RM) $(ODIR)/*.o
