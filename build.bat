@@ -6,7 +6,8 @@ setlocal
 	set root=..\bin\Debug
 	set objdir=..\obj
 	set resdir=..\res
-	set lua_ver=lua53
+	set dlldir=..\dll
+	set lua_ver=lua51
 
 
 	cd src
@@ -26,15 +27,16 @@ setlocal
 		gcc -s -Wall -O2 -g0 -L. -Llib -Ldll -Iinclude -o luaw.exe consolew.o darr.o -l%lua_ver%.dll
 		
 		
-		move /Y *.dll %root% >nul
-		move /Y *.exe %root% >nul
-		move /Y *.o %objdir% >nul
-		move /Y *.a %objdir% >nul
-		copy /Y %resdir%\* %root%\res >nul
-		
+		move /Y *.dll %root% 1>nul 2>nul
+		move /Y *.exe %root% 1>nul 2>nul
+		move /Y *.o %objdir% 1>nul 2>nul
+		move /Y *.a %objdir% 1>nul 2>nul
+		copy /Y %resdir%\* %root%\res 1>nul 2>nul
+		copy /Y %dlldir%\* %root% 1>nul 2>nul
 		
 		strip --strip-all %root%\luaw.exe
 		
+		echo Done.
 	cd ..
 	
 endlocal

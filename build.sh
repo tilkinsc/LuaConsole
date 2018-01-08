@@ -4,6 +4,7 @@ root=../bin/Release
 objdir=../obj
 resdir=../res
 luaver=lua53
+dlldir=../dll
 
 cd src
 	
@@ -32,9 +33,12 @@ cd src
 	mv *.a $objdir
 	mv luaw $root
 	cp -r $resdir/* $root/res
+	cp -r $dlldir/* $root
 	
 	
 	strip --strip-all luaw
+	
+	echo Done.
 	
 cd ..
 
