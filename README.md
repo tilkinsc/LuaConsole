@@ -1,15 +1,38 @@
 # LuaConsole
-
-A simple, powerful lua console with the intent of replacing CMD and Terminal + Lua's source console  
+[LuaConsole](https://github.com/Hydroque/LuaConsole)  
+A simple, powerful lua interperter with REPL with the project intent of replacing CMD batch and Terminal shell + PUC-Lua interpreter  
 Works on Linux, Windows, and Mac.  
 
+### Accomplished
+<details><summary> List </summary><p>
+	
+* Superseded PUC-Lua interpreter with full compatibility
+* Elegant(maintainable) looking code
+* Fully compatible with 5.x
+* Multi-OS Support (Windows, Linux, Mac for sure)
+* Great error support
+* Easy to set up (build support)
+* Easy to understand (no messy --help)
+* Speed to initiate program
+* Small file size
+* No external dependancies (other than lua)
+* Customizability with mechanisms (control arg placement)
+* Complete define and library ability with table support
+* Resolved PUC-Lua bug: `lua -e "print(({...})[1]);" arg1` doesn't work)
+* Working directory support
+</p></details>
+
 ### TODO  
-* Recode a lot of luajit.c into consolew.c for superceeding support
-* signal() in all modes so whole program can exit gracefully
+<details><summary> List </summary><p>
+	
+* Discover a way to execute commands (as os.execute() is really bulky)
+* Recode a lot of luajit.c into consolew.c for superseding support
+* signal() in all modes so whole program can exit gracefully/prevent hangs
 * Develop the additions package with more standard functions that lua could definitely use... maybe not idk  
 * Check with supporting spawning new threads entirely with its own lua_State* (as opposed to coroutines)
 * Check about serializing the environment to jump back in when not luajit (as it should already be supported)
 * português translation ( ͡° ͜ʖ° ͡)
+</p></details>
 
 # About
 <details><summary>luaw -?</summary><p>  
@@ -45,13 +68,13 @@ Usage: luaw.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c]
 ```
 </p></details>
 
-A console whose code is much easier to look at and handle than the one provided native with Lua. Has more functionality with native lua console. Supports everything Lua's console does except multiline support in-post-exist. Runs compiled source without a problem. Use -? to get a list of the switches above (different depending on how you build it). Support for LuaRocks is in the wiki. Want to contribute? Submit a pull request. Want to report a bug? Start an issue. Ideas? Start an issue.
+An interpreter whose code is much easier to look at and handle than PUC-Lua interpreter. Has more functionality than with native lua console. Supports everything Lua's console does except multiline support in REPL mode. Runs compiled source without a problem. Use -? to get a list of the switches above. Support for LuaRocks is in the wiki and is easy to set up on all platforms. Want to contribute? Submit a pull request. Want to report a bug? Start an issue. Ideas? Start an issue. Let's kick start this into something great.
 
 # Building
 Just two steps:
 1. get Lua
 2. build LuaConsole
-[Here are instructions.](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions) I didn't exactly go into detail, but you can use build.lua with the outdated PUC-Lua interpreter if you edit it and define `plat=Windows` or `plat=Linux` or `plat=MacOSX` before the requires as a global. Call it extra insult to injury if you want, but its cute.
+[Here are instructions.](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions) You can use build.lua with the outdated PUC-Lua interpreter if you edit it and define `plat=Windows` or `plat=Linux` or `plat=MacOSX` before the `require`'s as a global. You will also need luaadd dynamic library. Or just build it and continue future builds with LuaConsole interpreter. Call it extra insult to injury if you want, but its cute.
 
 <details><summary>Testing</summary><p> 
 
