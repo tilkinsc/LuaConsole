@@ -26,9 +26,9 @@
 
 #include "additions.h"
 
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include "lua53/lua.h"
+#include "lua53/lualib.h"
+#include "lua53/lauxlib.h"
 
 
 #if defined(_WIN32) || defined(_WIN64)

@@ -9,6 +9,7 @@
 #define LIBRARIES_INIT			2
 #define LIBRARIES_EXPANSION		2
 
+
 #if defined(linux) || defined(__linux__) || defined(__linux)
 #	include <unistd.h>
 #	include <stdio.h>
@@ -36,9 +37,9 @@
 
 #include <string.h>
 
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include "lua53/lua.h"
+#include "lua53/lualib.h"
+#include "lua53/lauxlib.h"
 
 #include "darr.h"
 
@@ -92,7 +93,7 @@ static lua_State* L = NULL;
 // necessary to put this outside of main, print doesn't work
 static int no_libraries = 0;
 
-// variable to end line by line iterpretation loop, for adaption
+// variable to end line by line interpretation loop, for adaption
 static int should_close = 0;
 
 
@@ -115,25 +116,25 @@ int stack_dump(lua_State *L) {
 			fprintf(stdout, "%d:(String):`%s`\n", i, lua_tostring(L, i));
 			break;
 		case LUA_TBOOLEAN:
-			fprintf(stdout, "%d:(Boolean):%s\n", i, lua_toboolean(L, i) ? "true" : "false");
+			fprintf(stdout, "%d:(Boolean):`%s`\n", i, lua_toboolean(L, i) ? "true" : "false");
 			break;
 		case LUA_TNUMBER:
-			fprintf(stdout, "%d:(Number):%g\n", i, lua_tonumber(L, i));
+			fprintf(stdout, "%d:(Number):`%g`\n", i, lua_tonumber(L, i));
 			break;
 		case LUA_TFUNCTION:
-			fprintf(stdout, "%d:(Function):@%p\n", i, lua_topointer(L, i));
+			fprintf(stdout, "%d:(Function):`@0x%p`\n", i, lua_topointer(L, i));
 			break;
 		case LUA_TTABLE:
-			fprintf(stdout, "%d:(Table):@%p\n", i, lua_topointer(L, i));
+			fprintf(stdout, "%d:(Table):`@0x%p`\n", i, lua_topointer(L, i));
 			break;
 		case LUA_TUSERDATA:
-			fprintf(stdout, "%d:(Userdata):@%p\n", i, lua_topointer(L, i));
+			fprintf(stdout, "%d:(Userdata):`@0x%p`\n", i, lua_topointer(L, i));
 			break;
 		case LUA_TLIGHTUSERDATA:
-			fprintf(stdout, "%d:(LUserdata):@%p\n", i, lua_topointer(L, i));
+			fprintf(stdout, "%d:(LUserdata):`0x@%p`\n", i, lua_topointer(L, i));
 			break;
 		default:
-			fprintf(stdout, "%d:(Object):%s:@%p\n", i, lua_typename(L, t), lua_topointer(L, i));
+			fprintf(stdout, "%d:(Object):%s:`0x@%p`\n", i, lua_typename(L, t), lua_topointer(L, i));
 			break;
 		}
 		i--;
@@ -200,21 +201,21 @@ static int lua_main_postexist(lua_State* L) {
 	int base = 0;
 	int status = 0;
 	while(should_close != 1) {
-		// reset
+		// 1. reset
 		status = 0;
 		memset(input, 0, PRIMARY_REPL_BUFFER_SIZE);
 		memset(retfmt, 0, SECONDARY_REPL_BUFFER_SIZE);
 		
-		// read
+		// 2. read
 		fputs(">", stdout);
 		fgets(input, PRIMARY_REPL_BUFFER_SIZE - 1, stdin);
 		input[strlen(input)-1] = '\0'; // remove \n
 		snprintf(retfmt, SECONDARY_REPL_BUFFER_SIZE - 1, "return %s;", input);
 		
-		// load first test
+		// 3. require %s; test
 		status = luaL_loadstring(L, retfmt);
 		if(status != 0) {
-			lua_pop(L, 1); // err msg, useless
+			lua_pop(L, 1); // err msg
 		} else {
 			// attempt first test, return seems to work
 			size_t top = lua_gettop(L);
@@ -235,8 +236,8 @@ static int lua_main_postexist(lua_State* L) {
 			lua_pop(L, 1); // err msg
 		}
 		
-		// load originally inserted code
 		lua_pushcclosure(L, lua_print_error, 0);
+		// 4. load originally inserted code
 		base = lua_gettop(L);
 		if((status = luaL_loadstring(L, input)) != 0) {
 			print_error(SYNTAX_ERROR, 1);
@@ -338,7 +339,7 @@ static inline int start_protective_mode_REPL() {
 
 
 
-// returns a malloc'd string with each split item being seperated by \0
+// returns a malloc'd string with each split item being separated by \0
 static char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 	char* cpy = malloc(len);
 	check_error_OOM(cpy == NULL, __LINE__);

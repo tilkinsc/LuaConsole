@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "lua.h"
+#include "lua53/lua.h"
 
 #define LUA_DLL			__declspec(dllexport)
 #define LUA_DLL_ENTRY 	LUA_DLL int
