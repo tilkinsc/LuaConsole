@@ -5,3 +5,6 @@
 /obj/*.a
 /src/*.o
 /bin/*
+/dll/lua51.dll
+/dll/lua52.dll
+/dll/lua53.dll
