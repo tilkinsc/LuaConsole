@@ -77,8 +77,8 @@ static inline void* array_get(Array* arr, size_t index) {
 }
 
 
-static inline void array_consume(Array* arr, void (*consumer)(void*)) {
+static inline void array_consume(Array* arr, void (*consumer)(Array*, void*)) {
 	for(size_t i=0; i<arr->size; i++)
-		consumer(array_get(arr, i));
+		consumer(arr, array_get(arr, i));
 }
 
