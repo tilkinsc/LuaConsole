@@ -106,6 +106,54 @@ static inline void check_error_OOM(int cond, int line) {
 	}
 }
 
+static inline void check_error_OOM(int cond, const char* str) {
+	if(cond == 1) {
+		fputs(str, stderr);
+		exit(EXIT_FAILURE);
+	}
+}
+
+// returns a malloc'd string with each split item being separated by \0
+static char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
+	char* cpy = malloc(len);
+	check_error_OOM(cpy == NULL, __LINE__);
+	memcpy(cpy, str1, len);
+	
+	size_t temp_max = max;
+	for(size_t i=0; i<len-1; i++) {
+		if(str1[i] == lookout) {
+			cpy[i] = '\0';
+			max--;
+		}
+		if(max == 0)
+			break;
+	}
+	if(temp_max == max) {
+		free(cpy);
+		return 0;
+	}
+	if(temp_max == 1) {
+		free(cpy);
+		return 0;
+	}
+	return cpy;
+}
+
+// gets the next string in array
+static inline char* strnxt(const char* str1) {
+	return (char*) str1 + (strlen(str1) + 1);
+}
+
+// counts the number of 'char c' occurances in a string
+static inline size_t strcnt(const char* str1, char c) {
+	size_t count = 0;
+	while(*str1++ != '\0' && (*str1 == c ? ++count : 1));
+	return count;
+}
+
+
+
+// prints out anything left on the stack in a verbose way
 int stack_dump(lua_State *L) {
 	int i = lua_gettop(L);
 	printf("--------------- Stack Dump ----------------\n");
@@ -273,6 +321,53 @@ static inline void load_parameters(char** parameters_argv, size_t param_len) {
 
 
 
+static inline void load_globals(Array* globals, void* data) {
+	char* str = (char*) data + 2; // gather argument, ignore -D/-d
+	
+	char* m_args = strsplit(str, '=', strlen(str) + 1, 2); // split argument between '=', max is two (left and right)
+	check_error_OOM(m_args == NULL, "Error: Incorrect -D specified. Use format 'name=value'.");
+	
+	char* arg1 = m_args; // left arg of '='
+	char* arg2 = strnxt(arg1); // right arg of '='
+	
+	size_t dot_count = strcnt(arg1, '.'); // count subtable tranversions
+	printf("%zu\n", dot_count);
+	if(dot_count == 0) { // if its just a set global
+		lua_pushlstring(L, arg2, strlen(arg2));
+		lua_setglobal(L, arg1);
+	} else if(dot_count > 0) { // if there are subtables
+		char* d_args = strsplit(arg1, '.', strlen(arg1) + 1, -1);
+		check_error_OOM(d_args == NULL, "Error: Parsing -D specified. Use format 'subtab.name=value'.");
+		
+		lua_getglobal(L, d_args);
+		int istab = lua_istable(L, -1);
+		if(istab == 0) {
+			lua_pop(L, 1); // nil
+			lua_newtable(L);
+		}
+		
+		char* cur_arg = d_args;
+		for(size_t i=1; i<dot_count; i++) {
+			cur_arg = strnxt(cur_arg);
+			lua_getfield(L, -1, cur_arg);
+			if(lua_istable(L, -1) == 0) {
+				lua_pop(L, 1); // nil
+				lua_newtable(L);
+				lua_setfield(L, -2, cur_arg);
+				lua_getfield(L, -1, cur_arg);
+			}
+		}
+		lua_pushlstring(L, arg2, strlen(arg2));
+		lua_setfield(L, -2, strnxt(cur_arg));
+		lua_pop(L, dot_count-1); // everything but root table
+		lua_setglobal(L, d_args);
+		free(d_args);
+	}
+	free(m_args);
+}
+
+
+
 // handle execution of files
 static int start_protective_mode_string(const char* str, char** parameters_argv, size_t param_len) {
 	lua_pushcclosure(L, lua_print_error, 0);
@@ -335,46 +430,6 @@ static inline int start_protective_mode_REPL() {
 		lua_pop(L, 1); // err msg
 	}
 	return status;
-}
-
-
-
-// returns a malloc'd string with each split item being separated by \0
-static char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
-	char* cpy = malloc(len);
-	check_error_OOM(cpy == NULL, __LINE__);
-	memcpy(cpy, str1, len);
-	
-	size_t temp_max = max;
-	for(size_t i=0; i<len-1; i++) {
-		if(str1[i] == lookout) {
-			cpy[i] = '\0';
-			max--;
-		}
-		if(max == 0)
-			break;
-	}
-	if(temp_max == max) {
-		free(cpy);
-		return 0;
-	}
-	if(temp_max == 1) {
-		free(cpy);
-		return 0;
-	}
-	return cpy;
-}
-
-// gets the next string in array
-static inline char* strnxt(const char* str1) {
-	return (char*) str1 + (strlen(str1) + 1);
-}
-
-// counts the number of 'char c' occurances in a string
-static inline size_t strcnt(const char* str1, char c) {
-	size_t count = 0;
-	while((*str1 == c && count++) || *str1++ != '\0');
-	return count;
 }
 
 
@@ -545,66 +600,7 @@ int main(int argc, char* argv[])
 	
 	// initiate global variables set up
 	if(globals != NULL) {
-		for(size_t i=0; i<globals->size; i++) {
-			char* str = (char*) array_get(globals, i) + 2;
-			
-			char* m_args = strsplit(str, '=', strlen(str) + 1, 2);
-			if(m_args == 0) {
-				fputs("Error: Incorrect -D specified. Use format 'name=value'.", stderr);
-				return EXIT_FAILURE;
-			}
-			char* arg1 = m_args;
-			char* arg2 = strnxt(arg1);
-			
-			size_t dot_count = strcnt(arg1, '.');
-			if(dot_count > 0) {
-				dot_count++;
-				Array* args = array_new(dot_count, 4, sizeof(char*));
-				check_error_OOM(args == NULL, __LINE__);
-				
-				char* d_args = strsplit(arg1, '.', strlen(arg1) + 1, -1);
-				if(d_args == 0) {
-					fputs("Error: Incorrect -D specified. Use format 'name.sub=value'.", stderr);
-					return EXIT_FAILURE;
-				}
-				
-				size_t offset = 0;
-				for(size_t l=0; l<dot_count; l++) {
-					array_push(args, d_args + offset);
-					offset += strlen(d_args + offset) + 1;
-				}
-				
-				lua_getglobal(L, (char*) array_get(args, 0));
-				int istab = lua_istable(L, -1);
-				if(istab == 0) {
-					lua_pop(L, 1); // nil
-					lua_newtable(L);
-				}
-				for(size_t l=1; l<dot_count - 1; l++) {
-					char* argsl = (char*) array_get(args, l);
-					lua_getfield(L, -1, argsl);
-					if(lua_istable(L, -1) == 0) {
-						lua_pop(L, 1); // nil
-						lua_newtable(L);
-						lua_setfield(L, -2, argsl);
-						lua_getfield(L, -1, argsl);
-					}
-				}
-				lua_pushlstring(L, arg2, strlen(arg2));
-				lua_setfield(L, -2, (char*) array_get(args, dot_count - 1));
-				lua_pop(L, dot_count-2); // root table
-				if(istab == 0)
-					lua_setglobal(L, (char*)array_get(args, 0));
-				array_free(args);
-				free(d_args);
-				free(m_args);
-				continue;
-			}
-			lua_pushlstring(L, arg2, strlen(arg2));
-			lua_setglobal(L, arg1);
-			
-			free(m_args);
-		}
+		array_consume(globals, load_globals);
 		array_free(globals);
 	}
 	
