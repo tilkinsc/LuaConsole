@@ -90,23 +90,16 @@ const char HELP_MESSAGE[] =
 static lua_State* L = NULL;
 
 
-// necessary to put this outside of main, print doesn't work
-static int no_libraries = 0;
-
-// variable to end line by line interpretation loop, for adaption
-static int should_close = 0;
-
-
 
 // easy macro for error handling
-static inline void check_error_OOM(int cond, int line) {
+static inline void check_error_OOMl(int cond, int line) {
 	if(cond == 1) {
 		fprintf(stderr, "ERROR: Out of memory! %d\n", line);
 		exit(EXIT_FAILURE);
 	}
 }
 
-static inline void check_error_OOM(int cond, const char* str) {
+static inline void check_error(int cond, const char* str) {
 	if(cond == 1) {
 		fputs(str, stderr);
 		exit(EXIT_FAILURE);
@@ -116,7 +109,7 @@ static inline void check_error_OOM(int cond, const char* str) {
 // returns a malloc'd string with each split item being separated by \0
 static char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 	char* cpy = malloc(len);
-	check_error_OOM(cpy == NULL, __LINE__);
+	check_error_OOMl(cpy == NULL, __LINE__);
 	memcpy(cpy, str1, len);
 	
 	size_t temp_max = max;
@@ -239,12 +232,14 @@ static int lua_print_error(lua_State* L) {
 }
 
 
+// variable to end line by line interpretation loop, for adaption
+static int should_close = 0;
 
 // handles line by line interpretation
 static int lua_main_postexist(lua_State* L) {
 	char* input = malloc(PRIMARY_REPL_BUFFER_SIZE);
 	char* retfmt = malloc(SECONDARY_REPL_BUFFER_SIZE);
-	check_error_OOM(input == NULL || retfmt == NULL, __LINE__);
+	check_error_OOMl(input == NULL || retfmt == NULL, __LINE__);
 	
 	int base = 0;
 	int status = 0;
@@ -271,13 +266,12 @@ static int lua_main_postexist(lua_State* L) {
 			if(status == 0) { // on success
 				top = lua_gettop(L) - top + 1; // + 1 = ignore pushed function
 				if(top > 0) { // more than 0 arguments returned
-					if(no_libraries == 1) {
-						lua_pop(L, top); // remove arguments instead of pop with print
-						continue;
-					}
 					lua_getglobal(L, "print");
-					lua_insert(L, lua_gettop(L)-top);
-					lua_call(L, top, 0);
+					if(lua_isnil(L, -1) != 1) { 
+						lua_insert(L, lua_gettop(L)-top);
+						lua_call(L, top, 0);
+					} else
+						lua_pop(L, 1); // nil global function print
 				}
 				continue;
 			}
@@ -311,59 +305,13 @@ static inline void inject_parameters(char** parameters_argv, size_t param_len) {
 // load parameters into global arg table
 static inline void load_parameters(char** parameters_argv, size_t param_len) {
 	lua_createtable(L, param_len, 0);
-	for(size_t i=0; i<param_len; i++) {
-		lua_pushinteger(L, i+1);
-		lua_pushlstring(L, parameters_argv[i], strlen(parameters_argv[i]));
-		lua_settable(L, -3);
-	}
+	if(parameters_argv != 0)
+		for(size_t i=0; i<param_len; i++) {
+			lua_pushinteger(L, i+1);
+			lua_pushlstring(L, parameters_argv[i], strlen(parameters_argv[i]));
+			lua_settable(L, -3);
+		}
 	lua_setglobal(L, "arg");
-}
-
-
-
-static inline void load_globals(Array* globals, void* data) {
-	char* str = (char*) data + 2; // gather argument, ignore -D/-d
-	
-	char* m_args = strsplit(str, '=', strlen(str) + 1, 2); // split argument between '=', max is two (left and right)
-	check_error_OOM(m_args == NULL, "Error: Incorrect -D specified. Use format 'name=value'.");
-	
-	char* arg1 = m_args; // left arg of '='
-	char* arg2 = strnxt(arg1); // right arg of '='
-	
-	size_t dot_count = strcnt(arg1, '.'); // count subtable tranversions
-	printf("%zu\n", dot_count);
-	if(dot_count == 0) { // if its just a set global
-		lua_pushlstring(L, arg2, strlen(arg2));
-		lua_setglobal(L, arg1);
-	} else if(dot_count > 0) { // if there are subtables
-		char* d_args = strsplit(arg1, '.', strlen(arg1) + 1, -1);
-		check_error_OOM(d_args == NULL, "Error: Parsing -D specified. Use format 'subtab.name=value'.");
-		
-		lua_getglobal(L, d_args);
-		int istab = lua_istable(L, -1);
-		if(istab == 0) {
-			lua_pop(L, 1); // nil
-			lua_newtable(L);
-		}
-		
-		char* cur_arg = d_args;
-		for(size_t i=1; i<dot_count; i++) {
-			cur_arg = strnxt(cur_arg);
-			lua_getfield(L, -1, cur_arg);
-			if(lua_istable(L, -1) == 0) {
-				lua_pop(L, 1); // nil
-				lua_newtable(L);
-				lua_setfield(L, -2, cur_arg);
-				lua_getfield(L, -1, cur_arg);
-			}
-		}
-		lua_pushlstring(L, arg2, strlen(arg2));
-		lua_setfield(L, -2, strnxt(cur_arg));
-		lua_pop(L, dot_count-1); // everything but root table
-		lua_setglobal(L, d_args);
-		free(d_args);
-	}
-	free(m_args);
 }
 
 
@@ -434,6 +382,83 @@ static inline int start_protective_mode_REPL() {
 
 
 
+// parses globals dynamic array and sets up global variables properly
+static inline void load_globals(Array* globals, void* data) {
+	char* str = (char*) data + 2; // gather argument, ignore -D/-d
+	
+	char* m_args = strsplit(str, '=', strlen(str) + 1, 2); // split argument between '=', max is two (left and right)
+	check_error(m_args == NULL, "Error: Incorrect -D specified. Use format 'name=value'.");
+	
+	char* arg1 = m_args; // left arg of '='
+	char* arg2 = strnxt(arg1); // right arg of '='
+	
+	size_t dot_count = strcnt(arg1, '.'); // count subtable tranversions
+	if(dot_count == 0) { // if its just a set global
+		lua_pushlstring(L, arg2, strlen(arg2));
+		lua_setglobal(L, arg1);
+	} else if(dot_count > 0) { // if there are subtables
+		char* d_args = strsplit(arg1, '.', strlen(arg1) + 1, -1);
+		check_error(d_args == NULL, "Error: Parsing -D specified. Use format 'subtab.name=value'.");
+		
+		lua_getglobal(L, d_args);
+		int istab = lua_istable(L, -1);
+		if(istab == 0) {
+			lua_pop(L, 1); // nil
+			lua_newtable(L);
+		}
+		
+		char* cur_arg = d_args;
+		for(size_t i=1; i<dot_count; i++) {
+			cur_arg = strnxt(cur_arg);
+			lua_getfield(L, -1, cur_arg);
+			if(lua_istable(L, -1) == 0) {
+				lua_pop(L, 1); // nil
+				lua_newtable(L);
+				lua_setfield(L, -2, cur_arg);
+				lua_getfield(L, -1, cur_arg);
+			}
+		}
+		lua_pushlstring(L, arg2, strlen(arg2));
+		lua_setfield(L, -2, strnxt(cur_arg));
+		lua_pop(L, dot_count-1); // everything but root table
+		lua_setglobal(L, d_args);
+		free(d_args);
+	}
+	free(m_args);
+}
+
+static int delay_parameters = 0;
+static size_t parameters = 0;
+static char** parameters_argv = NULL;
+static int tuple_parameters = 0;
+static int core_tuple_parameters = 0;
+static int core_no_arg = 0;
+static int tuple_for_strexec = 0;
+
+static int no_libraries = 0;
+
+// loads libraries into lua_State by executing them
+static inline void load_libraries(Array* libraries, void* data) {
+	char* name = (char*) data + 2;
+	char* str1 = strsplit(name, '.', strlen(name), 2);
+	if(str1 != 0) {
+		char* str2 = strnxt(str1);
+		if((memcmp(str2, "dll", 3) == 0 || memcmp(str2, "so", 2) == 0)) {
+			if(no_libraries == 0)
+				start_protective_mode_require(str1);
+			else
+				fprintf(stderr, "%s%s%s\n", "Error: ", name, " could not be required because no libraries.");
+			return;
+		}
+	}
+	start_protective_mode_file(name,
+			(tuple_parameters == 1 ? parameters_argv : NULL),
+			(tuple_parameters == 1 ? parameters : 0));
+	free(str1);
+}
+
+
+
 // handles arguments, cwd, loads necessary data, executes lua
 int main(int argc, char* argv[])
 {
@@ -442,17 +467,8 @@ int main(int argc, char* argv[])
 	static int no_file = 0;
 	static char* start = NULL;
 	static int copyright_squelch = 0;
-	static int delay_parameters = 0;
-	static int tuple_parameters = 0;
-	static int core_tuple_parameters = 0;
-	static int core_no_arg = 0;
-	static int tuple_for_strexec = 0;
-	
-	static size_t parameters = 0;
-	static char** parameters_argv = NULL;
 	
 	static Array* globals = NULL;
-	
 	static Array* libraries = NULL;
 	
 	static int run_after_libs = 0;
@@ -498,13 +514,13 @@ int main(int argc, char* argv[])
 			case 'd': case 'D':
 				if(globals == NULL)
 					globals = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(char*));
-				check_error_OOM(globals == NULL, __LINE__);
+				check_error_OOMl(globals == NULL, __LINE__);
 				array_push(globals, argv[i]);
 				break;
 			case 'l': case 'L':
 				if(libraries == NULL)
 					libraries = array_new(LIBRARIES_INIT, LIBRARIES_EXPANSION, sizeof(char*));
-				check_error_OOM(libraries == NULL, __LINE__);
+				check_error_OOMl(libraries == NULL, __LINE__);
 				array_push(libraries, argv[i]);
 				break;
 			case 'B':
@@ -548,7 +564,7 @@ int main(int argc, char* argv[])
 	
 	// initiate lua
 	L = luaL_newstate();
-	check_error_OOM(L == NULL, __LINE__);
+	check_error_OOMl(L == NULL, __LINE__);
 	
 	// initiate the libraries
 	if(no_libraries == 0)
@@ -571,7 +587,7 @@ int main(int argc, char* argv[])
 		lua_State* gL = NULL;
 		if(no_libraries == 1) {
 			gL = luaL_newstate();
-			check_error_OOM(gL == NULL, __LINE__);
+			check_error_OOMl(gL == NULL, __LINE__);
 			luaL_openlibs(gL);
 		} else {
 			gL = L;
@@ -591,11 +607,7 @@ int main(int argc, char* argv[])
 	
 	
 	// make sure to start in the requested directory, if any
-	if(start != 0 && chdir(start) == -1) {
-		fputs("Error: Invalid start directory supplied.", stderr);
-		fputs(HELP_MESSAGE, stdout);
-		return EXIT_FAILURE;
-	}
+	check_error(start == 0 && chdir(start) != -1, "Error: Invalid start directory supplied.");
 	
 	
 	// initiate global variables set up
@@ -620,24 +632,7 @@ int main(int argc, char* argv[])
 	
 	// do passed libraries/modules
 	if(libraries != NULL) {
-		for(size_t i=0; i<libraries->size; i++) {
-			char* name = (char*) array_get(libraries, i) + 2;
-			char* str1 = strsplit(name, '.', strlen(name), 2);
-			if(str1 != 0) {
-				char* str2 = strnxt(str1);
-				if((memcmp(str2, "dll", 3) == 0 || memcmp(str2, "so", 2) == 0)) {
-					if(no_libraries == 0)
-						start_protective_mode_require(str1);
-					else
-						fprintf(stderr, "%s%s%s\n", "Error: ", name, " could not be required because no libraries.");
-					continue;
-				}
-			}
-			start_protective_mode_file(name,
-					(tuple_parameters == 1 ? parameters_argv : NULL),
-					(tuple_parameters == 1 ? parameters : 0));
-			free(str1);
-		}
+		array_consume(libraries, load_libraries);
 		array_free(libraries);
 	}
 	
