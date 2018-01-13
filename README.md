@@ -1,7 +1,6 @@
 # LuaConsole
 [LuaConsole](https://github.com/Hydroque/LuaConsole)  
-A simple, powerful lua interperter with REPL with the project intent of replacing CMD batch and Terminal shell + PUC-Lua interpreter  
-Works on Linux, Windows, and Mac.  
+A next-gen, crossplatform Lua5.1, Lua5.2, Lua5.3 supporting interpreter w/ REPL made to support and supersede PUC-Lua and LuaJIT interpreter w/ REPL. Partial support for LuaJIT5.1 (full in-lua, partial program wise)
 
 ### Accomplished
 <details><summary> List </summary><p>
