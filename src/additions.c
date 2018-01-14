@@ -74,7 +74,8 @@ static int lua_clear_window(lua_State* L) {
 	return 0;
 }
 
-int stack_dump(lua_State *L) {
+// prints out anything left on the stack in a verbose way
+static int stack_dump(lua_State *L) {
 	int i = lua_gettop(L);
 	printf("--------------- Stack Dump ----------------\n");
 	while(i) {
@@ -84,19 +85,25 @@ int stack_dump(lua_State *L) {
 			fprintf(stdout, "%d:(String):`%s`\n", i, lua_tostring(L, i));
 			break;
 		case LUA_TBOOLEAN:
-			fprintf(stdout, "%d:(Boolean):%s\n", i, lua_toboolean(L, i) ? "true" : "false");
+			fprintf(stdout, "%d:(Boolean):`%s`\n", i, lua_toboolean(L, i) ? "true" : "false");
 			break;
 		case LUA_TNUMBER:
-			fprintf(stdout, "%d:(Number):%g\n", i, lua_tonumber(L, i));
+			fprintf(stdout, "%d:(Number):`%g`\n", i, lua_tonumber(L, i));
 			break;
 		case LUA_TFUNCTION:
-			fprintf(stdout, "%d:(Function):@%p\n", i, lua_topointer(L, i));
+			fprintf(stdout, "%d:(Function):`@0x%p`\n", i, lua_topointer(L, i));
 			break;
 		case LUA_TTABLE:
-			fprintf(stdout, "%d:(Table):@%p\n", i, lua_topointer(L, i));
+			fprintf(stdout, "%d:(Table):`@0x%p`\n", i, lua_topointer(L, i));
+			break;
+		case LUA_TUSERDATA:
+			fprintf(stdout, "%d:(Userdata):`@0x%p`\n", i, lua_topointer(L, i));
+			break;
+		case LUA_TLIGHTUSERDATA:
+			fprintf(stdout, "%d:(LUserdata):`0x@%p`\n", i, lua_topointer(L, i));
 			break;
 		default:
-			fprintf(stdout, "%d:(Object):%s:@%p\n", i, lua_typename(L, t), lua_topointer(L, i));
+			fprintf(stdout, "%d:(Object):%s:`0x@%p`\n", i, lua_typename(L, t), lua_topointer(L, i));
 			break;
 		}
 		i--;
