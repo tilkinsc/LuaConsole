@@ -19,7 +19,7 @@ local lua_define = " -DLUA_JIT_51"
 	
 --]]
 
-gcc = {
+local gcc = {
 	gcc_name = "gcc";
 	debug = true;
 	warnings = " -Wall";
@@ -34,10 +34,10 @@ gcc = {
 gcc.g = gcc.debug and 3 or 0
 gcc.O = gcc.debug and 0 or 2
 
-install_path = plat == os.types.Windows and (gcc.debug and ("bin\\Debug") or ("bin\\Release")) or ((plat == os.types.Linux or plat == os.types.MacOSX) and (gcc.debug and ("bin/Debug") or ("bin/Release")))
+local install_path = plat == os.types.Windows and (gcc.debug and ("bin\\Debug") or ("bin\\Release")) or ((plat == os.types.Linux or plat == os.types.MacOSX) and (gcc.debug and ("bin/Debug") or ("bin/Release")))
 
 
-targ_dir = (gcc.debug and "DEBUG" or "RELEASE")
+local targ_dir = (gcc.debug and "DEBUG" or "RELEASE")
 
 
 --[[

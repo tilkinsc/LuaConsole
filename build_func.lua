@@ -15,9 +15,11 @@ local tab2arr = function(tab, bolster)
 	return str
 end
 
+local gcc_name = "gcc"
+
 
 gcc_c = function(g, O, warnings, extrawarn, defines, extra, includesd, librariesd, sources, preprocess)
-	local str = gcc.gcc_name
+	local str = gcc_name
 		.. (g and (" -g" .. g) or "")
 		.. (O and (" -O" .. O) or "")
 		.. (type(warnings) == "table" and tab2arr(warnings) or (warnings or ""))
@@ -34,7 +36,7 @@ end
 
 
 gcc_l = function(windows, g, O, warnings, extrawarn, extra, includesd, librariesd, exe_name, objects, libs, preprocess)
-	local str = gcc.gcc_name
+	local str = gcc_name
 		.. (windows and " -mwindows" or "")
 		.. (g and (" -g" .. g) or "0")
 		.. (O and (" -O" .. O) or "0")
@@ -51,7 +53,7 @@ gcc_l = function(windows, g, O, warnings, extrawarn, extra, includesd, libraries
 end
 
 gcc_dll = function(lib_name, g, O, warnings, extrawarn, defines, extra, includesd, librariesd, dll_name, objects, libs, preprocess)
-	local str = gcc.gcc_name
+	local str = gcc_name
 		.. " -shared"
 		.. (lib_name and " -Wl,--out-implib," .. lib_name or "")
 		.. (g and (" -g" .. g) or "0")
@@ -70,7 +72,7 @@ gcc_dll = function(lib_name, g, O, warnings, extrawarn, defines, extra, includes
 end
 
 gcc_so = function(lib_name, g, O, warnings, extrawarn, defines, extra, includesd, librariesd, dll_name, objects, libs, preprocess)
-	local str = gcc.gcc_name
+	local str = gcc_name
 		.. " -shared"
 		.. " -Wl,-E -fPIC"
 		.. " -Wl,--out-implib," .. lib_name
