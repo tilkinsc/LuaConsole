@@ -1,13 +1,15 @@
 
+// how long of lines can be entered?
 #define PRIMARY_REPL_BUFFER_SIZE	(1024 + 1)
-#define SECONDARY_REPL_BUFFER_SIZE	(1032 + 1)
+#define SECONDARY_REPL_BUFFER_SIZE	(1024 + 8 + 1) // + 8 is for `return ;`
 
 
-#define DEFINES_INIT			4
-#define DEFINES_EXPANSION		4
+// dynamic array initialization sizes for void*'s
+#define DEFINES_INIT			(4)
+#define DEFINES_EXPANSION		(4)
 
-#define LIBRARIES_INIT			2
-#define LIBRARIES_EXPANSION		2
+#define LIBRARIES_INIT			(2)
+#define LIBRARIES_EXPANSION		(2)
 
 
 #if defined(linux) || defined(__linux__) || defined(__linux)
@@ -321,6 +323,7 @@ static int lua_main_postexist(lua_State* L) {
 
 
 
+// append parameters to the stack for a (p)call to consume
 static inline void inject_parameters(char** parameters_argv, size_t param_len) {
 	for(size_t i=0; i<param_len; i++)
 		lua_pushlstring(L, parameters_argv[i], strlen(parameters_argv[i]));
@@ -421,17 +424,17 @@ static inline void load_globals(Array* globals, void* data) {
 		lua_pushlstring(L, arg2, strlen(arg2));
 		lua_setglobal(L, arg1);
 	} else if(dot_count > 0) { // if there are subtables
-		char* d_args = strsplit(arg1, '.', strlen(arg1) + 1, -1);
-		check_error(d_args == NULL, "Error: Parsing -D specified. Use format 'subtab.name=value'.");
+		char* tabs = strsplit(arg1, '.', strlen(arg1) + 1, -1);
+		check_error(tabs == NULL, "Error: Parsing -D specified. Use format 'subtab.name=value'.");
 		
-		lua_getglobal(L, d_args);
+		lua_getglobal(L, tabs);
 		int istab = lua_istable(L, -1);
 		if(istab == 0) {
 			lua_pop(L, 1); // nil
 			lua_newtable(L);
 		}
 		
-		char* cur_arg = d_args;
+		char* cur_arg = tabs;
 		for(size_t i=1; i<dot_count; i++) {
 			cur_arg = strnxt(cur_arg);
 			lua_getfield(L, -1, cur_arg);
@@ -445,8 +448,8 @@ static inline void load_globals(Array* globals, void* data) {
 		lua_pushlstring(L, arg2, strlen(arg2));
 		lua_setfield(L, -2, strnxt(cur_arg));
 		lua_pop(L, dot_count-1); // everything but root table
-		lua_setglobal(L, d_args);
-		free(d_args);
+		lua_setglobal(L, tabs);
+		free(tabs);
 	}
 	free(m_args);
 }
@@ -471,7 +474,7 @@ static inline void load_libraries(Array* libraries, void* data) {
 			if(no_libraries == 0)
 				start_protective_mode_require(str1);
 			else
-				fprintf(stderr, "%s%s%s\n", "Error: ", name, " could not be required because no libraries.");
+				fprintf(stderr, "%s%s%s\n", "Error: ", name, " could not be required because no `require()`.");
 			return;
 		}
 	}
