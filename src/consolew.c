@@ -39,13 +39,34 @@
 #	error "OS not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
 #endif
 
+
 #include <string.h>
 
-#include "lua53/lua.h"
-#include "lua53/lualib.h"
-#include "lua53/lauxlib.h"
+
+#if defined(LUA_53)
+#	include "lua53/lua.h"
+#	include "lua53/lualib.h"
+#	include "lua53/lauxlib.h"
+#elif defined(LUA_52)
+#	include "lua52/lua.h"
+#	include "lua52/lualib.h"
+#	include "lua52/lauxlib.h"
+#elif defined(LUA_51)
+#	include "lua51/lua.h"
+#	include "lua51/lualib.h"
+#	include "lua51/lauxlib.h"
+#elif defined(LUA_JIT_51)
+#	include "luajit51/lua.h"
+#	include "luajit51/lualib.h"
+#	include "luajit51/lauxlib.h"
+#else
+#	warning "Please place the Lua version needed in './include' 'lua53/*' 'lua52/*' 'lua51/*' 'luajit51/*'"
+#	error "Define the version you want to use with -D. '-DLUA_53' '-DLUA_52' '-DLUA_51' '-DLUA_JIT_51'"
+#endif
+
 
 #include "darr.h"
+
 
 
 #define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright MIT (C) 2017 Hydroque\n"
@@ -54,7 +75,7 @@
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua Console | Version: 1/13/2017\n"
+	"Lua Console | Version: 1/13/2018\n"
 	LUA_COPYRIGHT
 	"\n"
 	LUA_CONSOLE_COPYRIGHT
@@ -250,9 +271,15 @@ static int lua_main_postexist(lua_State* L) {
 		fputs(">", stdout);
 		fgets(input, PRIMARY_REPL_BUFFER_SIZE - 1, stdin);
 		input[strlen(input)-1] = '\0'; // remove \n
-		snprintf(retfmt, SECONDARY_REPL_BUFFER_SIZE - 1, "return %s;", input);
+		
+		// 2.1 exit if requested
+		if(memcmp(input, "return", 6) == 0) {
+			should_close = 1;
+			break;
+		}
 		
 		// 3. require %s; test
+		snprintf(retfmt, SECONDARY_REPL_BUFFER_SIZE - 1, "return %s;", input);
 		status = luaL_loadstring(L, retfmt);
 		if(status != 0) {
 			lua_pop(L, 1); // err msg
@@ -301,7 +328,7 @@ static inline void inject_parameters(char** parameters_argv, size_t param_len) {
 
 // load parameters into global arg table
 static inline void load_parameters(char** parameters_argv, size_t param_len) {
-	lua_createtable(L, param_len, 0);
+	lua_createtable(L, 0, param_len);
 	if(parameters_argv != 0)
 		for(size_t i=0; i<param_len; i++) {
 			lua_pushinteger(L, i+1);
@@ -370,7 +397,7 @@ static int start_protective_mode_require(const char* file) {
 static inline int start_protective_mode_REPL() {
 	lua_pushcclosure(L, lua_main_postexist, 0);
 	int status = 0;
-	if((status == lua_pcall(L, 0, 0, 0)) != 0) {
+	if((status = lua_pcall(L, 0, 0, 0)) != 0) {
 		print_error(INTERNAL_ERROR, 1);
 		lua_pop(L, 1); // err msg
 	}
@@ -564,8 +591,11 @@ int main(int argc, char* argv[])
 	check_error_OOM(L == NULL, __LINE__);
 	
 	// initiate the libraries
-	if(no_libraries == 0)
+	if(no_libraries == 0) {
+		lua_gc(L, LUA_GCSTOP, 0);
 		luaL_openlibs(L);
+		lua_gc(L, LUA_GCRESTART, -1);
+	}
 	else {
 		lua_pushboolean(L, 1);
 		lua_setfield(L, LUA_REGISTRYINDEX, "LUA_NOENV");
