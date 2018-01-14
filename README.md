@@ -10,26 +10,27 @@ A next-gen, crossplatform Lua5.1, Lua5.2, Lua5.3 supporting interpreter w/ REPL 
 * Fully compatible with 5.x
 * Multi-OS Support (Windows, Linux, Mac for sure)
 * Great error support
-* Easy to set up (build support)
+* Mostly easy to set up (build support)
 * Easy to understand (no messy --help)
 * Speed to initiate program
 * Small file size
-* No external dependancies (other than lua)
+* No external dependancies (other than lua, duh)
 * Customizability with mechanisms (control arg placement)
 * Complete define and library ability with table support
 * Resolved PUC-Lua bug: `lua -e "print(({...})[1]);" arg1` doesn't work)
-* Working directory support
+* Working directory support (luaadd only)
 </p></details>
 
 ### TODO  
 <details><summary> List </summary><p>
 	
-* Discover a way to execute commands (as os.execute() is really bulky)
+* Discover a way to execute commands (as os.execute() is really bulky), perhaps do a quick path search for binaries
 * Recode a lot of luajit.c into consolew.c for superseding support
 * signal() in all modes so whole program can exit gracefully/prevent hangs
 * Develop the additions package with more standard functions that lua could definitely use... maybe not idk  
 * Check with supporting spawning new threads entirely with its own lua_State* (as opposed to coroutines)
 * Check about serializing the environment to jump back in when not luajit (as it should already be supported)
+* Test to see if it is worth implementing killing current lua_State for a new one (luaadd)
 * português translation ( ͡° ͜ʖ° ͡)
 </p></details>
 
