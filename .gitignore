@@ -8,3 +8,5 @@
 /dll/lua51.dll
 /dll/lua52.dll
 /dll/lua53.dll
+/include/luajit51/*
+/lib/libluajit51.dll.a
