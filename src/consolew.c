@@ -14,22 +14,26 @@
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
+#	define LUA_BIN_EXT_NAME ""
 #	define LUA_DLL_SO_NAME ".so"
 #elif defined(unix) || defined(__unix__) || defined(__unix)
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
+#	define LUA_BIN_EXT_NAME ""
 #	define LUA_DLL_SO_NAME ".so"
 #elif defined(__APPLE__) || defined(__MACH__)
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
+#	define LUA_BIN_EXT_NAME ""
 #	define LUA_DLL_SO_NAME ".so"
 #elif defined(_WIN32) || defined(_WIN64)
 #	include <windows.h>
 #	include <stdio.h>
 #	include <stdlib.h>
 #	include <dirent.h>
+#	define LUA_BIN_EXT_NAME ".exe"
 #	define LUA_DLL_SO_NAME ".dll"
 #else
 #	error "OS not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
@@ -50,14 +54,14 @@
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua Console | Version: 1/6/2017\n"
+	"Lua Console | Version: 1/13/2017\n"
 	LUA_COPYRIGHT
 	"\n"
 	LUA_CONSOLE_COPYRIGHT
 	"\n"
 	"Supports Lua5.3, Lua5.2, Lua5.1\n"
 	"\n"
-	"Usage: luaw.exe [FILE] [-v] [-e] [-s PATH] [-p] [-a] [-c] [-Dvar=val]\n"
+	"Usage: luaw" LUA_BIN_EXT_NAME " [FILE] [-v] [-e] [-s PATH] [-p] [-a] [-c] [-Dvar=val]\n"
 	"\t[-Dtab.var=val] [-Lfile.lua] [-Llualib" LUA_DLL_SO_NAME "] [-b{a,b,c,d}] [-?]\n"
 	"\t[-r \"string\"] [-R \"string\"] [-n {parameter1 ...}]\n"
 	"\n"
@@ -85,7 +89,7 @@ static lua_State* L = NULL;
 
 
 // easy macro for error handling
-static inline void check_error_OOMl(int cond, int line) {
+static inline void check_error_OOM(int cond, int line) {
 	if(cond == 1) {
 		fprintf(stderr, "ERROR: Out of memory! %d\n", line);
 		exit(EXIT_FAILURE);
@@ -102,7 +106,7 @@ static inline void check_error(int cond, const char* str) {
 // returns a malloc'd string with each split item being separated by \0
 static char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
 	char* cpy = malloc(len);
-	check_error_OOMl(cpy == NULL, __LINE__);
+	check_error_OOM(cpy == NULL, __LINE__);
 	memcpy(cpy, str1, len);
 	
 	size_t temp_max = max;
@@ -232,7 +236,7 @@ static int should_close = 0;
 static int lua_main_postexist(lua_State* L) {
 	char* input = malloc(PRIMARY_REPL_BUFFER_SIZE);
 	char* retfmt = malloc(SECONDARY_REPL_BUFFER_SIZE);
-	check_error_OOMl(input == NULL || retfmt == NULL, __LINE__);
+	check_error_OOM(input == NULL || retfmt == NULL, __LINE__);
 	
 	int base = 0;
 	int status = 0;
@@ -507,13 +511,13 @@ int main(int argc, char* argv[])
 			case 'd': case 'D':
 				if(globals == NULL)
 					globals = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(char*));
-				check_error_OOMl(globals == NULL, __LINE__);
+				check_error_OOM(globals == NULL, __LINE__);
 				array_push(globals, argv[i]);
 				break;
 			case 'l': case 'L':
 				if(libraries == NULL)
 					libraries = array_new(LIBRARIES_INIT, LIBRARIES_EXPANSION, sizeof(char*));
-				check_error_OOMl(libraries == NULL, __LINE__);
+				check_error_OOM(libraries == NULL, __LINE__);
 				array_push(libraries, argv[i]);
 				break;
 			case 'B':
@@ -557,7 +561,7 @@ int main(int argc, char* argv[])
 	
 	// initiate lua
 	L = luaL_newstate();
-	check_error_OOMl(L == NULL, __LINE__);
+	check_error_OOM(L == NULL, __LINE__);
 	
 	// initiate the libraries
 	if(no_libraries == 0)
@@ -580,7 +584,7 @@ int main(int argc, char* argv[])
 		lua_State* gL = NULL;
 		if(no_libraries == 1) {
 			gL = luaL_newstate();
-			check_error_OOMl(gL == NULL, __LINE__);
+			check_error_OOM(gL == NULL, __LINE__);
 			luaL_openlibs(gL);
 		} else {
 			gL = L;
