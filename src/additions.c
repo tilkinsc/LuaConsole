@@ -3,39 +3,57 @@
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
+#	define CLEAR_CONSOLE "clear"
 #elif defined(unix) || defined(__unix__) || defined(__unix)
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
+#	define CLEAR_CONSOLE "clear"
 #elif defined(__APPLE__) || defined(__MACH__)
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
+#	define CLEAR_CONSOLE "clear"
 #elif defined(_WIN32) || defined(_WIN64)
 #	include <windows.h>
 #	include <stdio.h>
 #	include <stdlib.h>
 #	include <dirent.h>
+#	define CLEAR_CONSOLE "cls"
 #else
 #	error "Not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
 #endif
+
 
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
+
+#if defined(LUA_53)
+#	include "lua53/lua.h"
+#	include "lua53/lualib.h"
+#	include "lua53/lauxlib.h"
+#elif defined(LUA_52)
+#	include "lua52/lua.h"
+#	include "lua52/lualib.h"
+#	include "lua52/lauxlib.h"
+#elif defined(LUA_51)
+#	include "lua51/lua.h"
+#	include "lua51/lualib.h"
+#	include "lua51/lauxlib.h"
+#elif defined(LUA_JIT_51)
+#	include "luajit51/lua.h"
+#	include "luajit51/lualib.h"
+#	include "luajit51/lauxlib.h"
+#else
+#	warning "Please place the Lua version needed in './include' 'lua53/*' 'lua52/*' 'lua51/*' 'luajit51/*'"
+#	error "Define the version you want to use with -D. '-DLUA_53' '-DLUA_52' '-DLUA_51' '-DLUA_JIT_51'"
+#endif
+
+
 #include "additions.h"
 
-#include "lua53/lua.h"
-#include "lua53/lualib.h"
-#include "lua53/lauxlib.h"
-
-
-#if defined(_WIN32) || defined(_WIN64)
-#	define CLEAR_CONSOLE "cls"
-#else
-#	define CLEAR_CONSOLE "clear"
-#endif
 
 
 static int lua_cwd_getcwd(lua_State* L) {
