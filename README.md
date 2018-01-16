@@ -1,11 +1,12 @@
 # LuaConsole
 [LuaConsole](https://github.com/Hydroque/LuaConsole)  
-A next-gen, crossplatform Lua5.1, Lua5.2, Lua5.3 supporting interpreter w/ REPL made to support and supersede PUC-Lua and LuaJIT interpreter w/ REPL. Partial support for LuaJIT5.1 (full in-lua, partial program wise)
+A next-gen, crossplatform \[Lua5.1, LuaJIT5.1, Lua5.2, Lua5.3\]-supporting interpreter w/ REPL made to support and supersede PUC-Lua and LuaJIT interpreter w/ REPL.
 
 ### Accomplished
 <details><summary> List </summary><p>
 	
 * Superseded PUC-Lua interpreter with full compatibility
+* Superseded LuaJIT interpreter with full compatibility
 * Elegant(maintainable) looking code
 * Fully compatible with 5.x
 * Multi-OS Support (Windows, Linux, Mac for sure)
@@ -19,56 +20,64 @@ A next-gen, crossplatform Lua5.1, Lua5.2, Lua5.3 supporting interpreter w/ REPL 
 * Complete define and library ability with table support
 * Resolved PUC-Lua bug: `lua -e "print(({...})[1]);" arg1` doesn't work)
 * Working directory support (luaadd only)
+
 </p></details>
 
 ### TODO  
 <details><summary> List </summary><p>
 	
 * Discover a way to execute commands (as os.execute() is really bulky), perhaps do a quick path search for binaries
-* Recode a lot of luajit.c into consolew.c for superseding support
 * signal() in all modes so whole program can exit gracefully/prevent hangs
 * Develop the additions package with more standard functions that lua could definitely use... maybe not idk  
 * Check with supporting spawning new threads entirely with its own lua_State* (as opposed to coroutines)
 * Check about serializing the environment to jump back in when not luajit (as it should already be supported)
 * Test to see if it is worth implementing killing current lua_State for a new one (luaadd)
 * português translation ( ͡° ͜ʖ° ͡)
+
 </p></details>
 
 # About
 <details><summary>luaw -?</summary><p>  
 
 ```
-Lua Console | Version: 1/8/2017  
-Lua 5.3.4  Copyright (C) 1994-2017 Lua.org, PUC-Rio  
-LuaConsole Copyright MIT (C) 2017 Hydroque  
+LuaConsole | Version: 1/16/2018
 
-Supports Lua5.3, Lua5.2, Lua5.1  
+Lua 5.1 Copyright (C) 1994-2008 Lua.org, PUC-Rio
+LuaConsole Copyright (C) 2017-2018, Hydroque
+LuaJIT 2.0.5 Copyright (C) 2005-2017 Mike Pall http://luajit.org/
 
-        - Files executed by passing  
-        - Global variable defintions  
-        - PUC-Lua and LuaJIT compatible  
-        - Dynamic module loading  
-        - Built-in stack-dump  
-        - Line by Line interpretation  
+Supports Lua5.3, Lua5.2, Lua5.1, LuaJIT5.1
 
-Usage: luaw.exe [FILE_PATH] [-v] [-e] [-s START_PATH] [-p] [-a] [-c]  
-        [-Dvar=val] [-Lfilepath.lua] [-b[a,b,c]] [-?] [-n]{parameter1 ...}  
+Usage: luaw.exe [FILE] [-v] [-e] [-E] [-s PATH] [-p] [-c] [-Dvar=val]
+        [-Dtb.var=val] [-Lfile.lua] [-Llualib.dll] [-t{a,b,c,d}] [-T{a,b,c,d}]
+        [-r "string"] [-R "string"] [-j{cmd,cmd=arg},...]
+        [-O{level,+flag,-flag,cmd=arg}] [-b{l,s,g,n,t,a,o,e,-} {IN,OUT}]
+        [-?] [-n {arg1 ...}]
 
--v               Prints the Lua version in use  
--e               Prevents lua core libraries from loading  
--s               Issues a new root path  
--p               Has console post exist after script in line by line mode  
--c               No copyright on init  
--d               Defines a global variable as value after '='  
--l               Executes a module before specified script or post-exist  
--b[a,b,c]        Load parameters arg differently. a=before passed -l's,  
-                        b=give passed -l's a tuple, c=give passed file a tuple  
--n               Start of parameter section  
--?               Displays this help message  
+-v              Prints the Lua version in use
+-e              Prevents lua core libraries from loading
+-E              Prevents lua environment variables from loading
+-s              Issues a new current directory
+-p              Has console post exist after script in line by line mode
+-c              No copyright on init
+-d              Defines a global variable as value after '='
+-l              Executes a module before specified script or post-exist
+-t[a,b,c,d]     Loads parameters after -l's and -r
+-T[a,b,d]       Loads parameters before -l's and -r
+                        [a]=arg-tuple for -l's, [b]=arg-tuple for file,
+                        [c]=no arg for file, [d]=tuple for -r
+-r              Executes a string as Lua Code BEFORE -l's
+-R              Executes a string as Lua Code AFTER -l's
+-j               LuaJIT  Performs a control command loads an extension module
+-O               LuaJIT  Sets an optimization level/parameters
+-b               LuaJIT  Saves or lists bytecode
+-? --help       Displays this help message
+-n              Start of parameter section
 ```
+
 </p></details>
 
-An interpreter whose code is much easier to look at and handle than PUC-Lua interpreter. Has more functionality than with native lua console. Supports everything Lua's console does except multiline support in REPL mode. Runs compiled source without a problem. Use -? to get a list of the switches above. Support for LuaRocks is in the wiki and is easy to set up on all platforms. Want to contribute? Submit a pull request. Want to report a bug? Start an issue. Ideas? Start an issue. Let's kick start this into something great.
+An interpreter whose code is much easier to look at and handle than PUC-Lua/LuaJIT interpreter. Has more functionality than with native lua console + LuaJit additions. Supports everything Lua's console does except multiline support in REPL mode - even LuaJIT dropped that. Runs compiled source (bytecode) without a problem. Use -? to get a list of the switches above, changes depending on if you build it with LuaJIT or vanilla Lua. Support for LuaRocks is in the wiki and is easy to set up on all platforms. Want to contribute? Submit a pull request. Want to report a bug? Start an issue. Ideas? Start an issue. Let's kick start this into something great.
 
 # Building
 Just two steps:
@@ -80,10 +89,13 @@ Just two steps:
 
 ```  
 C:\git\LuaConsole>bin\Debug\luaw.exe -lres/testing.lua -r "print(({...})[1]);" -
-Dtest=5 -Bacd -p -v -n a b c
-Copyright (C) 1994-2008 Lua.org, PUC-Rio
-LuaConsole Copyright MIT (C) 2017 Hydroque
-Lua 5.1
+Dtest=5 -Tacd -p -v -n a b c
+Lua 5.1 Copyright (C) 1994-2008 Lua.org, PUC-Rio
+LuaConsole Copyright (C) 2017-2018, Hydroque
+LuaJIT Copyright (C) 2005-2017 Mike Pall
+
+JIT: ON CMOV SSE2 SSE3 SSE4.1 fold cse dce fwd dse narrow loop abc sink fuse
+(null)
 a
 3
 3
@@ -106,20 +118,23 @@ stack traceback:
 
 # Additions
 <details><summary>About</summary><p>  
+
 Added full, very comprehensive error reporting.  
 
 There is an 'additions' module to this interpreter, which is completely up to the user to utilize. You can even keep them out of your build. It is recommended to use them, as build.lua depends on it.  
 
 void stackdump() works as easy as print does, but it does type conversion from lua to C-string and lists anything left in the stack.  
 
-For example, <br>
->\>stackdump(1, {}, function() end, "hello") <br>
->--------------- Stack Dump ---------------- <br>
->4:(String):`hello` <br>
->3:(Function):@007214C0 <br>
->2:(Table):@0072A258 <br>
->1:(Number):1 <br>
->----------- Stack Dump Finished ----------- <br>
+For example,  
+```
+>stackdump(1, {}, function() end, "hello")
+--------------- Stack Dump ----------------
+4:(String):`hello`
+3:(Function):@007214C0
+2:(Table):@0072A258
+1:(Number):1
+----------- Stack Dump Finished -----------
+```
 
 Number io.mtime(string) returns the last modified time of a file.  
 
@@ -127,10 +142,12 @@ void os.clear() clears the console using System("cls") or System("clear") depend
 
 String os.getcwd() returns the current working directory  
 
-void os.setcwd(string) sets the current working directory  
+void os.setcwd(string) sets the current working directory 
+
 </p></details>  
 
 <details><summary>Extending</summary><p>
+
 To add your own C functions, inherit the project and modify the additions.c file only. The perferred method is to add C functions by creating a dll/so file:  
 
 ```
