@@ -1,6 +1,6 @@
 # LuaConsole
 [LuaConsole](https://github.com/Hydroque/LuaConsole)  
-A next-gen, crossplatform \[Lua5.1, LuaJIT5.1, Lua5.2, Lua5.3\]-supporting interpreter w/ REPL made to support and supersede PUC-Lua and LuaJIT interpreter w/ REPL.
+A next-gen, crossplatform \[Lua5.1, LuaJIT5.1, Lua5.2, Lua5.3\]-supporting interpreter w/ REPL made to support and supersede PUC-Lua and LuaJIT interpreter w/ REPL
 
 ### Accomplished
 <details><summary> List </summary><p>
