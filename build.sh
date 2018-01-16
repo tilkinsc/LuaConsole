@@ -3,7 +3,9 @@
 root=../bin/Release
 objdir=../obj
 resdir=../res
-luaver=lua53
+rootdir=../root
+luaver=lua51
+luaverdef=-DLUA_JIT_51
 dlldir=../dll
 
 cd src
@@ -16,10 +18,10 @@ cd src
 	
 	
 	# Compile everything release w/ additions
-	gcc -Wall -O2 -g0 -L. -Llib -Ldll -Iinclude -c consolew.c additions.c darr.c
+	gcc -Wall -O2 -g0 -L. -Llib -Ldll -Iinclude $luaverdef -c consolew.c additions.c darr.c
 	
 	# Create luaadd.so luaadd.so.a
-	gcc -s -shared -Wall -Wl,-E -fPIC -O2 -g0 -L. -Ldll -Iinclude -o luaadd.so additions.o -l$luaver.so
+	gcc -s -shared -Wall -Wl,-E -fPIC -O2 -g0 -L. -Ldll -Iinclude $luaverdef -o luaadd.so additions.o -l$luaver.so
 	
 	# Link luaw
 	gcc -s -Wall -Wl,-E -O2 -g0 -L. -Llib -Ldll -Iinclude -o luaw consolew.o darr.o -lluaadd.so -l$luaver.so -lm -ldl
@@ -34,6 +36,7 @@ cd src
 	mv luaw $root
 	cp -r $resdir/* $root/res
 	cp -r $dlldir/* $root
+	cp -r $rootdir/* $root
 	
 	
 	strip --strip-all luaw

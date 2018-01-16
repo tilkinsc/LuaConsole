@@ -152,6 +152,7 @@ migrate_binaries = function(install_path, binaries)
 	print(">", "Injecting new files ...")
 	os.execute(copy("dll", install_path))
 	os.execute(copy("res", install_path .. "\\res"))
+	os.execute(copy("root", install_path))
 	for i, v in next, binaries do
 		os.execute(move(v, install_path))
 	end

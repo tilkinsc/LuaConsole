@@ -22,6 +22,7 @@ LDIR = lib
 DDIR = dll
 BDIR = bin
 RDIR = res
+ROOT = root
 
 DEBUG_BIN_DIR = $(BDIR)\Debug
 RELEASE_BIN_DIR = $(BDIR)\Release
@@ -57,12 +58,16 @@ directories:
 	-$(RMDIR) $(BIN_DIR)
 	-$(MKDIR) $(BIN_DIR)
 	-$(MKDIR) $(BIN_DIR)\$(RDIR)
+	-$(CP) $(RDIR)\* $(BIN_DIR)\$(RDIR)
+	-$(CP) $(ROOT)\* $(BIN_DIR)
+	-$(CP) $(DDIR)\* $(BIN_DIR)
 
-Windows: LIBS = -llua53.dll
-Windows: CFLAGS += -D__USE_MINGW_ANSI_STDIO=1
+Windows: LIBS = -llua51.dll
+Windows: CFLAGS += -D__USE_MINGW_ANSI_STDIO=1 -DLUA_JIT_51
 Windows: luaw luaadd.dll test
 
-Unix: LIBS = -llua53.dll -ldl -lm
+Unix: LIBS = -llua51.dll -ldl -lm
+Unix: CFLAGS += -DLUA_JIT_51
 Unix: luaw luaadd.so test
 	
 
@@ -76,9 +81,6 @@ luaadd.so: $(LUAADD.SO_OBJS)
 luaw: $(LUAW_OBJS)
 	$(CC) $(CFLAGS) -o $(BIN_DIR)/$@$(EXE_SUFFIX) $(subst $(SDIR),$(ODIR),$^) $(LIBS) $(LLIBS)
 
-
-test:
-	-$(CP) $(RDIR)\* $(BIN_DIR)\$(RDIR)
 
 
 .PHONY: clean
