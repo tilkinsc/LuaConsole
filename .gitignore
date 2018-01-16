@@ -10,3 +10,4 @@
 /dll/lua53.dll
 /include/luajit51/*
 /lib/libluajit51.dll.a
+/root/*
