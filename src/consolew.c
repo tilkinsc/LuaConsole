@@ -11,6 +11,8 @@
 #define LIBRARIES_INIT			(2)
 #define LIBRARIES_EXPANSION		(2)
 
+#define ENV_VAR					"LUA_INIT"
+
 
 #if defined(linux) || defined(__linux__) || defined(__linux)
 #	include <unistd.h>
@@ -61,6 +63,7 @@
 #	include "luajit51/lua.h"
 #	include "luajit51/lualib.h"
 #	include "luajit51/lauxlib.h"
+#	include "luajit51/luajit.h"
 #else
 #	warning "Please place the Lua version needed in './include' 'lua53/*' 'lua52/*' 'lua51/*' 'luajit51/*'"
 #	error "Define the version you want to use with -D. '-DLUA_53' '-DLUA_52' '-DLUA_51' '-DLUA_JIT_51'"
@@ -71,38 +74,181 @@
 
 
 
-#define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright MIT (C) 2017 Hydroque\n"
+#define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright (C) 2017-2018, Hydroque"
 
 
 
 // usage message
 const char HELP_MESSAGE[] = 
-	"Lua Console | Version: 1/13/2018\n"
-	LUA_COPYRIGHT
+	"LuaConsole | Version: 1/16/2018\n\n"
+	LUA_VERSION " " LUA_COPYRIGHT
 	"\n"
 	LUA_CONSOLE_COPYRIGHT
 	"\n"
-	"Supports Lua5.3, Lua5.2, Lua5.1\n"
+	#if defined(LUA_JIT_51)
+		LUAJIT_VERSION " " LUAJIT_COPYRIGHT " " LUAJIT_URL
+		"\n"
+	#endif
+	"\nSupports Lua5.3, Lua5.2, Lua5.1\n"
 	"\n"
-	"Usage: luaw" LUA_BIN_EXT_NAME " [FILE] [-v] [-e] [-s PATH] [-p] [-a] [-c] [-Dvar=val]\n"
-	"\t[-Dtab.var=val] [-Lfile.lua] [-Llualib" LUA_DLL_SO_NAME "] [-b{a,b,c,d}] [-?]\n"
-	"\t[-r \"string\"] [-R \"string\"] [-n {parameter1 ...}]\n"
+	"Usage: luaw" LUA_BIN_EXT_NAME " [FILE] [-v] [-e] [-E] [-s PATH] [-p] [-c] [-Dvar=val]\n"
+	"\t[-Dtb.var=val] [-Lfile.lua] [-Llualib" LUA_DLL_SO_NAME "] [-t{a,b,c,d}] [-T{a,b,c,d}]\n"
+	"\t[-r \"string\"] [-R \"string\"] "
+		#if defined(LUA_JIT_51)
+			"[-j{cmd,cmd=arg},...]\n\t[-O{level,+flag,-flag,cmd=arg}] [-b{l,s,g,n,t,a,o,e,-} {IN,OUT}]\n\t"
+		#endif
+		"[-?] [-n {arg1 ...}]\n"
 	"\n"
-	"-v \t\t Prints the Lua version in use\n"
-	"-e \t\t Prevents lua core libraries from loading\n"
-	"-s \t\t Issues a new root path\n"
-	"-p \t\t Has console post exist after script in line by line mode\n"
-	"-c \t\t No copyright on init\n"
-	"-d \t\t Defines a global variable as value after '='\n"
-	"-l \t\t Executes a module before specified script or post-exist\n"
-	"-b[a,b,c,d] \t Loads parameters after -l's and -r\n"
-	"-B[a,b,c,d] \t Loads parameters before -l's and -r\n"
+	"-v \t\tPrints the Lua version in use\n"
+	"-e \t\tPrevents lua core libraries from loading\n"
+	"-E \t\tPrevents lua environment variables from loading\n"
+	"-s \t\tIssues a new current directory\n"
+	"-p \t\tHas console post exist after script in line by line mode\n"
+	"-c \t\tNo copyright on init\n"
+	"-d \t\tDefines a global variable as value after '='\n"
+	"-l \t\tExecutes a module before specified script or post-exist\n"
+	"-t[a,b,c,d] \tLoads parameters after -l's and -r\n"
+	"-T[a,b,d] \tLoads parameters before -l's and -r\n"
 		"\t\t\t[a]=arg-tuple for -l's, [b]=arg-tuple for file,\n"
-		"\t\t\t[c]=no arg for file (only with -b), [d]=tuple for -r\n"
-	"-r \t\t Executes a string as Lua Code BEFORE -l's\n"
-	"-R \t\t Executes a string as Lua Code AFTER -l's\n"
-	"-n \t\t Start of parameter section\n"
-	"-? \t\t Displays this help message\n";
+		"\t\t\t[c]=no arg for file, [d]=tuple for -r\n"
+	"-r \t\tExecutes a string as Lua Code BEFORE -l's\n"
+	"-R \t\tExecutes a string as Lua Code AFTER -l's\n"
+	#if defined(LUA_JIT_51)
+		"-j \t\t LuaJIT  Performs a control command loads an extension module\n"
+		"-O \t\t LuaJIT  Sets an optimization level/parameters\n"
+		"-b \t\t LuaJIT  Saves or lists bytecode\n"
+	#endif
+	"-? --help \tDisplays this help message\n"
+	"-n \t\tStart of parameter section\n";
+
+
+#if defined(LUA_JIT_51)
+	// Load add-on module
+	static int loadjitmodule(lua_State* L) {
+		lua_getglobal(L, "require");
+		lua_pushliteral(L, "jit.");
+		lua_pushvalue(L, -3);
+		lua_concat(L, 2);
+		if (lua_pcall(L, 1, 1, 0)) {
+			const char *msg = lua_tostring(L, -1);
+			if (msg && !strncmp(msg, "module ", 7))
+				goto nomodule;
+			msg = lua_tostring(L, -1);
+			if(msg == NULL) msg = "(error object is not a string)";
+			fprintf(stderr, "LuaJIT Error: %s\n", msg);
+			lua_pop(L, 1);
+			return 1;
+		}
+		lua_getfield(L, -1, "start");
+		if (lua_isnil(L, -1)) {
+	nomodule:
+			fputs("LuaJIT Error: unknown luaJIT command or jit.* modules not installed\n", stderr);
+			return 1;
+		}
+		lua_remove(L, -2); // Drop module table
+		return 0;
+	}
+	
+	// Run command with options
+	static int runcmdopt(lua_State* L, const char* opt) {
+		int narg = 0;
+		if (opt && *opt) {
+			for (;;) { // Split arguments
+				const char *p = strchr(opt, ',');
+				narg++;
+				if (!p) break;
+				if (p == opt)
+					lua_pushnil(L);
+				else
+					lua_pushlstring(L, opt, (size_t)(p - opt));
+				opt = p + 1;
+			}
+			if (*opt)
+				lua_pushstring(L, opt);
+			else
+				lua_pushnil(L);
+		}
+		int status = 0;
+		if((status = lua_pcall(L, narg, 0, 0)) != 0) {
+			const char* msg = lua_tostring(L, -1);
+			if(msg == NULL) msg = "(error object is not a string)";
+			fprintf(stderr, "LuaJIT Error: %s\n", msg);
+			lua_pop(L, 1);
+		}
+		return status;
+	}
+	
+	// JIT engine control command: try jit library first or load add-on module
+	static int dojitcmd(lua_State* L, const char* cmd) {
+		const char *opt = strchr(cmd, '=');
+		lua_pushlstring(L, cmd, opt ? (size_t)(opt - cmd) : strlen(cmd));
+		lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
+		lua_getfield(L, -1, "jit"); // Get jit.* module table
+		lua_remove(L, -2);
+		lua_pushvalue(L, -2);
+		lua_gettable(L, -2); // Lookup library function
+		if (!lua_isfunction(L, -1)) {
+			lua_pop(L, 2); // Drop non-function and jit.* table, keep module name
+			if (loadjitmodule(L)) {
+				return 1;
+			}
+		} else
+			lua_remove(L, -2); // Drop jit.* table
+		lua_remove(L, -2); // Drop module name
+		return runcmdopt(L, opt ? opt+1 : opt);
+	}
+	
+	// Optimization flags
+	static int dojitopt(lua_State* L, const char* opt) {
+		lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
+		lua_getfield(L, -1, "jit.opt"); // Get jit.opt.* module table
+		lua_remove(L, -2);
+		lua_getfield(L, -1, "start");
+		lua_remove(L, -2);
+		return runcmdopt(L, opt);
+	}
+	
+	// Save or list bytecode
+	static int dobytecode(lua_State* L, char** argv) {
+		int narg = 0;
+		lua_pushliteral(L, "bcsave");
+		if (loadjitmodule(L))
+			return 1;
+		if (argv[0][2]) {
+			narg++;
+			argv[0][1] = '-';
+			lua_pushstring(L, argv[0]+1);
+		}
+		for (argv++; *argv != NULL; narg++, argv++)
+			lua_pushstring(L, *argv);
+		int status = 0;
+		if((status = lua_pcall(L, narg, 0, 0)) != 0) {
+			const char* msg = lua_tostring(L, -1);
+			if(msg == NULL) msg = "(error object is not a string)";
+			fprintf(stderr, "LuaJIT Error: %s\n", msg);
+			lua_pop(L, 1);
+		}
+		return status;
+	}
+	
+	// Prints JIT settings
+	static void print_jit_status(lua_State* L) {
+		lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
+		lua_getfield(L, -1, "jit");
+		lua_remove(L, -2);
+		lua_getfield(L, -1, "status");
+		lua_remove(L, -2); // _LOADED.jit.status
+		int n = lua_gettop(L);
+		lua_call(L, 0, LUA_MULTRET);
+		fputs(lua_toboolean(L, n) ? "JIT: ON" : "JIT: OFF", stdout);
+		const char* s = NULL;
+		for (n++; (s = lua_tostring(L, n)); n++) {
+			putc(' ', stdout);
+			fputs(s, stdout);
+		}
+		putc('\n', stdout);
+	}
+#endif
 
 
 
@@ -454,6 +600,8 @@ static inline void load_globals(Array* globals, void* data) {
 	free(m_args);
 }
 
+// TODO: I wonder how structures can play into this, like in luajit.c where
+// `static struct Smain;` defines variables for pmain - a function ran by lua cpcall
 static int delay_parameters = 0;
 static size_t parameters = 0;
 static char** parameters_argv = NULL;
@@ -462,6 +610,7 @@ static int core_tuple_parameters = 0;
 static int core_no_arg = 0;
 static int tuple_for_strexec = 0;
 
+static int no_env_var = 0;
 static int no_libraries = 0;
 
 // loads libraries into lua_State by executing them
@@ -501,32 +650,46 @@ int main(int argc, char* argv[])
 	static int run_after_libs = 0;
 	static char* run_str = NULL;
 	
+	#if defined(LUA_JIT_51)
+		static Array* luajit_jcmds = NULL;
+		static Array* luajit_opts = NULL;
+		static char** luajit_bc = NULL;
+	#endif
+	
 	// handle arguments
 	if(argc == 1) { // post-exist if !(arguments > 1)
 		post_exist = 1;
 		no_file = 1;
 	} else {
 		// don't try to execute file if it isn't first argument
-		if(argv[1][0] == '-')
+		if(argv[1][0] == '-' || argv[1][0] == '\\' || argv[1][0] == '/')
 			no_file = 1;
 		for(size_t i=1; i<(size_t)argc; i++) {
 			// if we have args around, break
 			if(parameters_argv != NULL)
 				break;
-			// don't parse non-switches
+			// skip over non-switches
 			switch(argv[i][0]) {
 			case '/':
+			case '\\':
 			case '-':
 				break;
 			default:
 				continue;
 			}
+			// a way of handling `--help` for common unix
+			if(strlen(argv[i]) == 6)
+				if(memcmp(argv[i], "--help", 6) == 0)
+					argv[i][1] = '?';
 			// set variables up for later parsing
 			switch(argv[i][1]) {
 			case 'v': case 'V':
 				print_version = 1;
 				break;
-			case 'e': case 'E':
+			case 'E':
+				no_env_var = 1;
+				break;
+			case 'e':
 				no_libraries = 1;
 				break;
 			case 's': case 'S':
@@ -550,9 +713,9 @@ int main(int argc, char* argv[])
 				check_error_OOM(libraries == NULL, __LINE__);
 				array_push(libraries, argv[i]);
 				break;
-			case 'B':
+			case 'T':
 				delay_parameters = 1;
-			case 'b':
+			case 't':
 				for(size_t j=0; j<strlen(argv[i]) - 2; j++) {
 					switch(argv[i][2+j]){
 						case 'a': case 'A':
@@ -576,9 +739,42 @@ int main(int argc, char* argv[])
 				break;
 			case 'R':
 				run_after_libs = 1;
-			case 'r':
 				run_str = argv[i + 1];
 				break;
+			case 'r':
+				run_after_libs = 0;
+				run_str = argv[i + 1];
+				break;
+			#if defined(LUA_JIT_51)
+				case 'j':
+					if(luajit_jcmds == NULL)
+						luajit_jcmds = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(const char*));
+					check_error_OOM(luajit_jcmds == NULL, __LINE__);
+					
+					char* jcmd = argv[i] + 2;
+					if(*jcmd == ' ' || *jcmd == '\0') {
+						if(i + 1 >= argc) {
+							fputs("LuaJIT Warning: malformed argument `-j` has no parameter!\n", stderr);
+							break;
+						} else
+							jcmd = argv[i+1];
+					}
+					array_push(luajit_jcmds, jcmd);
+					break;
+				case 'O':
+					if(luajit_opts == NULL)
+						luajit_opts = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(const char*));
+					check_error_OOM(luajit_opts == NULL, __LINE__);
+					if(strlen(argv[i]) > 2)
+						array_push(luajit_opts, argv[i] + 2);
+					else fputs("LuaJIT Warning: malformed argument `-O` has no parameter!\n", stderr);
+					break;
+				case 'b':
+					if(i + 1 < argc)
+						luajit_bc = argv + i;
+					else fputs("LuaJIT Warning: malfoirmed argument `-b` has no parameter!\n", stderr);
+					break;
+			#endif
 			case '?':
 				fputs(HELP_MESSAGE, stdout);
 				return EXIT_SUCCESS;
@@ -590,8 +786,30 @@ int main(int argc, char* argv[])
 	}
 	
 	// initiate lua
+	// TODO: I wonder why in luajit.c `lua_State* L = lua_open();` is
+	// defined inside `int main(int argc, char** argv)` and later
+	// it is set to the proper variable. Seems redundant.
 	L = luaL_newstate();
 	check_error_OOM(L == NULL, __LINE__);
+	
+	#if defined(LUA_JIT_51)
+		LUAJIT_VERSION_SYM();
+	#endif
+	
+	
+	// handle init environment variable
+	if(no_env_var == 0) {
+		const char* env_init = getenv(ENV_VAR);
+		if(env_init != NULL) {
+			if(env_init[0] == '@')
+				start_protective_mode_file(env_init + 1, NULL, 0);
+			else start_protective_mode_string(env_init, NULL, 0);
+		}
+	} else {
+		lua_pushboolean(L, 1);
+		lua_setfield(L, LUA_REGISTRYINDEX, "LUA_NOENV");
+	}
+	
 	
 	// initiate the libraries
 	if(no_libraries == 0) {
@@ -599,17 +817,37 @@ int main(int argc, char* argv[])
 		luaL_openlibs(L);
 		lua_gc(L, LUA_GCRESTART, -1);
 	}
-	else {
-		lua_pushboolean(L, 1);
-		lua_setfield(L, LUA_REGISTRYINDEX, "LUA_NOENV");
-	}
 	
-	
-	// copyright
+		// copyright
 	if(copyright_squelch == 0) {
-		fputs(LUA_COPYRIGHT "\n", stdout);
-		fputs(LUA_CONSOLE_COPYRIGHT, stdout);
+		fputs(LUA_VERSION " " LUA_COPYRIGHT "\n", stdout);
+		fputs(LUA_CONSOLE_COPYRIGHT "\n", stdout);
+		#if defined(LUA_JIT_51)
+			fputs("LuaJIT " LUAJIT_COPYRIGHT "\n", stdout);
+		#endif
+		fputs("\n", stdout);
 	}
+	
+	#if defined(LUA_JIT_51)
+		if(luajit_jcmds != NULL) {
+			for(size_t i=0; i<luajit_jcmds->size; i++)
+				if(dojitcmd(L, (const char*) array_get(luajit_jcmds, i)) != 0)
+					fputs("LuaJIT Warning: Failed to execute control command or load extension module!\n", stderr);
+			array_free(luajit_jcmds);
+		}
+		
+		if(luajit_opts != NULL) {
+			for(size_t i=0; i<luajit_opts->size; i++)
+				if(dojitopt(L, (const char*) array_get(luajit_opts, i)) != 0)
+					fputs("LuaJIT Warning: Failed to set with -O!\n", stderr);
+			array_free(luajit_opts);
+		}
+		
+		print_jit_status(L);
+		
+		if(luajit_bc != NULL)
+			return dobytecode(L, luajit_bc);
+	#endif
 	
 	
 	// print out the version, new state because no_libraries can be 1
