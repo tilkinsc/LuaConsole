@@ -5,7 +5,7 @@
 The project came to life when I realized how bad PUC-Lua and LuaJIT's REPL interpreters were.
 I took action and started development on a brand new REPL interpreter around May 1, 2017.
 
-Copyright information: [https://hydroque.github.io/LuaConsole/LICENSE](LuaConsole) [https://hydroque.github.io/LuaConsole/Lua LICENSE](Lua)
+Copyright information: [LuaConsole License](https://hydroque.github.io/LuaConsole/LICENSE) [Lua License](https://hydroque.github.io/LuaConsole/Lua LICENSE)
 
 Things wrong with PUC-Lua REPL interpreter (1/20/2018):
 * Badly formatted command line help message
@@ -71,9 +71,9 @@ Improvements made (1/20/2018):
 ### Getting Started
 
 First, download and build Lua and LuaConsole:
-* [https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#Windows](Windows Lua) [https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#windows-1](Windows LuaConsole)
-* [https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux](Linux Lua) [https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux-1](Linux LuaConsole)
-* [https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx](MacOSX Lua) [https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx](MacOSX LuaConsole)
+* [Windows Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#Windows) [Windows LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#windows-1)
+* [Linux Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux) [Linux LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux-1)
+* [MacOSX Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx) [MacOSX LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx)
 
 
 #### LuaAdd
