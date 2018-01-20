@@ -71,9 +71,9 @@ Improvements made (1/20/2018):
 ### Getting Started
 
 First, download and build Lua and LuaConsole:
-* [Windows Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#Windows) [Windows LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#windows-1)
-* [Linux Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux) [Linux LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux-1)
-* [MacOSX Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx) [MacOSX LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx)
+* [Windows Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#Windows) | [Windows LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#windows-1)
+* [Linux Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux) | [Linux LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux-1)
+* [MacOSX Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx) | [MacOSX LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx)
 
 
 #### LuaAdd
