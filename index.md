@@ -66,7 +66,7 @@ Improvements made (1/20/2018):
 
 ### Collaborators 
 
-* [https://github.com/Hydroque](Hydroque)
+* [Hydroque](https://github.com/Hydroque)
 
 ### Getting Started
 
