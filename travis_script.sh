@@ -10,6 +10,6 @@ if [ ! "$(ls -A $HOME/luajit-2.0)" ]; then
 fi
 mkdir ./include/luajit51
 cp $HOME/luajit-2.0/src/*.h ./include/luajit51
-cp $HOME/luajit-2.0/src/libluajit.so ./dll/lua51.so
+cp $HOME/luajit-2.0/src/libluajit.so ./dll/libluajit.so
 
 

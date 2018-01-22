@@ -2,7 +2,7 @@
 
 debug=1
 luaverdef=-DLUA_JIT_51
-luaver=lua51
+luaver=libluajit-5.1
 
 if [[ $debug -eq 0 ]]; then
 	attrib="-std=gnu99 -s -Wall -O2"
