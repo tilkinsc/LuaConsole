@@ -1,0 +1,26 @@
+language: c
+
+braches:
+  only:
+    - master
+
+dist: trusty
+
+cache:
+  directories:
+    - $HOME/luajit-2.0
+
+
+compiler:
+  - gcc
+
+script:
+  - bash travis_script.sh
+  - bash build.sh
+
+after_success:
+  - echo "Build successful. Testing."
+  - bash travis_test.sh
+after_failure:
+  - echo "Build failed."
+
