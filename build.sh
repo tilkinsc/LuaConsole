@@ -2,7 +2,7 @@
 
 debug=1
 luaverdef=-DLUA_JIT_51
-luaver=libluajit-5.1
+luaver=libluajit.so
 
 if [[ $debug -eq 0 ]]; then
 	attrib="-std=gnu99 -s -Wall -O2"
@@ -32,14 +32,14 @@ mkdir -p $root/res
 
 
 # Compile everything w/ additions
-gcc $attrib $dirs $luaverdef -c $srcdir/consolew.c $srcdir/darr.c
+gcc $attrib $dirs $luaverdef -Wl,-E -fPIC -c $srcdir/consolew.c $srcdir/darr.c
 gcc $attrib $dirs $luaverdef -Wl,-E -fPIC -c $srcdir/additions.c
 
 # Create luaadd.so
-gcc $attrib $dirs -shared -Wl,-E -fPIC -o luaadd.so additions.o $dlldir/$luaver.so
+gcc $attrib $dirs -shared -Wl,-E -fPIC -o luaadd.so additions.o $luaver
 
 # Link luaw
-gcc $attrib $dirs -o luaw consolew.o darr.o $dlldir/$luaver.so -lm -ldl
+gcc $attrib $dirs -o luaw consolew.o darr.o $luaver -lm -ldl
 
 
 chmod +x luaw
@@ -53,7 +53,7 @@ cp -r $resdir/* $root/res 1>/dev/null 2>/dev/null
 cp -r $dlldir/* $root 1>/dev/null 2>/dev/null
 cp -r $rootdir/* $root 1>/dev/null 2>/dev/null
 
-if [[ $debug -eq 1 ]]; then
+if [[ ! $debug -eq 0 ]]; then
 	strip --strip-all $root/luaw
 fi
 

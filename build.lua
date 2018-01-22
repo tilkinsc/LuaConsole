@@ -10,7 +10,7 @@ require("luaadd")
 require("build_func")
 
 
-local lua_ver = choose_opt("lua51", "libluajit-5.1", "libluajit-5.1")
+local lua_ver = choose_opt("lua51", "luajit", "luajit")
 local lua_define = " -DLUA_JIT_51"
 
 
