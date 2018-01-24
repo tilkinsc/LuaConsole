@@ -1,4 +1,6 @@
 # LuaConsole
+
+[![Join the chat at https://gitter.im/LuaConsole/Lobby](https://badges.gitter.im/LuaConsole/Lobby.svg)](https://gitter.im/LuaConsole/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 | Travis-cl | Appveyor |
 | --------- | -------- |
 | ![travis-ci](https://travis-ci.org/Hydroque/LuaConsole.svg?branch=master) | ![appveyor](https://ci.appveyor.com/api/projects/status/github/Hydroque/LuaConsole?svg=true) |  
