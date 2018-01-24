@@ -1,5 +1,7 @@
 # LuaConsole
-Travis-cl ![travis-ci](https://travis-ci.org/Hydroque/LuaConsole.svg?branch=master) | Appveyor ![appveyor](https://ci.appveyor.com/api/projects/status/github/Hydroque/LuaConsole?svg=true)  
+| Travis-cl | Appveyor |
+| --------- | -------- |
+| ![travis-ci](https://travis-ci.org/Hydroque/LuaConsole.svg?branch=master) | ![appveyor](https://ci.appveyor.com/api/projects/status/github/Hydroque/LuaConsole?svg=true) |  
 
 https://github.com/Hydroque/LuaConsole    
 [LuaConsole Website](https://hydroque.github.io/LuaConsole)  
