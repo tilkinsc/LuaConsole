@@ -506,7 +506,7 @@ retry:
 						lua_insert(L, lua_gettop(L)-top);
 						lua_call(L, top, 0);
 					} else
-						lua_pop(L, 1 + top); // anything returned, global function print
+						lua_pop(L, 1 + top); // nil, anything returned
 				}
 				continue;
 			} else lua_pop(L, 1); // err msg, also ignore it - no relevance
@@ -567,6 +567,7 @@ static inline int start_protective_mode_REPL() {
 static int start_protective_mode_string(const char* str, size_t params) {
 	signal(SIGINT, SIG_IGN); // Ignore for now
 	
+	lua_pushcclosure(L, lua_print_error, 0);
 	int base = lua_gettop(L);
 	int status = 0;
 	if((status = luaL_loadbuffer(L, str, strlen(str), "execute")) != 0) {
@@ -576,9 +577,18 @@ static int start_protective_mode_string(const char* str, size_t params) {
 	}
 	if(params > 0)
 		inject_parameters();
-	if((status = lua_pcall(L, params, 0, base)) != 0) {
+	if((status = lua_pcall(L, params, LUA_MULTRET, base)) != 0) {
 		lua_pop(L, 2); // err msg, err handler
 		return status;
+	}
+	base = lua_gettop(L) - base; // nargs returned
+	if(base > 0) {
+		lua_getglobal(L, "print");
+		if(lua_isnil(L, -1) != 1) { // check even if no_libraries == 1
+			lua_insert(L, lua_gettop(L) - base);
+			lua_call(L, base, 0);
+		} else
+			lua_pop(L, 1 + base); // nil, anything returned
 	}
 	lua_pop(L, 1); // err handler
 	return status;
