@@ -1,6 +1,7 @@
 
 // REPL line buffer length
-#define PRIMARY_REPL_BUFFER_SIZE	(1024 + 1)
+#define REPL_BUFFER_SIZE			(1024)
+#define PRIMARY_REPL_BUFFER_SIZE	(REPL_BUFFER_SIZE + 1)
 #define SECONDARY_REPL_BUFFER_SIZE	(PRIMARY_REPL_BUFFER_SIZE + 8) // + 8 is for `return ;`
 
 
@@ -53,26 +54,30 @@
 #include <signal.h>
 
 
-#if defined(LUA_53)
-#	include "lua53/lua.h"
-#	include "lua53/lualib.h"
-#	include "lua53/lauxlib.h"
+
+// Please migrate your lua h's to a proper directory so versions don't collide
+//   luajit make install puts them in /usr/local/include/luajit-X.X/*
+//   lua51/52/53 puts them directly in /usr/local/include/* with version collision
+#if defined(LUA_51)
+#	include "lua51/lua.h"
+#	include "lua51/lualib.h"
+#	include "lua51/lauxlib.h"
 #elif defined(LUA_52)
 #	include "lua52/lua.h"
 #	include "lua52/lualib.h"
 #	include "lua52/lauxlib.h"
-#elif defined(LUA_51)
-#	include "lua51/lua.h"
-#	include "lua51/lualib.h"
-#	include "lua51/lauxlib.h"
+#elif defined(LUA_53)
+#	include "lua53/lua.h"
+#	include "lua53/lualib.h"
+#	include "lua53/lauxlib.h"
 #elif defined(LUA_JIT_51)
-#	include "luajit51/lua.h"
-#	include "luajit51/lualib.h"
-#	include "luajit51/lauxlib.h"
-#	include "luajit51/luajit.h"
+#	include "luajit-2.0/lua.h"
+#	include "luajit-2.0/lualib.h"
+#	include "luajit-2.0/lauxlib.h"
+#	include "luajit-2.0/luajit.h"
 #else
-#	warning "Please place the Lua version needed in './include' 'lua53/*' 'lua52/*' 'lua51/*' 'luajit51/*'"
-#	error "Define the version you want to use with -D. '-DLUA_53' '-DLUA_52' '-DLUA_51' '-DLUA_JIT_51'"
+#	warning "Lua version not defined."
+#	error "Define the version to use. '-DLUA_53' '-DLUA_52' '-DLUA_51' '-DLUA_JIT_51'"
 #endif
 
 
@@ -132,6 +137,7 @@ const char HELP_MESSAGE[] =
 
 
 // LuaJIT functions slightly modified for LuaConsole
+// TODO: optimize
 #if defined(LUA_JIT_51)
 	// Load add-on module
 	static int loadjitmodule(lua_State* L) {
@@ -265,6 +271,7 @@ const char HELP_MESSAGE[] =
 
 // struct for args to be seen across functions
 struct {
+	size_t parameters;
 	char* start;
 	char* run_str;
 	Array* globals;
@@ -275,7 +282,6 @@ struct {
 		Array* luajit_opts;
 		char** luajit_bc;
 	#endif
-	size_t parameters;
 	int print_version;
 	int post_exist;
 	int no_file;
@@ -290,15 +296,15 @@ struct {
 	int no_libraries;
 } ARGS;
 
-// flag for closing REPL
-static int should_close = 0;
+// one environment per process
+static lua_State* L = NULL;
 
 // buffers for REPL
 static char* input = NULL;
 static char* retfmt = NULL;
 
-// one environment per process
-static lua_State* L = NULL;
+// flag for closing REPL
+static int should_close = 0;
 
 
 

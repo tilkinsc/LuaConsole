@@ -2,15 +2,15 @@
 
 echo Managing dependancies...
 
-if [ ! "$(ls -A $HOME/luajit-2.0)" ]; then
-	git clone http://luajit.org/git/luajit-2.0.git $HOME/luajit-2.0
-	pushd $HOME/luajit-2.0
+echo " # luajit-2.0"
+pushd $HOME/luajit-2.0
+	if [ ! "$(ls -A $HOME/luajit-2.0)" ]; then
+		git clone http://luajit.org/git/luajit-2.0.git $HOME/luajit-2.0
 		make -j 4
-		sudo make install
-		dir
-	popd
-fi
-mkdir ./include/luajit51
-cp $HOME/luajit-2.0/src/*.h ./include/luajit51
+	fi
+	# TODO: migrate stuff needed elsewhere to prevent downloading a lot, instead of make install
+	sudo make install
+	sudo ldconfig
+popd
 
-
+echo Done managing dependancies.

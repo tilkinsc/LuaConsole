@@ -2,8 +2,19 @@
 
 pushd bin/Debug
 
-export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+	errors=0
 
-./luaw ./res/testing.lua -v -Tb -n a b c
+
+	./luaw ./res/testing.lua -v -Tb -n a b c
+	if [ $? -ne 0 ]; then
+		echo Testing scenario 1 failed to complete.
+		((errors++))
+	fi
+
+
+	if [ $errors > 0 ]; then
+		echo Exited with $errors errors!
+		exit 1
+	fi
 
 popd

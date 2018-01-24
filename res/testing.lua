@@ -20,5 +20,3 @@ end
 -- use -Dtest=5 to display use
 print(test)
 
--- error
-os.whatever()

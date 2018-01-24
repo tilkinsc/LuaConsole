@@ -1,18 +1,19 @@
 language: c
+language: c
+
+dist: trusty
+sudo: true
+
+compiler:
+  - gcc
 
 braches:
   only:
     - master
 
-dist: trusty
-
 cache:
   directories:
     - $HOME/luajit-2.0
-
-
-compiler:
-  - gcc
 
 script:
   - bash travis_script.sh

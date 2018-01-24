@@ -12,26 +12,33 @@
 #else
 #	error "OS not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
 #endif
-#if defined(LUA_53)
-#	include "lua53/lua.h"
-#	include "lua53/lualib.h"
-#	include "lua53/lauxlib.h"
+
+
+// Please migrate your lua h's to a proper directory so versions don't collide
+//   luajit make install puts them in /usr/local/include/luajit-X.X/*
+//   lua51/52/53 puts them directly in /usr/local/include/* with version collision
+#if defined(LUA_51)
+#	include "lua51/lua.h"
+#	include "lua51/lualib.h"
+#	include "lua51/lauxlib.h"
 #elif defined(LUA_52)
 #	include "lua52/lua.h"
 #	include "lua52/lualib.h"
 #	include "lua52/lauxlib.h"
-#elif defined(LUA_51)
-#	include "lua51/lua.h"
-#	include "lua51/lualib.h"
-#	include "lua51/lauxlib.h"
+#elif defined(LUA_53)
+#	include "lua53/lua.h"
+#	include "lua53/lualib.h"
+#	include "lua53/lauxlib.h"
 #elif defined(LUA_JIT_51)
-#	include "luajit51/lua.h"
-#	include "luajit51/lualib.h"
-#	include "luajit51/lauxlib.h"
+#	include "luajit-2.0/lua.h"
+#	include "luajit-2.0/lualib.h"
+#	include "luajit-2.0/lauxlib.h"
+#	include "luajit-2.0/luajit.h"
 #else
-#	warning "Please place the Lua version needed in './include' 'lua53/*' 'lua52/*' 'lua51/*' 'luajit51/*'"
-#	error "Define the version you want to use with -D. '-DLUA_53' '-DLUA_52' '-DLUA_51' '-DLUA_JIT_51'"
+#	warning "Lua version not defined."
+#	error "Define the version to use. '-DLUA_53' '-DLUA_52' '-DLUA_51' '-DLUA_JIT_51'"
 #endif
+
 
 
 #define LUA_DLL_ENTRY 	LUA_DLL int
