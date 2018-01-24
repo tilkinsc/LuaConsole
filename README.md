@@ -1,7 +1,8 @@
 # LuaConsole
-Travis-cl ![travis-ci](https://travis-ci.org/Hydroque/LuaConsole.svg?branch=master) | Appveyor ![appveyor](https://ci.appveyor.com/api/projects/status/github/Hydroque/LuaConsole?svg=true)
+Travis-cl ![travis-ci](https://travis-ci.org/Hydroque/LuaConsole.svg?branch=master) | Appveyor ![appveyor](https://ci.appveyor.com/api/projects/status/github/Hydroque/LuaConsole?svg=true)  
+
 https://github.com/Hydroque/LuaConsole    
-https://hydroque.github.io/LuaConsole  
+[LuaConsole Website](https://hydroque.github.io/LuaConsole)  
 A next-gen, crossplatform \[Lua5.1, LuaJIT5.1, Lua5.2, Lua5.3\]-supporting interpreter w/ REPL made to support and supersede PUC-Lua and LuaJIT interpreter w/ REPL
 
 For more information, visit [LuaConsole Github Website](https://hydroque.github.io/LuaConsole).  
