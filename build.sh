@@ -5,10 +5,11 @@ debug=1
 
 luaverdef=-DLUA_JIT_51
 luaver=-lluajit-5.1
-luainc=/usr/local/include/luajit-2.0
-#luainc=/usr/local/include/lua51
-#luainc=/usr/local/include/lua52
-#luainc=/usr/local/include/lua53
+luainc=.
+#luainc=/usr/local/include
+#luainc is for external include directory only
+#If its in ./include, keep luainc set to .
+
 
 if [[ $debug -eq 0 ]]; then
 	attrib="-std=gnu99 -s -Wall -O2"

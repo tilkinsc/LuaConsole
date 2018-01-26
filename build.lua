@@ -10,7 +10,7 @@ require("luaadd")
 require("build_func")
 
 
-local lua_ver = choose_opt("lua51", "-lluajit-5.1", "-lluajit-5.1")
+local lua_ver = choose_opt("lua51", "luajit-5.1", "luajit-5.1")
 local lua_define = " -DLUA_JIT_51"
 local lua_includes = choose_opt("", "/usr/local/include/luajit-2.0", "/usr/local/include/luajit-2.0")
 
@@ -38,6 +38,7 @@ gcc.O = gcc.debug and 0 or 2
 local install_path = plat == os.types.Windows and (gcc.debug and ("bin\\Debug") or ("bin\\Release")) or ((plat == os.types.Linux or plat == os.types.MacOSX) and (gcc.debug and ("bin/Debug") or ("bin/Release")))
 
 
+-- this is only a print
 local targ_dir = (gcc.debug and "DEBUG" or "RELEASE")
 
 
@@ -54,22 +55,23 @@ local targ2_compile_units = {"additions.c"}
 
 local exe_test = true
 
-if(cache == nil)then
-	targ1_compile_units = check_cache(targ1_compile_units, "src/", "obj/", "o")
-	targ2_compile_units = check_cache(targ2_compile_units, "src/", "obj/", "o")
+if(no_cache == nil) then
+	if(cache == nil)then
+		targ1_compile_units = check_cache(targ1_compile_units, "src/", "obj/", "o")
+		targ2_compile_units = check_cache(targ2_compile_units, "src/", "obj/", "o")
 
-	exe_test = 
-		   check_bin_cache(targ1_exe, "src/", install_path .. "\\", targ1_compile_units)
-		or check_bin_cache(targ1_exe, "src/", install_path .. "\\", targ2_compile_units)
-		or check_bin_cache(targ2_dll, "src/", install_path .. "\\", targ1_compile_units)
-		or check_bin_cache(targ2_dll, "src/", install_path .. "\\", targ2_compile_units)
+		exe_test = 
+			   check_bin_cache(targ1_exe, "src/", install_path .. "\\", targ1_compile_units)
+			or check_bin_cache(targ1_exe, "src/", install_path .. "\\", targ2_compile_units)
+			or check_bin_cache(targ2_dll, "src/", install_path .. "\\", targ1_compile_units)
+			or check_bin_cache(targ2_dll, "src/", install_path .. "\\", targ2_compile_units)
+	end
+
+	if(#targ1_compile_units == 0 and #targ2_compile_units == 0 and not exe_test and force == nil)then
+		print("Done. Up to date.")
+		return
+	end
 end
-
-if(#targ1_compile_units == 0 and #targ2_compile_units == 0 and not exe_test and force == nil)then
-	print("Done. Up to date.")
-	return
-end
-
 
 
 --[[

@@ -6,6 +6,9 @@ setlocal
 	set debug=1
 	set luaverdef=-DLUA_JIT_51
 	set luaver=lua51
+	set luainc=.
+	REM luainc is for external include directory only
+	REM if its in /include, keep luainc set to .
 	
 	if %debug% EQU 0 (
 		set attrib=-std=gnu99 -s -Wall -O2
@@ -23,7 +26,7 @@ setlocal
 	set srcdir=src
 	set incdir=include
 	
-	set dirs=-L%srcdir% -L%libdir% -L%dlldir% -I%srcdir% -I%incdir%
+	set dirs=-L%srcdir% -L%libdir% -L%dlldir% -I%srcdir% -I%incdir% -I%luainc%
 
 	
 	if EXIST %root% ( rmdir /S /Q %root% )

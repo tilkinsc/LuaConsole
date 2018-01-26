@@ -1,8 +1,15 @@
 
-# TODO:
-# - need to handle files from dll well
-# - need to copy *.dll to bin/Debug or bin/Release
-# - make sure to exclude all dummy files except those in res
+# TODO: Ensure this happens under `directories:` target
+# - need to copy *.dll/so to bin/Debug or bin/Release
+# - need to copy res/* to bin/Debug/res or bin/Release/res
+# - need to copy root/* to bin/Debug or bin/Release
+# - target-specific tools are utilized
+# - removed embedded lua -l's
+
+# TODO: Improvements
+# - improve the environment setup system
+# - obviously support external lua directories/ -D's
+
 
 ifeq ($(PLAT), )
 	$(error Please define PLAT= `Windows`, `Unix`)
@@ -24,11 +31,11 @@ BDIR = bin
 RDIR = res
 ROOT = root
 
-DEBUG_BIN_DIR = $(BDIR)\Debug
-RELEASE_BIN_DIR = $(BDIR)\Release
-
 LIBS_DIR = -L. -Lsrc -Llib -Ldll
 INCL_DIR = -I. -Isrc -Iinclude
+
+DEBUG_BIN_DIR = $(BDIR)\Debug
+RELEASE_BIN_DIR = $(BDIR)\Release
 
 
 # Compiler/Linker setup
@@ -64,11 +71,11 @@ directories:
 
 Windows: LIBS = -llua51.dll
 Windows: CFLAGS += -D__USE_MINGW_ANSI_STDIO=1 -DLUA_JIT_51
-Windows: luaw luaadd.dll test
+Windows: luaw luaadd.dll
 
-Unix: LIBS = -llua51.dll -ldl -lm
+Unix: LIBS = -lluajit-5.1 -ldl -lm
 Unix: CFLAGS += -DLUA_JIT_51
-Unix: luaw luaadd.so test
+Unix: luaw luaadd.so
 	
 
 luaadd.dll: $(LUAADD.DLL_OBJS)
@@ -82,8 +89,9 @@ luaw: $(LUAW_OBJS)
 	$(CC) $(CFLAGS) -o $(BIN_DIR)/$@$(EXE_SUFFIX) $(subst $(SDIR),$(ODIR),$^) $(LIBS) $(LLIBS)
 
 
-
+# many things need added
 .PHONY: clean
 
+# clean needs improved
 clean:
 	-$(RM) $(ODIR)/*.o
