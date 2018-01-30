@@ -63,7 +63,6 @@
 #	include <windows.h>
 #	include <stdio.h>
 #	include <stdlib.h>
-#	include <dirent.h>
 #	define IS_ATTY _isatty(_fileno(stdin))
 #	define LUA_BIN_EXT_NAME ".exe"
 #	define LUA_DLL_SO_NAME ".dll"
@@ -72,6 +71,7 @@
 #endif
 
 
+#include <dirent.h>
 #include <string.h>
 #include <signal.h>
 

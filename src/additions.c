@@ -40,13 +40,14 @@
 #	include <windows.h>
 #	include <stdio.h>
 #	include <stdlib.h>
-#	include <dirent.h>
 #	define CLEAR_CONSOLE "cls"
 #else
 #	error "Not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
 #endif
 
 
+#include <string.h>
+#include <dirent.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
