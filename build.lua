@@ -22,7 +22,7 @@ local lua_includes = choose_opt("", "/usr/local/include/luajit-2.0", "/usr/local
 
 local gcc = {
 	gcc_name = "gcc";
-	debug = true;
+	debug = false;
 	warnings = " -Wall";
 	windows = false;
 	extra_warnings = "";
@@ -55,7 +55,7 @@ local targ2_compile_units = {"additions.c"}
 
 local exe_test = true
 
-if(no_cache == nil) then
+if(no_cache == nil and force == nil) then
 	if(cache == nil)then
 		targ1_compile_units = check_cache(targ1_compile_units, "src/", "obj/", "o")
 		targ2_compile_units = check_cache(targ2_compile_units, "src/", "obj/", "o")
@@ -67,7 +67,7 @@ if(no_cache == nil) then
 			or check_bin_cache(targ2_dll, "src/", install_path .. "\\", targ2_compile_units)
 	end
 
-	if(#targ1_compile_units == 0 and #targ2_compile_units == 0 and not exe_test and force == nil)then
+	if(#targ1_compile_units == 0 and #targ2_compile_units == 0 and not exe_test)then
 		print("Done. Up to date.")
 		return
 	end
@@ -158,6 +158,7 @@ if(#targ2_compile_units > 0 or exe_test or force)then
 end
 
 
+-- link/file manage
 if(#targ1_compile_units + #targ2_compile_units > 0 or exe_test or force)then
 	-- link dll
 	linker_exec(enc_dll(" luaadd"), linker_str_dll1)

@@ -15,7 +15,7 @@ if [[ $debug -eq 0 ]]; then
 	attrib="-std=gnu99 -s -Wall -O2"
 	root=bin/Release
 else
-	attrib="-std=gnu99 -Wall -g -O0"
+	attrib="-std=gnu99 -coverage -Wall -g -O0"
 	root=bin/Debug
 fi
 

@@ -14,7 +14,7 @@ setlocal
 		set attrib=-std=gnu99 -s -Wall -O2
 		set root=bin\Release
 	) else (
-		set attrib=-std=gnu99 -Wall -g -O0
+		set attrib=-std=gnu99 -coverage -Wall -g -O0
 		set root=bin\Debug
 	)
 	

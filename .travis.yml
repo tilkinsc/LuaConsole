@@ -1,5 +1,4 @@
 language: c
-language: c
 
 dist: trusty
 sudo: true
@@ -16,7 +15,7 @@ cache:
     - $HOME/luajit-2.0
 
 script:
-  - bash travis_script.sh
+  - bash travis_dependancies.sh
   - bash build.sh
 
 after_success:

@@ -122,14 +122,16 @@ end
 
 compiler_exec = function(target, str)
 	print(">>> Compiling for `" .. target .. "`")
-	print(">", str)
+	print(">", str .. "\n")
 	os.execute(str)
+	print("")
 end
 
 linker_exec = function(target, str)
 	print(">>> Linking `" .. target .. "`")
-	print(">", str)
+	print(">", str .. "\n")
 	os.execute(str)
+	print("")
 end
 
 
@@ -141,7 +143,7 @@ end
 
 strip_targ = function(target)
 	print(">>> Stripping `" .. target .. "`")
-	os.execute("strip " .. enc_exe(target))
+	os.execute("strip " .. target)
 end
 
 migrate_binaries = function(install_path, binaries)
