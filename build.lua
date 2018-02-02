@@ -1,3 +1,27 @@
+--[[
+	MIT License
+ 
+	Copyright (c) 2017-2018 Cody Tilkins
+ 
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+ 
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+ 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+--]]
+
 
 -- define v this or use -Dplat=Windows -- Linux -- MacOSX
 -- plat = os.types.Windows -- os.types.Linux -- os.types.MacOSX
@@ -48,7 +72,7 @@ local targ_dir = (gcc.debug and "DEBUG" or "RELEASE")
 --]]
 
 local targ1_exe = {enc_exe("luaw")}
-local targ1_compile_units = {"consolew.c", "darr.c"}
+local targ1_compile_units = {"consolew.c", "jitsupport.c", "darr.c"}
 
 local targ2_dll = {enc_dll("luaadd")}
 local targ2_compile_units = {"additions.c"}
@@ -83,7 +107,7 @@ local std_libs = enc_dll(" -l" .. lua_ver) .. choose_opt("", " -lm -ldl", " -lm 
 
 
 local targ1_luaw_exe = enc_exe("luaw")
-local targ1_luaw_exe_o = {"consolew.o", "darr.o"}
+local targ1_luaw_exe_o = {"consolew.o", "jitsupport.o", "darr.o"}
 local targ1_lua_exe_libs = std_libs
 
 
