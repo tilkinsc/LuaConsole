@@ -1,6 +1,6 @@
 /* MIT License
  * 
- * Copyright (c) 2018 PoliteKiwi
+ * Copyright (c) 2017-2018 Cody Tilkins
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -97,6 +97,7 @@
 #	include "luajit-2.0/lualib.h"
 #	include "luajit-2.0/lauxlib.h"
 #	include "luajit-2.0/luajit.h"
+#	include "jitsupport.h"
 #else
 #	warning "Lua version not defined."
 #	error "Define the version to use. '-DLUA_53' '-DLUA_52' '-DLUA_51' '-DLUA_JIT_51'"
@@ -109,7 +110,7 @@
 
 
 // copyright information
-#define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright (C) 2017-2018, Hydroque"
+#define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright (C) 2017-2018, Cody Tilkins"
 
 
 
@@ -158,141 +159,14 @@ const char HELP_MESSAGE[] =
 
 
 
-// LuaJIT functions slightly modified for LuaConsole
-// TODO: optimize
 #if defined(LUA_JIT_51)
-	// Load add-on module
-	static int loadjitmodule(lua_State* L) {
-		lua_getglobal(L, "require");
-		lua_pushliteral(L, "jit.");
-		lua_pushvalue(L, -3);
-		lua_concat(L, 2);
-		if (lua_pcall(L, 1, 1, 0)) {
-			const char *msg = lua_tostring(L, -1);
-			if (msg && !strncmp(msg, "module ", 7))
-				goto nomodule;
-			msg = lua_tostring(L, -1);
-			if(msg == NULL) msg = "(error object is not a string)";
-			fprintf(stderr, "LuaJIT Error: %s\n", msg);
-			lua_pop(L, 1);
-			return 1;
-		}
-		lua_getfield(L, -1, "start");
-		if (lua_isnil(L, -1)) {
-	nomodule:
-			fputs("LuaJIT Error: unknown luaJIT command or jit.* modules not installed\n", stderr);
-			return 1;
-		}
-		lua_remove(L, -2); // Drop module table
-		return 0;
-	}
-	
-	// Run command with options
-	static int runcmdopt(lua_State* L, const char* opt) {
-		int narg = 0;
-		if (opt && *opt) {
-			for (;;) { // Split arguments
-				const char *p = strchr(opt, ',');
-				narg++;
-				if (!p) break;
-				if (p == opt)
-					lua_pushnil(L);
-				else
-					lua_pushlstring(L, opt, (size_t)(p - opt));
-				opt = p + 1;
-			}
-			if (*opt)
-				lua_pushstring(L, opt);
-			else
-				lua_pushnil(L);
-		}
-		int status = 0;
-		if((status = lua_pcall(L, narg, 0, 0)) != 0) {
-			const char* msg = lua_tostring(L, -1);
-			if(msg == NULL) msg = "(error object is not a string)";
-			fprintf(stderr, "LuaJIT Error: %s\n", msg);
-			lua_pop(L, 1);
-		}
-		return status;
-	}
-	
-	// JIT engine control command: try jit library first or load add-on module
-	static int dojitcmd(lua_State* L, const char* cmd) {
-		const char *opt = strchr(cmd, '=');
-		lua_pushlstring(L, cmd, opt ? (size_t)(opt - cmd) : strlen(cmd));
-		lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
-		lua_getfield(L, -1, "jit"); // Get jit.* module table
-		lua_remove(L, -2);
-		lua_pushvalue(L, -2);
-		lua_gettable(L, -2); // Lookup library function
-		if (!lua_isfunction(L, -1)) {
-			lua_pop(L, 2); // Drop non-function and jit.* table, keep module name
-			if (loadjitmodule(L)) {
-				return 1;
-			}
-		} else
-			lua_remove(L, -2); // Drop jit.* table
-		lua_remove(L, -2); // Drop module name
-		return runcmdopt(L, opt ? opt+1 : opt);
-	}
-	
-	// Optimization flags
-	static int dojitopt(lua_State* L, const char* opt) {
-		lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
-		lua_getfield(L, -1, "jit.opt"); // Get jit.opt.* module table
-		lua_remove(L, -2);
-		lua_getfield(L, -1, "start");
-		lua_remove(L, -2);
-		return runcmdopt(L, opt);
-	}
-	
-	// Save or list bytecode
-	static int dobytecode(lua_State* L, char** argv) {
-		int narg = 0;
-		lua_pushliteral(L, "bcsave");
-		if (loadjitmodule(L))
-			return 1;
-		if (argv[0][2]) {
-			narg++;
-			argv[0][1] = '-';
-			lua_pushstring(L, argv[0]+1);
-		}
-		for (argv++; *argv != NULL; narg++, argv++)
-			lua_pushstring(L, *argv);
-		int status = 0;
-		if((status = lua_pcall(L, narg, 0, 0)) != 0) {
-			const char* msg = lua_tostring(L, -1);
-			if(msg == NULL) msg = "(error object is not a string)";
-			fprintf(stderr, "LuaJIT Error: %s\n", msg);
-			lua_pop(L, 1);
-		}
-		return status;
-	}
-	
-	// Prints JIT settings
-	static void print_jit_status(lua_State* L) {
-		lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
-		lua_getfield(L, -1, "jit");
-		lua_remove(L, -2);
-		lua_getfield(L, -1, "status");
-		lua_remove(L, -2); // _LOADED.jit.status
-		int n = lua_gettop(L);
-		lua_call(L, 0, LUA_MULTRET);
-		fputs(lua_toboolean(L, n) ? "JIT: ON" : "JIT: OFF", stdout);
-		const char* s = NULL;
-		for (n++; (s = lua_tostring(L, n)); n++) {
-			putc(' ', stdout);
-			fputs(s, stdout);
-		}
-		putc('\n', stdout);
-		lua_pop(L, lua_gettop(L) - n);
-	}
+	#include "jitsupport.h"
 #endif
 
 
 
 // struct for args to be seen across functions
-struct {
+static struct {
 	size_t parameters;
 	char* start;
 	char* run_str;
@@ -725,9 +599,6 @@ static inline void load_libraries(Array* libraries, void* data) {
 // handles arguments, cwd, loads necessary data, executes lua
 int main(int argc, char* argv[])
 {
-	// ensure all 0's
-	memset(&ARGS, 0, sizeof(ARGS));
-	
 	// handle arguments
 	if(argc == 1) { // post-exist if !(arguments > 1)
 		ARGS.post_exist = 1;
@@ -859,9 +730,6 @@ int main(int argc, char* argv[])
 	}
 	
 	// initiate lua
-	// TODO: I wonder why in luajit.c `lua_State* L = lua_open();` is
-	// defined inside `int main(int argc, char** argv)` and later
-	// it is set to the proper variable. Seems redundant.
 	L = luaL_newstate();
 	check_error_OOM(L == NULL, __LINE__);
 	
@@ -905,25 +773,9 @@ int main(int argc, char* argv[])
 	
 	#if defined(LUA_JIT_51)
 		if(ARGS.no_libraries == 0) {
-			if(ARGS.luajit_jcmds != NULL) {
-				for(size_t i=0; i<ARGS.luajit_jcmds->size; i++)
-					if(dojitcmd(L, (const char*) array_get(ARGS.luajit_jcmds, i)) != 0)
-						fputs("LuaJIT Warning: Failed to execute control command or load extension module!\n", stderr);
-				array_free(ARGS.luajit_jcmds);
-			}
-		
-			if(ARGS.luajit_opts != NULL) {
-				for(size_t i=0; i<ARGS.luajit_opts->size; i++)
-					if(dojitopt(L, (const char*) array_get(ARGS.luajit_opts, i)) != 0)
-						fputs("LuaJIT Warning: Failed to set with -O!\n", stderr);
-				array_free(ARGS.luajit_opts);
-			}
-			
-			if(ARGS.copyright_squelch == 0)
-				print_jit_status(L);
-			
+			int status = jitargs(L, ARGS.luajit_jcmds, ARGS.luajit_opts, ARGS.luajit_bc, ARGS.copyright_squelch);
 			if(ARGS.luajit_bc != NULL)
-				return dobytecode(L, ARGS.luajit_bc);
+				return status;
 		}
 	#endif
 	
@@ -997,7 +849,6 @@ int main(int argc, char* argv[])
 		
 		if(ARGS.no_file == 0)
 			status = start_protective_mode_file(argv[1], (ARGS.core_tuple_parameters == 1 ? ARGS.parameters : 0));
-		// TODO: what if status == 1
 		if(ARGS.post_exist == 1)
 			status = start_protective_mode_REPL();
 	}
