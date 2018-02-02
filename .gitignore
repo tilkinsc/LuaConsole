@@ -11,3 +11,6 @@
 /include/luajit51/*
 /lib/libluajit51.dll.a
 /root/*
+*.gcov
+*.gcda
+*.gcno
