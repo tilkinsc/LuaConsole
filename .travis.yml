@@ -15,7 +15,7 @@ cache:
     - $HOME/luajit-2.0
 
 script:
-  - bash travis_dependancies.sh
+  - bash travis_dependencies.sh
   - bash build.sh
 
 after_success:
