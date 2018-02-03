@@ -603,7 +603,7 @@ static inline void load_libraries(Array* libraries, void* data) {
 			return;
 		}
 	}
-	start_protective_mode_file(name, (ARGS.no_tuple_parameters == 0 ? 0 : ARGS.parameters));
+	start_protective_mode_file(name, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 	free(str1);
 }
 
@@ -836,7 +836,7 @@ int main(int argc, char* argv[])
 	
 	// run executable string before -l's
 	if(ARGS.run_str != 0 && ARGS.run_after_libs == 0)
-		start_protective_mode_string(ARGS.run_str, (ARGS.no_tuple_parameters == 1 ? 0 :ARGS.parameters));
+		start_protective_mode_string(ARGS.run_str, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 	
 	
 	// do passed libraries/modules
@@ -848,7 +848,7 @@ int main(int argc, char* argv[])
 	
 	// run executable string after -l's
 	if(ARGS.run_str != 0 && ARGS.run_after_libs == 1)
-		start_protective_mode_string(ARGS.run_str, (ARGS.no_tuple_parameters == 1 ? 0 :ARGS.parameters));
+		start_protective_mode_string(ARGS.run_str, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 	
 	
 	
@@ -862,7 +862,7 @@ int main(int argc, char* argv[])
 			load_parameters();
 		
 		if(ARGS.no_file == 0)
-			status = start_protective_mode_file(argv[1], (ARGS.no_tuple_parameters == 1 ? 0 :ARGS.parameters));
+			status = start_protective_mode_file(argv[1], (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 		if(ARGS.post_exist == 1)
 			status = start_protective_mode_REPL();
 	}
