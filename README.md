@@ -8,6 +8,13 @@ A next-gen, crossplatform \[Lua5.1, LuaJIT5.1, Lua5.2, Lua5.3\]-supporting inter
 
 For more information, visit [LuaConsole Github Website](https://tilkinsc.github.io/LuaConsole) and the [wiki](https://github.com/tilkinsc/LuaConsole/wiki)!   
 
+# Goals
+* Be a better CLI application than PUC-Lua/LuaJIT
+* Have low codecoverage to prevent redundancy being executed (33% pseudo-goal)
+* Support everything that I can, included everything compatible with PUC-Lua source
+* Prevent messy, obfuscating code
+* Be CLI dependant and independant
+
 # Building
 [Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)
 
