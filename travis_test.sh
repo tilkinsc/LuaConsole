@@ -30,7 +30,7 @@ release=bin/Release
 
 if [ -d "./bin/Debug" ]; then
 	export LUA_CPATH="./$debug/?.so;$LUA_CPATH"
-	./$debug/luaw ./res/testing.lua -lluaadd.so -Tb -n a b c
+	./$debug/luaw ./res/testing.lua -lluaadd.so -Dtest=6 -n a b c
 	if [ $? -ne 0 ]; then
 		echo Testing scenario 1 failed to complete.
 		((errors++))
@@ -40,7 +40,7 @@ if [ -d "./bin/Debug" ]; then
 	fi
 else
 	export LUA_CPATH="./$release/?.so;$LUA_CPATH"
-	./$release/luaw ./res/testing.lua -lluaadd.so -Tb -n a b c
+	./$release/luaw ./res/testing.lua -lluaadd.so -Dtest=6 -n a b c
 	if [ $? -ne 0 ]; then
 		echo Testing scenario 1 failed to complete.
 		((errors++))
