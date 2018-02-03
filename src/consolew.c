@@ -127,28 +127,26 @@ const char HELP_MESSAGE[] =
 	#endif
 	"\nSupports Lua5.3, Lua5.2, Lua5.1, LuaJIT5.1\n"
 	"\n"
-	"Usage: luaw" LUA_BIN_EXT_NAME " [FILE] [-v] [-e] [-E] [-s PATH] [-p] [-c] [-Dvar=val]\n"
-	"\t[-Dtb.var=val] [-Lfile.lua] [-Llualib" LUA_DLL_SO_NAME "] [-t{a,b,c,d}] [-T{a,b,d}]\n"
-	"\t[-r \"string\"] [-R \"string\"] "
+	"Usage: luaw" LUA_BIN_EXT_NAME " [FILE] [-v] [-r] [-R] [-s PATH] [-p] [-c] [-Dvar=val]\n"
+	"\t[-Dtb.var=val] [-Lfile.lua] [-Llualib" LUA_DLL_SO_NAME "] [-t{a,b}] [-r \"string\"]\n"
+	"\t[-R \"string\"] "
 		#if defined(LUA_JIT_51)
 			"[-j{cmd,cmd=arg},...]\n\t[-O{level,+flag,-flag,cmd=arg}] [-b{l,s,g,n,t,a,o,e,-} {IN,OUT}]\n\t"
 		#endif
 		"[-?] [-n {arg1 ...}]\n"
 	"\n"
 	"-v \t\tPrints the Lua version in use\n"
-	"-e \t\tPrevents lua core libraries from loading\n"
-	"-E \t\tPrevents lua environment variables from loading\n"
+	"-r \t\tPrevents lua core libraries from loading\n"
+	"-R \t\tPrevents lua environment variables from loading\n"
 	"-s \t\tIssues a new current directory\n"
 	"-p \t\tActivates REPL mode after all or no supplied scripts\n"
 	"-c \t\tNo copyright on init\n"
 	"-d \t\tDefines a global variable as value after '='\n"
 	"-l \t\tExecutes a module before specified script or post-exist\n"
-	"-t[a,b,c,d] \tLoads parameters after -l's and -r\n"
-	"-T[a,b,d] \tLoads parameters before -l's and -r\n"
-		"\t\t\t[a]=arg-tuple for -l's, [b]=arg-tuple for file,\n"
-		"\t\t\t[c]=no arg for file, [d]=tuple for -r\n"
-	"-r \t\tExecutes a string as Lua Code BEFORE -l's\n"
-	"-R \t\tExecutes a string as Lua Code AFTER -l's\n"
+	"-t[a,b] \tLoads parameters after -l's and -e\n"
+		"\t\t\t[a]=delay arg table for file. [b]=no tuples\n"
+	"-e \t\tExecutes a string as Lua Code BEFORE -l's\n"
+	"-E \t\tExecutes a string as Lua Code AFTER -l's\n"
 	#if defined(LUA_JIT_51)
 		"-j \t\t LuaJIT  Performs a control command loads an extension module\n"
 		"-O \t\t LuaJIT  Sets an optimization level/parameters\n"
@@ -184,10 +182,7 @@ static struct {
 	int copyright_squelch;
 	int run_after_libs;
 	int delay_parameters;
-	int tuple_parameters;
-	int core_tuple_parameters;
-	int core_no_arg;
-	int tuple_for_strexec;
+	int no_tuple_parameters;
 	int no_env_var;
 	int no_libraries;
 } ARGS;
@@ -308,6 +303,21 @@ typedef enum LuaConsoleError {
 	RUNTIME_ERROR = 2,
 } LuaConsoleError;
 
+static inline const char* error_test_meta(const char** out_type) {
+	const char* msg = lua_tostring(L, -1);
+	if(msg == NULL) {
+		int meta = luaL_callmeta(L, -1, "__tostring");
+		int ret = lua_type(L, -1);
+		if(meta != 0 && (ret == LUA_TSTRING /*|| ret == LUA_TNUMBER || ret == LUA_TBOOLEAN) */))
+			msg = lua_tostring(L, -1);
+		else {
+			msg = "Warning: Error return type is ";
+			*out_type = luaL_typename(L, -1);
+		}
+	}
+	return msg;
+}
+
 // handles out-of-lua error messages
 // leaves 1 item on stack:
 //		1. error message
@@ -323,9 +333,10 @@ static void print_error(LuaConsoleError error, int offset) {
 		fprintf(stderr, " (Runtime)");
 		break;
 	}
-	const char* msg = lua_tostring(L, -1);
+	const char* type = "";
+	const char* msg = error_test_meta(&type);
 	size_t top = lua_gettop(L);
-	fprintf(stderr, " | Stack Top: %zu | %s\n", top - offset, msg);
+	fprintf(stderr, " | Stack Top: %zu | %s%s\n", top - offset, msg, type);
 	if(top - offset > 1)
 		stack_dump(L);
 }
@@ -334,14 +345,16 @@ static void print_error(LuaConsoleError error, int offset) {
 // returns/leaves 1 item on stack:
 //		1. error message
 static int lua_print_error(lua_State* L) {
-	const char* msg = lua_tostring(L, -1);
+	const char* type = "";
+	const char* msg = error_test_meta(&type);
+	lua_pop(L, 1);
 	
 	luaL_traceback(L, L, "--", 1);
 	const char* tb = lua_tostring(L, -1);
-	lua_pop(L, 1);
+	lua_pop(L, 1); // luaL_traceback
 	
 	size_t top = lua_gettop(L);
-	fprintf(stderr, " (Runtime) | Stack Top: %zu | %s\n %s\n", top, msg, tb);
+	fprintf(stderr, " (Runtime) | Stack Top: %zu | %s%s\n %s\n", top, msg, type, tb);
 	if(top > 1)
 		stack_dump(L);
 	return 1;
@@ -578,7 +591,7 @@ static inline void load_globals(Array* globals, void* data) {
 
 // loads libraries into lua_State by executing them
 static inline void load_libraries(Array* libraries, void* data) {
-	char* name = (char*) data + 2;
+	char* name = (char*) data;
 	char* str1 = strsplit(name, '.', strlen(name), 2);
 	if(str1 != 0) {
 		char* str2 = strnxt(str1);
@@ -590,7 +603,7 @@ static inline void load_libraries(Array* libraries, void* data) {
 			return;
 		}
 	}
-	start_protective_mode_file(name, (ARGS.tuple_parameters == 1 ? ARGS.parameters : 0));
+	start_protective_mode_file(name, (ARGS.no_tuple_parameters == 0 ? 0 : ARGS.parameters));
 	free(str1);
 }
 
@@ -605,7 +618,7 @@ int main(int argc, char* argv[])
 		ARGS.no_file = 1;
 	} else {
 		// don't try to execute file if it isn't first argument
-		if(argv[1][0] == '-' || argv[1][0] == '\\' || argv[1][0] == '/')
+		if(argv[1][0] == '-' || argv[1][0] == '/')
 			ARGS.no_file = 1;
 		for(size_t i=1; i<(size_t)argc; i++) {
 			// if we have args around, break
@@ -614,7 +627,6 @@ int main(int argc, char* argv[])
 			// skip over non-switches
 			switch(argv[i][0]) {
 			case '/':
-			case '\\':
 			case '-':
 				break;
 			default:
@@ -629,10 +641,10 @@ int main(int argc, char* argv[])
 			case 'v': case 'V':
 				ARGS.print_version = 1;
 				break;
-			case 'E':
+			case 'R':
 				ARGS.no_env_var = 1;
 				break;
-			case 'e':
+			case 'r':
 				ARGS.no_libraries = 1;
 				break;
 			case 's': case 'S':
@@ -654,24 +666,18 @@ int main(int argc, char* argv[])
 				if(ARGS.libraries == NULL)
 					ARGS.libraries = array_new(LIBRARIES_INIT, LIBRARIES_EXPANSION, sizeof(char*));
 				check_error_OOM(ARGS.libraries == NULL, __LINE__);
-				array_push(ARGS.libraries, argv[i]);
+				if(argv[i][2] == 0)
+					array_push(ARGS.libraries, argv[i+1]);
+				else array_push(ARGS.libraries, argv[i]+2);
 				break;
-			case 'T':
-				ARGS.delay_parameters = 1;
-			case 't':
+			case 't': case 'T':
 				for(size_t j=0; j<strlen(argv[i]) - 2; j++) {
 					switch(argv[i][2+j]){
 						case 'a': case 'A':
-							ARGS.tuple_parameters = 1;
+							ARGS.delay_parameters = 1;
 							break;
 						case 'b': case 'B':
-							ARGS.core_tuple_parameters = 1;
-							break;
-						case 'c': case 'C':
-							ARGS.core_no_arg = 1;
-							break;
-						case 'd': case 'D':
-							ARGS.tuple_for_strexec = 1;
+							ARGS.no_tuple_parameters = 1;
 							break;
 					}
 				}
@@ -680,13 +686,17 @@ int main(int argc, char* argv[])
 				ARGS.parameters = (argc - i) - 1;
 				ARGS.parameters_argv = &(argv[i+1]);
 				break;
-			case 'R':
+			case 'E':
 				ARGS.run_after_libs = 1;
-				ARGS.run_str = argv[i + 1];
+				if(argv[i][2] == 0)
+					ARGS.run_str = argv[i + 1];
+				else ARGS.run_str = argv[i]+2;
 				break;
-			case 'r':
+			case 'e':
 				ARGS.run_after_libs = 0;
-				ARGS.run_str = argv[i + 1];
+				if(argv[i][2] == 0)
+					ARGS.run_str = argv[i + 1];
+				else ARGS.run_str = argv[i]+2;
 				break;
 			#if defined(LUA_JIT_51)
 				case 'j':
@@ -738,6 +748,16 @@ int main(int argc, char* argv[])
 	#endif
 	
 	
+	
+	// initiate the libraries
+	if(ARGS.no_libraries == 0) {
+		lua_gc(L, LUA_GCSTOP, 0);
+		luaL_openlibs(L);
+		lua_gc(L, LUA_GCRESTART, -1);
+	}
+	
+	
+	
 	// handle init environment variable
 	if(ARGS.no_env_var == 0) {
 		const char* env_init = getenv(ENV_VAR);
@@ -752,13 +772,6 @@ int main(int argc, char* argv[])
 	}
 	
 	
-	
-	// initiate the libraries
-	if(ARGS.no_libraries == 0) {
-		lua_gc(L, LUA_GCSTOP, 0);
-		luaL_openlibs(L);
-		lua_gc(L, LUA_GCRESTART, -1);
-	}
 	
 	// copyright
 	if(ARGS.copyright_squelch == 0) {
@@ -817,13 +830,13 @@ int main(int argc, char* argv[])
 	
 	
 	// load parameters early
-	if(ARGS.delay_parameters == 1)
+	if(ARGS.delay_parameters == 0)
 		load_parameters();
 	
 	
 	// run executable string before -l's
 	if(ARGS.run_str != 0 && ARGS.run_after_libs == 0)
-		start_protective_mode_string(ARGS.run_str, (ARGS.tuple_for_strexec == 1 ? ARGS.parameters : 0));
+		start_protective_mode_string(ARGS.run_str, (ARGS.no_tuple_parameters == 1 ? 0 :ARGS.parameters));
 	
 	
 	// do passed libraries/modules
@@ -835,7 +848,8 @@ int main(int argc, char* argv[])
 	
 	// run executable string after -l's
 	if(ARGS.run_str != 0 && ARGS.run_after_libs == 1)
-		start_protective_mode_string(ARGS.run_str, (ARGS.tuple_for_strexec == 1 ? ARGS.parameters : 0));
+		start_protective_mode_string(ARGS.run_str, (ARGS.no_tuple_parameters == 1 ? 0 :ARGS.parameters));
+	
 	
 	
 	// if there is nothing to do, then exit, as there is nothing left to do
@@ -844,11 +858,11 @@ int main(int argc, char* argv[])
 	//   - post-exist
 	int status = 0;
 	if(ARGS.no_file == 0 || ARGS.post_exist == 1) {
-		if(ARGS.delay_parameters == 0 && ARGS.core_no_arg == 0)
+		if(ARGS.delay_parameters == 1)
 			load_parameters();
 		
 		if(ARGS.no_file == 0)
-			status = start_protective_mode_file(argv[1], (ARGS.core_tuple_parameters == 1 ? ARGS.parameters : 0));
+			status = start_protective_mode_file(argv[1], (ARGS.no_tuple_parameters == 1 ? 0 :ARGS.parameters));
 		if(ARGS.post_exist == 1)
 			status = start_protective_mode_REPL();
 	}
