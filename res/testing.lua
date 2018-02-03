@@ -1,6 +1,8 @@
 
 require("luaadd")
 
+print(package.path)
+
 if(arg)then
 	print(#arg)
 end
