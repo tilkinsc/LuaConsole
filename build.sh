@@ -64,7 +64,7 @@ mkdir -p $root/res
 
 
 # Compile everything w/ additions
-gcc $attrib $dirs $luaverdef  -c $srcdir/consolew.c $srcdir/darr.c
+gcc $attrib $dirs $luaverdef  -c $srcdir/consolew.c $srcdir/jitsupport.c $srcdir/darr.c
 if [ $? -ne 0 ]; then exit 1; fi
 gcc $attrib $dirs $luaverdef -Wl,-E -fPIC -c $srcdir/additions.c
 if [ $? -ne 0 ]; then exit 1; fi
@@ -74,7 +74,7 @@ gcc $attrib $dirs -shared -Wl,-E -fPIC -o luaadd.so additions.o $luaver
 if [ $? -ne 0 ]; then exit 1; fi
 
 # Link luaw
-gcc $attrib $dirs -o luaw consolew.o darr.o $luaver -lm -ldl
+gcc $attrib $dirs -o luaw consolew.o jitsupport.o darr.o $luaver -lm -ldl
 if [ $? -ne 0 ]; then exit 1; fi
 
 
