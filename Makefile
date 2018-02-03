@@ -71,7 +71,7 @@ HEADERS = $(wildcard $(SDIR)/*.h)
 LLIBS = $(wildcard $(LDIR)/*.a) $(wildcard $(DDIR)/*.dll) $(wildcard $(DDIR)/*.so)
 
 
-LUAW_OBJS = $(addprefix $(SDIR)/, consolew.o darr.o)
+LUAW_OBJS = $(addprefix $(SDIR)/, consolew.o jitsupport.o darr.o)
 LUAADD.DLL_OBJS = $(addprefix $(SDIR)/, additions.o)
 LUAADD.SO_OBJS = $(addprefix $(SDIR)/, additions.o)
 
