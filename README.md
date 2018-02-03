@@ -17,6 +17,7 @@ For more information, visit [LuaConsole Github Website](https://tilkinsc.github.
 
 # Building
 [Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)
+[Rebuilding with LuaConsole](https://github.com/tilkinsc/LuaConsole/wiki/Rebuilding-LuaConsole-with-Lua)
 
 # Using with LuaRocks
 [Windows MinGW](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW)  
