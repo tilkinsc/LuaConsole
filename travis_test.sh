@@ -25,10 +25,12 @@
 	
 errors=0
 
-
+debug=bin/Debug
+release=bin/Release
 
 if [ -d "./bin/Debug" ]; then
-	./bin/Debug/luaw -lluaadd.so ./res/testing.lua -v -Tb -n a b c
+	export LUA_CPATH="./$debug/?.so;$LUA_CPATH"
+	./$debug/luaw ./res/testing.lua -lluaadd.so -Tb -n a b c
 	if [ $? -ne 0 ]; then
 		echo Testing scenario 1 failed to complete.
 		((errors++))
@@ -37,8 +39,8 @@ if [ -d "./bin/Debug" ]; then
 		bash <(curl -s https://codecov.io/bash)
 	fi
 else
-	export LUA_CPATH=./?.so;$LUA_CPATH
-	./bin/Release/luaw -lluaadd.so ./res/testing.lua -v -Tb -n a b c
+	export LUA_CPATH="./$release/?.so;$LUA_CPATH"
+	./$release/luaw ./res/testing.lua -lluaadd.so -Tb -n a b c
 	if [ $? -ne 0 ]; then
 		echo Testing scenario 1 failed to complete.
 		((errors++))
