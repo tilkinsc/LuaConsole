@@ -5,11 +5,11 @@
 The project came to life when I realized how bad PUC-Lua and LuaJIT's REPL interpreters were.
 I took action and started development on a brand new REPL interpreter around May 1, 2017.
 
-Copyright information: [LuaConsole License](https://hydroque.github.io/LuaConsole/LICENSE) - [Lua License](https://hydroque.github.io/LuaConsole/Lua%20LICENSE) - [LuaJIT License](https://hydroque.github.io/LuaConsole/LuaJIT%20LICENSE)
+Copyright information: [LuaConsole License](https://tilkinsc.github.io/LuaConsole/LICENSE) - [Lua License](https://tilkinsc.github.io/LuaConsole/Lua%20LICENSE) - [LuaJIT License](https://tilkinsc.github.io/LuaConsole/LuaJIT%20LICENSE)
 
 ### Collaborators 
 
-* [Hydroque](https://github.com/Hydroque)
+* [tilkinsc](https://github.com/tilkinsc)
 
 ### Getting Started
 
@@ -17,9 +17,9 @@ First, download and build Lua then LuaConsole:
 
 | Vanilla Lua | LuaConsole |
 | ----------- | ----------------------- |
-| [Windows Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#Windows) | [Windows LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#windows-1) |
-| [Linux Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux) | [Linux LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux-1) |
-| [MacOSX Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx) | [MacOSX LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx) |
+| [Windows Lua](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions#Windows) | [Windows LuaConsole](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions#windows-1) |
+| [Linux Lua](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions#linux) | [Linux LuaConsole](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions#linux-1) |
+| [MacOSX Lua](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions#mac-osx) | [MacOSX LuaConsole](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions#mac-osx) |
 
 _____
 
