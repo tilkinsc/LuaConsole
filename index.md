@@ -13,9 +13,10 @@ Copyright information: [LuaConsole License](https://hydroque.github.io/LuaConsol
 
 ### Getting Started
 
-First, download and build Lua then LuaConsole:
-| OS | LuaConsole Instructions |
-| -- | ----------------------- |
+First, download and build Lua then LuaConsole:  
+
+| Vanilla Lua | LuaConsole |
+| ----------- | ----------------------- |
 | [Windows Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#Windows) | [Windows LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#windows-1) |
 | [Linux Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux) | [Linux LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#linux-1) |
 | [MacOSX Lua](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx) | [MacOSX LuaConsole](https://github.com/Hydroque/LuaConsole/wiki/Build-Instructions#mac-osx) |
