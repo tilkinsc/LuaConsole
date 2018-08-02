@@ -5,7 +5,7 @@
 The project came to life when I realized how bad PUC-Lua and LuaJIT's REPL interpreters were.
 I took action and started development on a brand new REPL interpreter around May 1, 2017.
 
-Copyright information: [LuaConsole License](https://hydroque.github.io/LuaConsole/LICENSE) - [Lua License](https://hydroque.github.io/LuaConsole/Lua LICENSE) - [LuaJIT License](https://hydroque.github.io/LuaConsole/LuaJIT LICENSE)
+Copyright information: [LuaConsole License](https://hydroque.github.io/LuaConsole/LICENSE) - [Lua License](https://hydroque.github.io/LuaConsole/Lua%20LICENSE) - [LuaJIT License](https://hydroque.github.io/LuaConsole/LuaJIT%20LICENSE)
 
 ### Collaborators 
 
