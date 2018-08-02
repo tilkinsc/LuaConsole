@@ -351,7 +351,6 @@ static int lua_print_error(lua_State* L) {
 	
 	luaL_traceback(L, L, "--", 1);
 	const char* tb = lua_tostring(L, -1);
-	lua_pop(L, 1); // luaL_traceback
 	
 	size_t top = lua_gettop(L);
 	fprintf(stderr, " (Runtime) | Stack Top: %zu | %s%s\n %s\n", top, msg, type, tb);
@@ -400,7 +399,7 @@ retry:
 		
 		// 3. return %s; test
 		snprintf(retfmt, SECONDARY_REPL_BUFFER_SIZE, "return %s;", input);
-		status = luaL_loadstring(L, retfmt);
+		status = luaL_loadbuffer(L, retfmt, strlen(retfmt), "REPL return");
 		if(status != 0) {
 			lua_pop(L, 1); // err msg
 		} else {
@@ -424,12 +423,19 @@ retry:
 		// 4. load and execute originally inserted code with error handler
 		lua_pushcclosure(L, lua_print_error, 0);
 		base = lua_gettop(L);
-		if((status = luaL_loadstring(L, input)) != 0) {
+		if((status = luaL_loadbuffer(L, input, strlen(input), "REPL")) != 0) {
 			print_error(SYNTAX_ERROR, 1);
 			lua_pop(L, 2); // err msg, err handler
-		} else if((status = lua_pcall(L, 0, 0, base)) != 0) {
-			// attempt originally inserted code
-			lua_pop(L, 2); // err msg, err handler
+		} else {
+			stack_dump(L);
+			if((status = lua_pcall(L, 0, LUA_MULTRET, base)) != 0) {
+				lua_pop(L, 2); // err msg, err handler, also ignore it - no relevance
+			} else {
+				// code can't be `return %s;`'d and it doesn't syntax out, but it still works
+				// by design, it always returns even nil so idk if this is even possible
+				// in practice, I can't figure out how to trigger this else clause, so undefined behavior?
+				fprintf(stderr, "Please submit a github issue with this command attached.");
+			}
 		}
 	}
 	
