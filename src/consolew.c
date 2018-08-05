@@ -28,13 +28,17 @@
 
 
 // dynamic array initialization sizes for void*'s
-#define DEFINES_INIT			(4)
-#define DEFINES_EXPANSION		(4)
+#define DEFINES_INIT				(4)
+#define DEFINES_EXPANSION			(4)
 
-#define LIBRARIES_INIT			(2)
-#define LIBRARIES_EXPANSION		(2)
+#define LIBRARIES_INIT				(2)
+#define LIBRARIES_EXPANSION			(2)
 
-#define ENV_VAR					"LUA_INIT"
+// controls verbosity of error output (0 off) (1 traceback) (2 stack_dump)
+#define DO_VERBOSE_ERRORS			(0)
+
+// environment variable for lua usage
+#define ENV_VAR						"LUA_INIT"
 
 
 // standard libraries per OS
@@ -43,43 +47,45 @@
 #	include <stdio.h>
 #	include <stdlib.h>
 #	define IS_ATTY isatty(fileno(stdin))
-#	define LUA_BIN_EXT_NAME ""
-#	define LUA_DLL_SO_NAME ".so"
+#	define LUA_BIN_EXT_NAME 		""
+#	define LUA_DLL_SO_NAME 			".so"
 #elif defined(unix) || defined(__unix__) || defined(__unix)
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
 #	define IS_ATTY isatty(fileno(stdin))
-#	define LUA_BIN_EXT_NAME ""
-#	define LUA_DLL_SO_NAME ".so"
+#	define LUA_BIN_EXT_NAME 		""
+#	define LUA_DLL_SO_NAME 			".so"
 #elif defined(__APPLE__) || defined(__MACH__)
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
 #	define IS_ATTY isatty(fileno(stdin))
-#	define LUA_BIN_EXT_NAME ""
-#	define LUA_DLL_SO_NAME ".so"
+#	define LUA_BIN_EXT_NAME 		""
+#	define LUA_DLL_SO_NAME 			".so"
 #elif defined(_WIN32) || defined(_WIN64)
 #	include <windows.h>
 #	include <stdio.h>
 #	include <stdlib.h>
 #	define IS_ATTY _isatty(_fileno(stdin))
-#	define LUA_BIN_EXT_NAME ".exe"
-#	define LUA_DLL_SO_NAME ".dll"
+#	define LUA_BIN_EXT_NAME 		".exe"
+#	define LUA_DLL_SO_NAME 			".dll"
 #else
-#	error "OS not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
+#	error "OS not familiar. Set up headers accordingly, or -D__linux__ or -Dunix or -D__APPLE__ or -D_WIN32"
 #endif
 
 
+// stdlib includes
 #include <dirent.h>
 #include <string.h>
 #include <signal.h>
 
 
 
+// compiler/project includes
 // Please migrate your lua h's to a proper directory so versions don't collide
-//   luajit make install puts them in /usr/local/include/luajit-X.X/*
-//   lua51/52/53 puts them directly in /usr/local/include/* with version collision
+//   luajit `make install` puts them in /usr/local/include/luajit-X.X/*
+//   lua51/52/53 `make install` puts them in /usr/local/include/* with version collision
 #if defined(LUA_51)
 #	include "lua51/lua.h"
 #	include "lua51/lualib.h"
@@ -98,13 +104,14 @@
 #	include "luajit-2.0/lauxlib.h"
 #	include "luajit-2.0/luajit.h"
 #	include "jitsupport.h"
+// TODO: support latest version of luajit
 #else
 #	warning "Lua version not defined."
 #	error "Define the version to use. '-DLUA_53' '-DLUA_52' '-DLUA_51' '-DLUA_JIT_51'"
 #endif
 
 
-// inner-project includes
+// local src includes
 #include "darr.h"
 
 
@@ -273,6 +280,7 @@ int stack_dump(lua_State *L) {
 		case LUA_TNUMBER:
 			fprintf(stdout, "%d:(Number):`%g`\n", i, lua_tonumber(L, i));
 			break;
+		// TODO: handle Integer and any other data types
 		case LUA_TFUNCTION:
 			fprintf(stdout, "%d:(Function):`@0x%p`\n", i, lua_topointer(L, i));
 			break;
@@ -303,12 +311,13 @@ typedef enum LuaConsoleError {
 	RUNTIME_ERROR = 2,
 } LuaConsoleError;
 
+// handles non-string errors
+// 
 static inline const char* error_test_meta(const char** out_type) {
 	const char* msg = lua_tostring(L, -1);
 	if(msg == NULL) {
-		int meta = luaL_callmeta(L, -1, "__tostring");
 		int ret = lua_type(L, -1);
-		if(meta != 0 && (ret == LUA_TSTRING /*|| ret == LUA_TNUMBER || ret == LUA_TBOOLEAN) */))
+		if(luaL_callmeta(L, -1, "__tostring") != 0 && (ret == LUA_TSTRING /*|| ret == LUA_TNUMBER || ret == LUA_TBOOLEAN) */))
 			msg = lua_tostring(L, -1);
 		else {
 			msg = "Warning: Error return type is ";
@@ -337,8 +346,10 @@ static void print_error(LuaConsoleError error, int offset) {
 	const char* msg = error_test_meta(&type);
 	size_t top = lua_gettop(L);
 	fprintf(stderr, " | Stack Top: %zu | %s%s\n", top - offset, msg, type);
-	if(top - offset > 1)
-		stack_dump(L);
+	#if DO_VERBOSE_ERRORS > 0
+		if(top - offset > 1)
+			stack_dump(L);
+	#endif
 }
 
 // handles in-lua runtime error messages
@@ -347,15 +358,22 @@ static void print_error(LuaConsoleError error, int offset) {
 static int lua_print_error(lua_State* L) {
 	const char* type = "";
 	const char* msg = error_test_meta(&type);
-	lua_pop(L, 1);
+	lua_pop(L, 1); // err msg
 	
-	luaL_traceback(L, L, "--", 1);
-	const char* tb = lua_tostring(L, -1);
+	#if DO_VERBOSE_ERRORS > 0
+		luaL_traceback(L, L, "--", 1);
+		const char* tb = lua_tostring(L, -1);
+	#endif
 	
 	size_t top = lua_gettop(L);
-	fprintf(stderr, " (Runtime) | Stack Top: %zu | %s%s\n %s\n", top, msg, type, tb);
-	if(top > 1)
-		stack_dump(L);
+	fprintf(stderr, " (Runtime) | Stack Top: %zu | %s%s\n", top, msg, type);
+	#if DO_VERBOSE_ERRORS > 0
+		fputs(tb, stderr);
+		#if DO_VERBOSE_ERRORS > 1
+			if(top > 1)
+				stack_dump(L);
+		#endif
+	#endif
 	return 1;
 }
 
@@ -427,7 +445,6 @@ retry:
 			print_error(SYNTAX_ERROR, 1);
 			lua_pop(L, 2); // err msg, err handler
 		} else {
-			stack_dump(L);
 			if((status = lua_pcall(L, 0, LUA_MULTRET, base)) != 0) {
 				lua_pop(L, 2); // err msg, err handler, also ignore it - no relevance
 			} else {
@@ -532,7 +549,7 @@ static int start_protective_mode_file(const char* file, size_t params) {
 }
 
 // handle execution of anything to be required
-static int start_protective_mode_require(const char* file) {
+static inline int start_protective_mode_require(const char* file) {
 	signal(SIGINT, SIG_IGN); // Ignore for now
 	
 	lua_pushcclosure(L, lua_print_error, 0);
@@ -859,7 +876,8 @@ int main(int argc, char* argv[])
 	
 	
 	// if there is nothing to do, then exit, as there is nothing left to do
-	//   - load parameters late, if applicable
+	//   if applicable,
+	//   - load parameters late
 	//   - load function into protected mode (pcall)
 	//   - post-exist
 	int status = 0;
