@@ -279,7 +279,7 @@ int stack_dump(lua_State *L) {
 			fprintf(stdout, "%d:(Boolean):`%s`\n", i, lua_toboolean(L, i) ? "true" : "false");
 			break;
 		case LUA_TNUMBER:
-			fprintf(stdout, "%d:(Number):`%g`\n", i, num_type, lua_tonumber(L, i));
+			fprintf(stdout, "%d:(Number):`%g`\n", i, lua_tonumber(L, i));
 			break;
 		case LUA_TFUNCTION:
 			fprintf(stdout, "%d:(Function):`@0x%p`\n", i, lua_topointer(L, i));
@@ -298,6 +298,7 @@ int stack_dump(lua_State *L) {
 			break;
 		case LUA_TNONE:
 			fprintf(stdout, "%d:(None)\n", i);
+			break;
 		default:
 			fprintf(stdout, "%d:(Object):%s:`0x@%p`\n", i, lua_typename(L, t), lua_topointer(L, i));
 			break;
