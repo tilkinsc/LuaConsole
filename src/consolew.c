@@ -317,7 +317,7 @@ typedef enum LuaConsoleError {
 } LuaConsoleError;
 
 // handles non-string errors
-// 
+// if error message is not a string, execute a tostring on metatable if present
 static inline const char* error_test_meta(const char** out_type) {
 	const char* msg = lua_tostring(L, -1);
 	if(msg == NULL) {
@@ -505,7 +505,7 @@ static inline int start_protective_mode_REPL() {
 static int start_protective_mode_string(const char* str, size_t params) {
 	signal(SIGINT, SIG_IGN); // Ignore for now
 	
-	lua_pushcclosure(L, lua_print_error, 0);
+	lua_pushcclosure(L, lua_print_error, 0); // wrap in error handler
 	int base = lua_gettop(L);
 	int status = 0;
 	if((status = luaL_loadbuffer(L, str, strlen(str), "execute")) != 0) {
@@ -520,7 +520,7 @@ static int start_protective_mode_string(const char* str, size_t params) {
 		return status;
 	}
 	base = lua_gettop(L) - base; // nargs returned
-	if(base > 0) {
+	if(base > 0) { // print if returns are present
 		lua_getglobal(L, "print");
 		if(lua_isnil(L, -1) != 1) { // check even if no_libraries == 1
 			lua_insert(L, lua_gettop(L) - base);
@@ -558,12 +558,12 @@ static int start_protective_mode_file(const char* file, size_t params) {
 static inline int start_protective_mode_require(const char* file) {
 	signal(SIGINT, SIG_IGN); // Ignore for now
 	
-	lua_pushcclosure(L, lua_print_error, 0);
+	lua_pushcclosure(L, lua_print_error, 0); // wrap in error handler
 	int base = lua_gettop(L);
 	lua_getglobal(L, "require");
 	lua_pushlstring(L, file, strlen(file));
 	int status = 0;
-	if((status = lua_pcall(L, 1, 0, base)) != 0) {
+	if((status = lua_pcall(L, 1, 0, base)) != 0) { // execute require on string
 		lua_pop(L, 2); // err msg, err handler
 		return status;
 	}
@@ -591,14 +591,14 @@ static inline void load_globals(Array* globals, void* data) {
 		char* tabs = strsplit(arg1, '.', strlen(arg1) + 1, -1);
 		check_error(tabs == NULL, "Error: Parsing -D specified. Use format 'subtab.name=value'.");
 		
-		lua_getglobal(L, tabs);
+		lua_getglobal(L, tabs); // select first table, create if none
 		int istab = lua_istable(L, -1);
 		if(istab == 0) {
 			lua_pop(L, 1); // nil
 			lua_newtable(L);
 		}
 		
-		char* cur_arg = tabs;
+		char* cur_arg = tabs; // iterate through table
 		for(size_t i=1; i<dot_count; i++) {
 			cur_arg = strnxt(cur_arg);
 			lua_getfield(L, -1, cur_arg);
@@ -646,27 +646,22 @@ int main(int argc, char* argv[])
 		ARGS.post_exist = 1;
 		ARGS.no_file = 1;
 	} else {
-		// don't try to execute file if it isn't first argument
-		if(argv[1][0] == '-' || argv[1][0] == '/')
+		if(argv[1][0] == '-' || argv[1][0] == '/') // don't try to execute file if it isn't first argument
 			ARGS.no_file = 1;
 		for(size_t i=1; i<(size_t)argc; i++) {
-			// if we have args around, break
-			if(ARGS.parameters_argv != NULL)
+			if(ARGS.parameters_argv != NULL) // if we have args around, break
 				break;
-			// skip over non-switches
-			switch(argv[i][0]) {
+			switch(argv[i][0]) { // skip over non-switches
 			case '/':
 			case '-':
 				break;
 			default:
 				continue;
 			}
-			// a way of handling `--help` for common unix
-			if(strlen(argv[i]) == 6)
+			if(strlen(argv[i]) == 6) // a way of handling `--help` for common unix
 				if(memcmp(argv[i], "--help", 6) == 0)
 					argv[i][1] = '?';
-			// set variables up for later parsing
-			switch(argv[i][1]) {
+			switch(argv[i][1]) { // set variables up for later parsing
 			case 'v': case 'V':
 				ARGS.print_version = 1;
 				break;
