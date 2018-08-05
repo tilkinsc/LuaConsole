@@ -256,6 +256,7 @@ static inline char* strnxt(const char* str1) {
 }
 
 // counts the number of 'char c' occurances in a string
+// WARNING: undefined behavior if non-numm-terminal'd data chunk
 static inline size_t strcnt(const char* str1, char c) {
 	size_t count = 0;
 	while(*str1++ != '\0' && (*str1 == c ? ++count : 1));
@@ -269,8 +270,8 @@ int stack_dump(lua_State *L) {
 	int i = lua_gettop(L);
 	printf("--------------- Stack Dump ----------------\n");
 	while(i) {
-		int t = lua_type(L, i);
-		switch (t) {
+		int t = lua_type(L, i); // get type number
+		switch (t) { // switch type number
 		case LUA_TSTRING:
 			fprintf(stdout, "%d:(String):`%s`\n", i, lua_tostring(L, i));
 			break;
@@ -278,9 +279,8 @@ int stack_dump(lua_State *L) {
 			fprintf(stdout, "%d:(Boolean):`%s`\n", i, lua_toboolean(L, i) ? "true" : "false");
 			break;
 		case LUA_TNUMBER:
-			fprintf(stdout, "%d:(Number):`%g`\n", i, lua_tonumber(L, i));
+			fprintf(stdout, "%d:(Number):`%g`\n", i, num_type, lua_tonumber(L, i));
 			break;
-		// TODO: handle Integer and any other data types
 		case LUA_TFUNCTION:
 			fprintf(stdout, "%d:(Function):`@0x%p`\n", i, lua_topointer(L, i));
 			break;
@@ -293,6 +293,11 @@ int stack_dump(lua_State *L) {
 		case LUA_TLIGHTUSERDATA:
 			fprintf(stdout, "%d:(LUserdata):`0x@%p`\n", i, lua_topointer(L, i));
 			break;
+		case LUA_TTHREAD:
+			fprintf(stdout, "%d:(Thread):`0x%p`\n", i, lua_topointer(L, i));
+			break;
+		case LUA_TNONE:
+			fprintf(stdout, "%d:(None)\n", i);
 		default:
 			fprintf(stdout, "%d:(Object):%s:`0x@%p`\n", i, lua_typename(L, t), lua_topointer(L, i));
 			break;
@@ -316,8 +321,9 @@ typedef enum LuaConsoleError {
 static inline const char* error_test_meta(const char** out_type) {
 	const char* msg = lua_tostring(L, -1);
 	if(msg == NULL) {
-		int ret = lua_type(L, -1);
-		if(luaL_callmeta(L, -1, "__tostring") != 0 && (ret == LUA_TSTRING /*|| ret == LUA_TNUMBER || ret == LUA_TBOOLEAN) */))
+		int meta = luaL_callmeta(L, -1, "__tostring");
+		int ret = lua_type(L, -1); 
+		if(meta != 0 && (ret == LUA_TSTRING /*|| ret == LUA_TNUMBER || ret == LUA_TBOOLEAN) */))
 			msg = lua_tostring(L, -1);
 		else {
 			msg = "Warning: Error return type is ";
