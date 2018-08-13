@@ -37,6 +37,9 @@
 // controls verbosity of error output (0 off) (1 traceback) (2 stack_dump)
 #define DO_VERBOSE_ERRORS			(0)
 
+// controls whether boolean and number should be tostring'd if error returns a non-string
+#define DO_EXT_ERROR_RETS			(0)
+
 // environment variable for lua usage
 #define ENV_VAR						"LUA_INIT"
 
@@ -256,7 +259,7 @@ static inline char* strnxt(const char* str1) {
 }
 
 // counts the number of 'char c' occurances in a string
-// WARNING: undefined behavior if non-numm-terminal'd data chunk
+// WARNING: while(1){} if non-null-terminal'd data chunk
 static inline size_t strcnt(const char* str1, char c) {
 	size_t count = 0;
 	while(*str1++ != '\0' && (*str1 == c ? ++count : 1));
@@ -320,13 +323,19 @@ typedef enum LuaConsoleError {
 // handles non-string errors
 // if error message is not a string, execute a tostring on metatable if present
 static inline const char* error_test_meta(const char** out_type) {
-	const char* msg = lua_tostring(L, -1);
-	if(msg == NULL) {
-		int meta = luaL_callmeta(L, -1, "__tostring");
+	const char* msg = lua_tostring(L, -1); // attempt tostring
+	if(msg == NULL) { // if failed
+		int meta = luaL_callmeta(L, -1, "__tostring"); // call the metatable __tostring
 		int ret = lua_type(L, -1); 
-		if(meta != 0 && (ret == LUA_TSTRING /*|| ret == LUA_TNUMBER || ret == LUA_TBOOLEAN) */))
-			msg = lua_tostring(L, -1);
-		else {
+		if(meta != 0) {
+			#if DO_EXT_ERROR_RETS == 1
+				if(ret == LUA_TSTRING || (ret == LUA_TNUMBER || ret == LUA_TBOOLEAN)
+					msg = lua_tostring(L, -1);
+			#else
+				if(ret == LUA_TSTRING)
+					msg = lua_tostring(L, -1);
+			#endif
+		} else {
 			msg = "Warning: Error return type is ";
 			*out_type = luaL_typename(L, -1);
 		}
