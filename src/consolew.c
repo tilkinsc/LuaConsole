@@ -760,7 +760,7 @@ int main(int argc, char* argv[])
 					if(i + 1 < argc)
 						ARGS.luajit_bc = argv + i;
 					else
-						fputs("LuaJIT Warning: malfoirmed argument `-b` has no parameter!\n", stderr);
+						fputs("LuaJIT Warning: malformed argument `-b` has no parameter!\n", stderr);
 					break;
 			#endif
 			case '?':
