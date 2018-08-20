@@ -126,7 +126,7 @@
 
 // usage message
 const char HELP_MESSAGE[] =
-	"LuaConsole | Version: 1/20/2018\n\n"
+	"LuaConsole | Version: 8/20/2018\n\n"
 	LUA_VERSION " " LUA_COPYRIGHT
 	"\n"
 	LUA_CONSOLE_COPYRIGHT
@@ -137,7 +137,7 @@ const char HELP_MESSAGE[] =
 	#endif
 	"\nSupports Lua5.3, Lua5.2, Lua5.1, LuaJIT5.1\n"
 	"\n"
-	"Usage: luaw" LUA_BIN_EXT_NAME " [FILE] [-v] [-r] [-R] [-s PATH] [-p] [-c] [-Dvar=val]\n"
+	"Usage: luaw" LUA_BIN_EXT_NAME " [FILES] [-v] [-r] [-R] [-s PATH] [-p] [-c] [-Dvar=val]\n"
 	"\t[-Dtb.var=val] [-Lfile.lua] [-Llualib" LUA_DLL_SO_NAME "] [-t{a,b}] [-r \"string\"]\n"
 	"\t[-R \"string\"] "
 		#if defined(LUA_JIT_51)
@@ -175,6 +175,7 @@ const char HELP_MESSAGE[] =
 
 // struct for args to be seen across functions
 static struct {
+	size_t file_count;
 	size_t parameters;
 	char* start;
 	char* run_str;
@@ -374,9 +375,9 @@ static void print_error(LuaConsoleError error, int offset) {
 static int lua_print_error(lua_State* L) {
 	const char* type = "";
 	const char* msg = error_test_meta(&type);
-	lua_pop(L, 1); // err msg
 	
 	#if DO_VERBOSE_ERRORS > 0
+		lua_pop(L, 1); // err msg
 		luaL_traceback(L, L, "--", 1);
 		const char* tb = lua_tostring(L, -1);
 	#endif
@@ -656,8 +657,12 @@ int main(int argc, char* argv[])
 		ARGS.post_exist = 1;
 		ARGS.no_file = 1;
 	} else {
-		if(argv[1][0] == '-' || argv[1][0] == '/') // don't try to execute file if it isn't first argument
+		if(argv[1][0] == '-' || argv[1][0] == '/') { // don't try to execute file if it isn't first argument
 			ARGS.no_file = 1;
+		} else {
+			// i<argc might not run final file?
+			for(ARGS.file_count=0; ARGS.file_count+1<(size_t)argc && (argv[1+ARGS.file_count][0] != '-' && argv[1+ARGS.file_count][0] != '/'); ARGS.file_count++);
+		}
 		for(size_t i=1; i<(size_t)argc; i++) {
 			if(ARGS.parameters_argv != NULL) // if we have args around, break
 				break;
@@ -896,8 +901,16 @@ int main(int argc, char* argv[])
 		if(ARGS.delay_parameters == 1)
 			load_parameters();
 		
-		if(ARGS.no_file == 0)
-			status = start_protective_mode_file(argv[1], (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+		if(ARGS.no_file == 0) {
+			for(size_t i=0; i<ARGS.file_count; i++) {
+				status = start_protective_mode_file(argv[i+1], (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+				if(status != 0) {
+					fprintf(stderr, "LuaConsole ended on file `%s`\n", argv[1+i]);
+					break;
+				}
+			}
+		}
+		
 		if(ARGS.post_exist == 1)
 			status = start_protective_mode_REPL();
 	}
