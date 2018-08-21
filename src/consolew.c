@@ -955,7 +955,7 @@ int main(int argc, char* argv[])
 			#else
 				puts("Restore the linux console please!");
 				dup2(fileno(fd), STDIN_FILENO);
-				close(fd);
+				
 			#endif
 		}
 		status = start_protective_mode_REPL();
