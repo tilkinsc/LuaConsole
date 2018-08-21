@@ -873,11 +873,11 @@ int main(int argc, char* argv[])
 			puts("we are not atty");
 			int fd = open("/dev/tty", O_WRONLY);
 			if(fd != -1) {
-				puts("fd failed.");
 				close(fd);
 				ARGS.restore_console = 1;
+			} else {
+				ARGS.post_exist = 0;
 			}
-			ARGS.post_exist = 0;
 		#endif
 	}
 	
