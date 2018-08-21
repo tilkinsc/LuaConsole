@@ -49,6 +49,7 @@
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
+#	include <sys/stat.h>
 #	define IS_ATTY isatty(fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		""
 #	define LUA_DLL_SO_NAME 			".so"
@@ -56,6 +57,7 @@
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
+#	include <sys/stat.h>
 #	define IS_ATTY isatty(fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		""
 #	define LUA_DLL_SO_NAME 			".so"
@@ -63,6 +65,7 @@
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
+#	include <sys/stat.h>
 #	define IS_ATTY isatty(fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		""
 #	define LUA_DLL_SO_NAME 			".so"
@@ -70,7 +73,7 @@
 #	include <windows.h>
 #	include <stdio.h>
 #	include <stdlib.h>
-#include <fcntl.h>
+#	include <fcntl.h>
 #	define IS_ATTY _isatty(_fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		".exe"
 #	define LUA_DLL_SO_NAME 			".dll"
@@ -868,6 +871,11 @@ int main(int argc, char* argv[])
 			}
 		#else
 			puts("we are not atty");
+			int fd = open("/dev/tty", O_WRONLY);
+			if(fd != -1) {
+				close(fd);
+				ARGS.restore_console = 1;
+			}
 			ARGS.post_exist = 0;
 		#endif
 	}
