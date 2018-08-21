@@ -27,7 +27,7 @@
 #define SECONDARY_REPL_BUFFER_SIZE	(PRIMARY_REPL_BUFFER_SIZE + 8) // + 8 is for `return ;`
 
 
-// dynamic array initialization sizes for void*'s
+// dynamic array initialization sizes for darr's
 #define DEFINES_INIT				(4)
 #define DEFINES_EXPANSION			(4)
 
@@ -82,6 +82,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <signal.h>
+#include <fcntl.h>
 
 
 
@@ -126,7 +127,7 @@
 
 // usage message
 const char HELP_MESSAGE[] =
-	"LuaConsole | Version: 8/20/2018\n\n"
+	"LuaConsole | Version: 8/21/2018\n\n"
 	LUA_VERSION " " LUA_COPYRIGHT
 	"\n"
 	LUA_CONSOLE_COPYRIGHT
@@ -187,6 +188,8 @@ static struct {
 		Array* luajit_opts;
 		char** luajit_bc;
 	#endif
+	int do_stdin;
+	int restore_console;
 	int print_version;
 	int post_exist;
 	int no_file;
@@ -395,7 +398,6 @@ static int lua_print_error(lua_State* L) {
 }
 
 
-
 // handles line by line interpretation (REPL)
 static int lua_main_postexist(lua_State* L) {
 	input = malloc(PRIMARY_REPL_BUFFER_SIZE);
@@ -414,7 +416,7 @@ retry:
 		
 		// 2. read
 		fputs(">", stdout);
-		while((ch = getchar()) != '\n') {
+		while((ch = fgetc(stdin)) != '\n') {
 			if(ch == -1) // sigint
 				return luaL_error(L, "Interrupted!");
 			if(i == PRIMARY_REPL_BUFFER_SIZE - 1) { // if max input reached
@@ -547,7 +549,7 @@ static int start_protective_mode_string(const char* str, size_t params) {
 static int start_protective_mode_file(const char* file, size_t params) {
 	signal(SIGINT, SIG_IGN); // Ignore for now
 	
-	lua_pushcclosure(L, lua_print_error, 0);
+	lua_pushcclosure(L, lua_print_error, 0); // wrap in error handler
 	int base = lua_gettop(L);
 	int status = 0;
 	if((status = luaL_loadfile(L, file)) != 0) {
@@ -737,6 +739,12 @@ int main(int argc, char* argv[])
 					ARGS.run_str = argv[i + 1];
 				else ARGS.run_str = argv[i]+2;
 				break;
+			case '\0':
+				ARGS.do_stdin = 1;
+				break;
+			case '-':
+				i = argc;
+				break;
 			#if defined(LUA_JIT_51)
 				case 'j':
 					if(ARGS.luajit_jcmds == NULL)
@@ -853,9 +861,21 @@ int main(int argc, char* argv[])
 	
 	
 	// query the ability to post-exist
-	if(!IS_ATTY)
-		ARGS.post_exist = 0;
-	
+	if(!IS_ATTY) {
+		#if defined(_WIN32) || defined(_WIN64)
+			if(GetConsoleWindow() != 0 && (argc > 1 && ARGS.post_exist == 1))
+				ARGS.restore_console = 1;
+			else
+				ARGS.post_exist = 0;
+		#else
+			int fd = open("/dev/tty", O_WRONLY);
+			if(fd != -1) {
+				ARGS.restore_console = 1;
+				close(fd);
+			} else
+				ARGS.post_exist = 0;
+		#endif
+	}
 	
 	// make sure to start in the requested directory, if any
 	check_error(ARGS.start != NULL && chdir(ARGS.start) == -1, "Error: Invalid start directory supplied.");
@@ -897,24 +917,47 @@ int main(int argc, char* argv[])
 	//   - load function into protected mode (pcall)
 	//   - post-exist
 	int status = 0;
-	if(ARGS.no_file == 0 || ARGS.post_exist == 1) {
-		if(ARGS.delay_parameters == 1)
-			load_parameters();
-		
-		if(ARGS.no_file == 0) {
-			for(size_t i=0; i<ARGS.file_count; i++) {
-				status = start_protective_mode_file(argv[i+1], (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
-				if(status != 0) {
-					fprintf(stderr, "LuaConsole ended on file `%s`\n", argv[1+i]);
-					break;
-				}
+	if(ARGS.delay_parameters == 1)
+		load_parameters();
+	
+	if(ARGS.no_file == 0) {
+		for(size_t i=0; i<ARGS.file_count; i++) {
+			status = start_protective_mode_file(argv[i+1], (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+			if(status != 0) {
+				fprintf(stderr, "LuaConsole ended on file `%s`!\n", argv[1+i]);
+				goto exit;
 			}
 		}
-		
-		if(ARGS.post_exist == 1)
-			status = start_protective_mode_REPL();
 	}
 	
+	// stdin
+	if(ARGS.do_stdin == 1) {
+		status = start_protective_mode_file(0, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+		if(status != 0) {
+			fprintf(stderr, "LuaConsole had an error in stdin!\n!");
+			goto exit;
+		}
+	}
+	
+	// post-exist
+	if(ARGS.post_exist == 1) {
+		if(ARGS.restore_console == 1) {
+			#if defined(_WIN32) || defined(_WIN64)
+				HANDLE hand_stdin = CreateFile("CONIN$", (GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+				int hand_stdin_final = _open_osfhandle((intptr_t)hand_stdin, _O_TEXT);
+				_dup2(hand_stdin_final, fileno(stdin));
+				SetStdHandle(STD_INPUT_HANDLE, (HANDLE) _get_osfhandle(fileno(stdin)));
+				_close(hand_stdin_final);
+			#else
+				fclose(stdin);
+				freopen("/dev/tty", "r", stdin);
+			#endif
+		}
+		status = start_protective_mode_REPL();
+	}
+	
+	
+exit:
 	// free resources
 	lua_close(L);
 	
