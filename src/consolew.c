@@ -49,7 +49,7 @@
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
-#	include <sys/stat.h>
+#	include <fcntl.h>
 #	define IS_ATTY isatty(fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		""
 #	define LUA_DLL_SO_NAME 			".so"
@@ -57,7 +57,7 @@
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
-#	include <sys/stat.h>
+#	include <fcntl.h>
 #	define IS_ATTY isatty(fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		""
 #	define LUA_DLL_SO_NAME 			".so"
@@ -65,7 +65,7 @@
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
-#	include <sys/stat.h>
+#	include <fcntl.h>
 #	define IS_ATTY isatty(fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		""
 #	define LUA_DLL_SO_NAME 			".so"
