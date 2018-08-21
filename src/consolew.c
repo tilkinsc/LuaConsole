@@ -49,7 +49,6 @@
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
-#	include <fcntl.h>
 #	define IS_ATTY isatty(fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		""
 #	define LUA_DLL_SO_NAME 			".so"
@@ -57,7 +56,6 @@
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
-#	include <fcntl.h>
 #	define IS_ATTY isatty(fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		""
 #	define LUA_DLL_SO_NAME 			".so"
@@ -65,7 +63,6 @@
 #	include <unistd.h>
 #	include <stdio.h>
 #	include <stdlib.h>
-#	include <fcntl.h>
 #	define IS_ATTY isatty(fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		""
 #	define LUA_DLL_SO_NAME 			".so"
@@ -73,7 +70,6 @@
 #	include <windows.h>
 #	include <stdio.h>
 #	include <stdlib.h>
-#	include <fcntl.h>
 #	define IS_ATTY _isatty(_fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		".exe"
 #	define LUA_DLL_SO_NAME 			".dll"
@@ -86,6 +82,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <signal.h>
+#include <fcntl.h>
 
 
 
@@ -130,7 +127,7 @@
 
 // usage message
 const char HELP_MESSAGE[] =
-	"LuaConsole | Version: 8/20/2018\n\n"
+	"LuaConsole | Version: 8/21/2018\n\n"
 	LUA_VERSION " " LUA_COPYRIGHT
 	"\n"
 	LUA_CONSOLE_COPYRIGHT
@@ -745,6 +742,9 @@ int main(int argc, char* argv[])
 			case '\0':
 				ARGS.do_stdin = 1;
 				break;
+			case '-':
+				i = argc;
+				break;
 			#if defined(LUA_JIT_51)
 				case 'j':
 					if(ARGS.luajit_jcmds == NULL)
@@ -863,14 +863,11 @@ int main(int argc, char* argv[])
 	// query the ability to post-exist
 	if(!IS_ATTY) {
 		#if defined(_WIN32) || defined(_WIN64)
-			if(GetConsoleWindow() != 0 && (argc > 1 && ARGS.post_exist == 1)) {
+			if(GetConsoleWindow() != 0 && (argc > 1 && ARGS.post_exist == 1))
 				ARGS.restore_console = 1;
-			} else {
-				puts("Nope not atty");
+			else
 				ARGS.post_exist = 0;
-			}
 		#else
-			puts("we are not atty");
 			int fd = open("/dev/tty", O_WRONLY);
 			if(fd != -1) {
 				ARGS.restore_console = 1;
@@ -946,14 +943,13 @@ int main(int argc, char* argv[])
 	if(ARGS.post_exist == 1) {
 		if(ARGS.restore_console == 1) {
 			#if defined(_WIN32) || defined(_WIN64)
-				puts("Restored the console!");
 				HANDLE hand_stdin = CreateFile("CONIN$", (GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
 				int hand_stdin_final = _open_osfhandle((intptr_t)hand_stdin, _O_TEXT);
 				_dup2(hand_stdin_final, fileno(stdin));
 				SetStdHandle(STD_INPUT_HANDLE, (HANDLE) _get_osfhandle(fileno(stdin)));
 				_close(hand_stdin_final);
 			#else
-				puts("Restore the linux console please!");
+				fclose(stdin);
 				freopen("/dev/tty", "r", stdin);
 			#endif
 		}
