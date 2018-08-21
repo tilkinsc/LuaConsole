@@ -188,6 +188,7 @@ static struct {
 		Array* luajit_opts;
 		char** luajit_bc;
 	#endif
+	int do_stdin;
 	int restore_console;
 	int print_version;
 	int post_exist;
@@ -396,8 +397,6 @@ static int lua_print_error(lua_State* L) {
 	return 1;
 }
 
-HANDLE hand_stdin = 0;
-int hand_stdin_final = 0;
 
 // handles line by line interpretation (REPL)
 static int lua_main_postexist(lua_State* L) {
@@ -740,6 +739,9 @@ int main(int argc, char* argv[])
 					ARGS.run_str = argv[i + 1];
 				else ARGS.run_str = argv[i]+2;
 				break;
+			case '\0':
+				ARGS.do_stdin = 1;
+				break;
 			#if defined(LUA_JIT_51)
 				case 'j':
 					if(ARGS.luajit_jcmds == NULL)
@@ -865,6 +867,7 @@ int main(int argc, char* argv[])
 				ARGS.post_exist = 0;
 			}
 		#else
+			puts("we are not atty");
 			ARGS.post_exist = 0;
 		#endif
 	}
@@ -923,10 +926,12 @@ int main(int argc, char* argv[])
 	}
 	
 	// stdin
-	status = start_protective_mode_file(0, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
-	if(status != 0) {
-		fprintf(stderr, "LuaConsole had an error in stdin!\n!");
-		goto exit;
+	if(ARGS.do_stdin == 1) {
+		status = start_protective_mode_file(0, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+		if(status != 0) {
+			fprintf(stderr, "LuaConsole had an error in stdin!\n!");
+			goto exit;
+		}
 	}
 	
 	// post-exist
@@ -934,12 +939,13 @@ int main(int argc, char* argv[])
 		if(ARGS.restore_console == 1) {
 			#if defined(_WIN32) || defined(_WIN64)
 				puts("Restored the console!");
-				hand_stdin = CreateFile("CONIN$", (GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
-				hand_stdin_final = _open_osfhandle((intptr_t)hand_stdin, _O_TEXT);
+				HANDLE hand_stdin = CreateFile("CONIN$", (GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+				int hand_stdin_final = _open_osfhandle((intptr_t)hand_stdin, _O_TEXT);
 				_dup2(hand_stdin_final, fileno(stdin));
 				SetStdHandle(STD_INPUT_HANDLE, (HANDLE) _get_osfhandle(fileno(stdin)));
 				_close(hand_stdin_final);
 			#else
+				puts("Restore the linux console please!");
 				
 			#endif
 		}
