@@ -35,7 +35,7 @@
 #define LIBRARIES_EXPANSION			(2)
 
 // controls verbosity of error output (0 off) (1 traceback) (2 stack_dump)
-#define DO_VERBOSE_ERRORS			(0)
+#define DO_VERBOSE_ERRORS			(2)
 
 // controls whether boolean and number should be tostring'd if error returns a non-string
 #define DO_EXT_ERROR_RETS			(0)
@@ -158,6 +158,8 @@ const char HELP_MESSAGE[] =
 		"\t\t\t[a]=delay arg table for file. [b]=no tuples\n"
 	"-e \t\tExecutes a string as Lua Code BEFORE -l's\n"
 	"-E \t\tExecutes a string as Lua Code AFTER -l's\n"
+	"-  \t\tProcesses input from stdin\n"
+	"-- \t\tStops processing parameters\n"
 	#if defined(LUA_JIT_51)
 		"-j \t\t LuaJIT  Performs a control command loads an extension module\n"
 		"-O \t\t LuaJIT  Sets an optimization level/parameters\n"
@@ -388,7 +390,7 @@ static int lua_print_error(lua_State* L) {
 	size_t top = lua_gettop(L);
 	fprintf(stderr, " (Runtime) | Stack Top: %zu | %s%s\n", top, msg, type);
 	#if DO_VERBOSE_ERRORS > 0
-		fputs(tb, stderr);
+		fprintf(stderr, "%s\n", tb);
 		#if DO_VERBOSE_ERRORS > 1
 			if(top > 1)
 				stack_dump(L);
