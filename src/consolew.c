@@ -861,6 +861,7 @@ int main(int argc, char* argv[])
 	
 	
 	// query the ability to post-exist
+	int fd = 0;
 	if(!IS_ATTY) {
 		#if defined(_WIN32) || defined(_WIN64)
 			if(GetConsoleWindow() != 0 && (argc > 1 && ARGS.post_exist == 1)) {
@@ -872,12 +873,10 @@ int main(int argc, char* argv[])
 		#else
 			puts("we are not atty");
 			int fd = open("/dev/tty", O_WRONLY);
-			if(fd != -1) {
-				close(fd);
+			if(fd != -1)
 				ARGS.restore_console = 1;
-			} else {
+			else
 				ARGS.post_exist = 0;
-			}
 		#endif
 	}
 	
@@ -955,7 +954,8 @@ int main(int argc, char* argv[])
 				_close(hand_stdin_final);
 			#else
 				puts("Restore the linux console please!");
-				
+				dup2(fileno(fd), STDIN_FILENO);
+				close(fd);
 			#endif
 		}
 		status = start_protective_mode_REPL();
