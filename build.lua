@@ -23,17 +23,18 @@
 --]]
 
 
--- define v this or use -Dplat=Windows -- Linux -- MacOSX
+-- uncomment below or use -Dplat=Windows -- Linux -- MacOSX
 -- plat = os.types.Windows -- os.types.Linux -- os.types.MacOSX
 
 if(plat == nil)then
-	error("Please define plat as Windows, Linux, or MacOSX")
+	error("Please define `plat` as Windows, Linux, or MacOSX")
 end
 
 require("luaadd")
 require("build_func")
 
 
+-- TODO: local no_additions
 local lua_ver = choose_opt("lua51", "luajit-5.1", "luajit-5.1")
 local lua_define = " -DLUA_JIT_51"
 local lua_includes = choose_opt("", "/usr/local/include/luajit-2.0", "/usr/local/include/luajit-2.0")
@@ -48,7 +49,7 @@ local gcc = {
 	gcc_name = "gcc";
 	debug = false;
 	warnings = " -Wall";
-	windows = false;
+	windows = choose_opt(true, false, false);
 	extra_warnings = "";
 	include_dir = " -I. -Iinclude";
 	library_dir = " -L. -Llib -Lobj -Ldll";
@@ -60,6 +61,7 @@ gcc.g = gcc.debug and 3 or 0
 gcc.O = gcc.debug and 0 or 2
 
 local install_path = plat == os.types.Windows and (gcc.debug and ("bin\\Debug") or ("bin\\Release")) or ((plat == os.types.Linux or plat == os.types.MacOSX) and (gcc.debug and ("bin/Debug") or ("bin/Release")))
+
 
 
 -- this is only a print
@@ -103,7 +105,7 @@ end
 
 --]]
 
-local std_libs = enc_dll(" -l" .. lua_ver) .. choose_opt("", " -lm -ldl", " -lm -ldl")
+local std_libs = enc_dll(" dll/" .. lua_ver) .. choose_opt("", " -lm -ldl", " -lm -ldl")
 
 
 local targ1_luaw_exe = enc_exe("luaw")
@@ -140,7 +142,7 @@ local compile_str2 = gcc_c(
 		gcc.library_dir,
 		targ2_compile_units)
 		
--- generate dll/so string
+-- generate additions dll/so string
 local linker_str_dll1 = choose_gcc_dll()(
 		targ2_luaadd_dll_a,
 		gcc.g, gcc.O, gcc.warnings, gcc.extra_warnings,

@@ -22,22 +22,31 @@
 
 @echo off
 
-
 setlocal
 	
 	set debug=0
+	set debug_coverage=0
+	set no_additions=0
+	
+	@REM -DLUA_JIT_51 -DLUA_51 -DLUA_52 -DLUA_53
 	set luaverdef=-DLUA_JIT_51
 	set luaver=lua51
+	
+	@REM luainc is for an external non-system-std lua include directory only
+	@REM if its in ./include, keep luainc set to .
 	set luainc=.
-	REM luainc is for external include directory only
-	REM if its in /include, keep luainc set to .
+	
+	
+	@REM --------------------------------------------------------------------
+	
 	
 	if %debug% EQU 0 (
-		set attrib=-std=gnu99 -s -Wall -O2
+		set attrib=-std=gnu11 -s -Wall -O2
 		set root=bin\Release
 	) else (
-		set attrib=-std=gnu99 -coverage -Wall -g -O0
+		set attrib=-std=gnu11 -Wall -g -O0
 		set root=bin\Debug
+		if %debug_coverage% EQU 1 set attrib=%attrib% -coverage
 	)
 	
 	set objdir=obj
@@ -51,22 +60,42 @@ setlocal
 	set dirs=-L%srcdir% -L%libdir% -L%dlldir% -I%srcdir% -I%incdir% -I%luainc%
 	
 	
+	@REM Ensure bin && bin\res exists
 	if EXIST %root% ( rmdir /S /Q %root% )
-	mkdir %root%
 	mkdir %root%\res
 	
 	
-	rem Compile everything w/ additions
+	@REM --------------------------------------------------------------------
+	
+	
+	echo Compiling luaw...
 	gcc %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -c %srcdir%\consolew.c %srcdir%\jitsupport.c %srcdir%\darr.c
-	gcc %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -c %srcdir%\additions.c
+	if %errorlevel% NEQ 0 exit /b 1
 	
-	rem Create luaadd.dll
-	gcc %attrib% %dirs% -shared -o luaadd.dll additions.o %dlldir%\%luaver%.dll
-	
-	rem Link luaw.exe
+	echo Linking luaw...
 	gcc %attrib% %dirs% -o luaw.exe consolew.o jitsupport.o darr.o %dlldir%\%luaver%.dll
+	if %errorlevel% NEQ 0 exit /b 1
+	@REM Strip if not debug
+	if %debug% EQU 0 (
+		strip --strip-all luaw.exe
+		if %errorlevel% NEQ 0 exit /b 1
+	)
 	
 	
+	if %no_additions% EQU 0 (
+		echo Compiling additions...
+		gcc %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -c %srcdir%\additions.c
+		if %errorlevel% NEQ 0 exit /b 1
+		echo Linking additions..
+		gcc %attrib% %dirs% -shared -o luaadd.dll additions.o %dlldir%\%luaver%.dll
+		if %errorlevel% NEQ 0 exit /b 1
+	)
+	
+	
+	@REM --------------------------------------------------------------------
+	
+	
+	@REM Migrate binaries
 	move /Y *.dll %root% 1>nul 2>nul
 	move /Y *.o %objdir% 1>nul 2>nul
 	move /Y *.a %objdir% 1>nul 2>nul
@@ -75,12 +104,9 @@ setlocal
 	copy /Y %dlldir%\* %root% 1>nul 2>nul
 	copy /Y %rootdir%\* %root% 1>nul 2>nul
 	
-	if %debug% EQU 0 strip --strip-all %root%\luaw.exe
-	
-	
-	echo Done.
-	
 endlocal
+
+echo Done.
 
 exit /b
 
