@@ -145,8 +145,8 @@ static int stack_dump(lua_State *L) {
 	int i = lua_gettop(L);
 	printf("--------------- Stack Dump ----------------\n");
 	while(i) {
-		int t = lua_type(L, i);
-		switch (t) {
+		int t = lua_type(L, i); // get type number
+		switch (t) { // switch type number
 		case LUA_TSTRING:
 			fprintf(stdout, "%d:(String):`%s`\n", i, lua_tostring(L, i));
 			break;
@@ -167,6 +167,12 @@ static int stack_dump(lua_State *L) {
 			break;
 		case LUA_TLIGHTUSERDATA:
 			fprintf(stdout, "%d:(LUserdata):`0x@%p`\n", i, lua_topointer(L, i));
+			break;
+		case LUA_TTHREAD:
+			fprintf(stdout, "%d:(Thread):`0x%p`\n", i, lua_topointer(L, i));
+			break;
+		case LUA_TNONE:
+			fprintf(stdout, "%d:(None)\n", i);
 			break;
 		default:
 			fprintf(stdout, "%d:(Object):%s:`0x@%p`\n", i, lua_typename(L, t), lua_topointer(L, i));
