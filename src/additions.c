@@ -21,63 +21,28 @@
  * SOFTWARE.
  */
 
-#if defined(linux) || defined(__linux__) || defined(__linux)
-#	include <unistd.h>
-#	include <stdio.h>
-#	include <stdlib.h>
-#	define CLEAR_CONSOLE "clear"
-#elif defined(unix) || defined(__unix__) || defined(__unix)
-#	include <unistd.h>
-#	include <stdio.h>
-#	include <stdlib.h>
-#	define CLEAR_CONSOLE "clear"
-#elif defined(__APPLE__) || defined(__MACH__)
-#	include <unistd.h>
-#	include <stdio.h>
-#	include <stdlib.h>
-#	define CLEAR_CONSOLE "clear"
-#elif defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64)
 #	include <windows.h>
 #	include <stdio.h>
 #	include <stdlib.h>
-#	define CLEAR_CONSOLE "cls"
+#	include <direct.h>
+#	define CLEAR_CONSOLE	("cls")
+#	ifndef PATH_MAX
+#		define PATH_MAX		(260)
+#	endif
 #else
-#	error "Not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
+#	include <unistd.h>
+#	include <stdio.h>
+#	include <stdlib.h>
+#	include <dirent.h>
+#	define CLEAR_CONSOLE	("clear")
 #endif
-
 
 #include <string.h>
-#include <dirent.h>
 #include <time.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
-
-
-// Please migrate your lua h's to a proper directory so versions don't collide
-//   luajit make install puts them in /usr/local/include/luajit-X.X/*
-//   lua51/52/53 puts them directly in /usr/local/include/* with version collision
-#if defined(LUA_51)
-#	include "lua51/lua.h"
-#	include "lua51/lualib.h"
-#	include "lua51/lauxlib.h"
-#elif defined(LUA_52)
-#	include "lua52/lua.h"
-#	include "lua52/lualib.h"
-#	include "lua52/lauxlib.h"
-#elif defined(LUA_53)
-#	include "lua53/lua.h"
-#	include "lua53/lualib.h"
-#	include "lua53/lauxlib.h"
-#elif defined(LUA_JIT_51)
-#	include "luajit-2.0/lua.h"
-#	include "luajit-2.0/lualib.h"
-#	include "luajit-2.0/lauxlib.h"
-#	include "luajit-2.0/luajit.h"
-#else
-#	warning "Lua version not defined."
-#	error "Define the version to use. '-DLUA_53' '-DLUA_52' '-DLUA_51' '-DLUA_JIT_51'"
-#endif
-
 
 #include "additions.h"
 
@@ -87,7 +52,7 @@
 static int lua_cwd_getcwd(lua_State* L) {
 	static char buffer[PATH_MAX];
 	luaL_checkstack(L, 1, NULL);
-	lua_pushstring(L, getcwd(buffer, PATH_MAX));	
+	lua_pushstring(L, _getcwd(buffer, PATH_MAX));	
 	return 1;
 }
 
@@ -97,7 +62,7 @@ static int lua_cwd_getcwd(lua_State* L) {
 static int lua_cwd_setcwd(lua_State* L) {
 	luaL_checkstack(L, 1, NULL);
 	const char* path = luaL_checkstring(L, 1);
-	if(chdir(path) == 0)
+	if(_chdir(path) == 0)
 		lua_pushboolean(L, 1);
 	else lua_pushboolean(L, 0);
 	return 1;
@@ -108,6 +73,7 @@ static int lua_cwd_setcwd(lua_State* L) {
 // boolean [2] : should stat be used
 // returns nil or error, or array with strings of all element names
 static int lua_cwd_getdir(lua_State* L) {
+#ifndef _WIN32
 	static DIR* dp;
 	static struct dirent* ep;
 	
@@ -131,6 +97,9 @@ static int lua_cwd_getdir(lua_State* L) {
 	
 	closedir(dp);
 	return 1;
+#else
+	return 0;
+#endif // !_WIN32
 }
 
 // void clear_window()
