@@ -103,13 +103,13 @@ chmod +x luaw
 
 
 # Migrate binaries
-mv *.so $root 1>/dev/null 2>/dev/null
-mv *.o $objdir 1>/dev/null 2>/dev/null
-mv *.a $objdir 1>/dev/null 2>/dev/null
-mv luaw $root 1>/dev/null 2>/dev/null
-cp -r $resdir/* $root/res 1>/dev/null 2>/dev/null
-cp -r $dlldir/* $root 1>/dev/null 2>/dev/null
-cp -r $rootdir/* $root 1>/dev/null 2>/dev/null
+mv *.so		$root		1>/dev/null	2>/dev/null
+mv *.o		$objdir		1>/dev/null	2>/dev/null
+mv *.a		$objdir		1>/dev/null	2>/dev/null
+mv luaw		$root		1>/dev/null	2>/dev/null
+cp -r		$resdir/*	$root/res	1>/dev/null	2>/dev/null
+cp -r		$dlldir/*	$root		1>/dev/null	2>/dev/null
+cp -r		$rootdir/*	$root		1>/dev/null	2>/dev/null
 
 
 echo Done.
