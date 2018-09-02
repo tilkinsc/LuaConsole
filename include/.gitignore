@@ -1,2 +1,7 @@
 !.gitignore 
-/luajit-2.0
+
+lua.h
+lualib.h
+luaconf.h
+lauxlib.h
+luajit.h

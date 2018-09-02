@@ -24,17 +24,37 @@
 
 setlocal
 	
-	set debug=0
-	set debug_coverage=0
-	set no_additions=0
+	@REM luainc is for an external lua headers location
+	@REM if its in ./include, keep luainc set to `.`, else i.e. `C:\git\luajit-2.0\src` might be an option
+	if NOT DEFINED luainc			set luainc=.
 	
-	@REM -DLUA_JIT_51 -DLUA_51 -DLUA_52 -DLUA_53
-	set luaverdef=-DLUA_JIT_51
-	set luaver=lua51
 	
-	@REM luainc is for an external non-system-std lua include directory only
-	@REM if its in ./include, keep luainc set to .
-	set luainc=.
+	@REM --------------------------------------------------------------------
+	
+	
+	if [%1] EQU [LUA51] (
+		set luaverdef= 
+		set luaver=lua51
+	)
+	if [%1] EQU [LUA52] (
+		set luaverdef= 
+		set luaver=lua52
+	)
+	if [%1] EQU [LUA53] (
+		set luaverdef= 
+		set luaver=lua53
+	)
+	if [%1] EQU [LUAJIT] (
+		set luaverdef=-DLUA_JIT_51
+		set luaver=lua51
+	)
+	
+	@REM These are defaults, defaults to luajit
+	if NOT DEFINED debug 			set debug=0
+	if NOT DEFINED debug_coverage	set debug_coverage=0
+	if NOT DEFINED no_additions		set no_additions=0
+	if NOT DEFINED luaverdef		set luaverdef=-DLUA_JIT_51
+	if NOT DEFINED luaver			set luaver=lua51
 	
 	
 	@REM --------------------------------------------------------------------
@@ -96,13 +116,13 @@ setlocal
 	
 	
 	@REM Migrate binaries
-	move /Y *.dll %root% 1>nul 2>nul
-	move /Y *.o %objdir% 1>nul 2>nul
-	move /Y *.a %objdir% 1>nul 2>nul
-	move /Y *.exe %root% 1>nul 2>nul
-	copy /Y %resdir%\* %root%\res 1>nul 2>nul
-	copy /Y %dlldir%\* %root% 1>nul 2>nul
-	copy /Y %rootdir%\* %root% 1>nul 2>nul
+	move /Y *.dll		%root%		1>nul	2>nul
+	move /Y *.o			%objdir%	1>nul	2>nul
+	move /Y *.a			%objdir%	1>nul	2>nul
+	move /Y *.exe		%root%		1>nul	2>nul
+	copy /Y %resdir%\*	%root%\res	1>nul	2>nul
+	copy /Y %dlldir%\*	%root%		1>nul	2>nul
+	copy /Y %rootdir%\*	%root%		1>nul	2>nul
 	
 endlocal
 

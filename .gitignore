@@ -14,3 +14,7 @@
 *.gcov
 *.gcda
 *.gcno
+*.tar
+*.gz
+lua-5*/
+luajit-*/
