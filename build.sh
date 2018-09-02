@@ -30,7 +30,7 @@ no_additions=0
 
 # -DLUA_JIT_51 -DLUA_51 -DLUA_52 -DLUA_53
 luaverdef=-DLUA_JIT_51
-luaver=-lluajit-5.1
+luaver=-lluajit
 
 # luainc is for an external non-system-std lua include directory only
 # if its in ./include, keep luainc set to .

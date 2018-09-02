@@ -25,14 +25,22 @@
 echo Managing dependancies...
 
 echo " # luajit-2.0"
-pushd $HOME/luajit-2.0
-	if [ ! "$(ls -A $HOME/luajit-2.0)" ]; then
-		git clone http://luajit.org/git/luajit-2.0.git $HOME/luajit-2.0
-		make -j 4
-	fi
-	# TODO: migrate stuff needed elsewhere to prevent downloading a lot, instead of make install
-	sudo make install
-	sudo ldconfig
+if [ ! "$(ls -A $HOME/luajit-2.0)" ]; then
+	git clone http://luajit.org/git/luajit-2.0.git $HOME/luajit-2.0
+	make -j 4
+fi
+
+cp -u $HOME/luajit-2.0/src/lua.h		./include
+cp -u $HOME/luajit-2.0/src/luaconf.h	./include
+cp -u $HOME/luajit-2.0/src/lualib.h		./include
+cp -u $HOME/luajit-2.0/src/lauxlib.h	./include
+cp -u $HOME/luajit-2.0/src/luajit.h		./include
+cp -u $HOME/luajit-2.0/src/libluajit.so	./dll
+
+pushd ./bin
+ldconfig
 popd
+
+ln -s /usr/lib/
 
 echo Done managing dependancies.

@@ -36,6 +36,9 @@
 #	include <stdlib.h>
 #	include <dirent.h>
 #	define CLEAR_CONSOLE	("clear")
+#	define _getcwd			getcwd
+#	define _setcwd			setcwd
+#	define _chdir			chdir
 #endif
 
 #include <string.h>

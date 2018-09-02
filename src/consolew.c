@@ -61,6 +61,7 @@
 #	define IS_ATTY					isatty(fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		""
 #	define LUA_DLL_SO_NAME 			".so"
+#	define _chdir					chdir
 #endif
 
 
