@@ -22,35 +22,7 @@
  */
  
 #if defined(LUA_JIT_51)
-#	include "luajit-2.0/lua.h"
-#	include "luajit-2.0/lualib.h"
-#	include "luajit-2.0/lauxlib.h"
-#	include "luajit-2.0/luajit.h"
-
-
-// standard libraries per OS
-#	if defined(linux) || defined(__linux__) || defined(__linux)
-#		include <unistd.h>
-#		include <stdio.h>
-#		include <stdlib.h>
-#	elif defined(unix) || defined(__unix__) || defined(__unix)
-#		include <unistd.h>
-#		include <stdio.h>
-#		include <stdlib.h>
-#	elif defined(__APPLE__) || defined(__MACH__)
-#		include <unistd.h>
-#		include <stdio.h>
-#		include <stdlib.h>
-#	elif defined(_WIN32) || defined(_WIN64)
-#		include <windows.h>
-#		include <stdio.h>
-#		include <stdlib.h>
-#	else
-#		error "OS not familiar. Set up headers accordingly, or -D__linux__ of -Dunix or -D__APPLE__ or -D_WIN32"
-#	endif
-
-
-#	include "darr.h"
+#	include "jitsupport.h"
 
 
 // LuaJIT functions slightly modified for LuaConsole

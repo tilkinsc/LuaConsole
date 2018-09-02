@@ -24,10 +24,10 @@
 #pragma once
 
 #if defined(LUA_JIT_51)
-#	include "luajit-2.0/lua.h"
-#	include "luajit-2.0/lualib.h"
-#	include "luajit-2.0/lauxlib.h"
-#	include "luajit-2.0/luajit.h"
+#	include "lua.h"
+#	include "lualib.h"
+#	include "lauxlib.h"
+#	include "luajit.h"
 
 #	include "darr.h"
 
