@@ -22,10 +22,9 @@
  */
 
 // REPL line buffer length
-#define REPL_BUFFER_SIZE			(1024)
-#define PRIMARY_REPL_BUFFER_SIZE	(REPL_BUFFER_SIZE + 1)
-#define SECONDARY_REPL_BUFFER_SIZE	(PRIMARY_REPL_BUFFER_SIZE + 8) // + 8 is for `return ;`
-
+#define REPL_BUFFER_SIZE			(2048)							// REPL input buffer size
+#define PRIMARY_REPL_BUFFER_SIZE	(REPL_BUFFER_SIZE + 1)			// + 1 is for `\0`
+#define SECONDARY_REPL_BUFFER_SIZE	(PRIMARY_REPL_BUFFER_SIZE + 8)	// + 8 is for `return ;`
 
 // dynamic array initialization sizes for darr's
 #define DEFINES_INIT				(4)
@@ -41,82 +40,60 @@
 #define DO_EXT_ERROR_RETS			(0)
 
 // environment variable for lua usage
+// TODO: I want to support LUA_INIT_5_2 LUA_INIT_5_1 and LUA_INIT_5_3 (ENV_VAR_EXT) which version takes precedence and falls back to LUA_INIT afterward
 #define ENV_VAR						"LUA_INIT"
+// #define ENV_VAR_EXT				(0)
+
 
 
 // standard libraries per OS
-#if defined(linux) || defined(__linux__) || defined(__linux)
-#	include <unistd.h>
-#	include <stdio.h>
-#	include <stdlib.h>
-#	define IS_ATTY isatty(fileno(stdin))
-#	define LUA_BIN_EXT_NAME 		""
-#	define LUA_DLL_SO_NAME 			".so"
-#elif defined(unix) || defined(__unix__) || defined(__unix)
-#	include <unistd.h>
-#	include <stdio.h>
-#	include <stdlib.h>
-#	define IS_ATTY isatty(fileno(stdin))
-#	define LUA_BIN_EXT_NAME 		""
-#	define LUA_DLL_SO_NAME 			".so"
-#elif defined(__APPLE__) || defined(__MACH__)
-#	include <unistd.h>
-#	include <stdio.h>
-#	include <stdlib.h>
-#	define IS_ATTY isatty(fileno(stdin))
-#	define LUA_BIN_EXT_NAME 		""
-#	define LUA_DLL_SO_NAME 			".so"
-#elif defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64)
+#	define WIN32_LEAN_AND_MEAN
 #	include <windows.h>
-#	include <stdio.h>
-#	include <stdlib.h>
-#	define IS_ATTY _isatty(_fileno(stdin))
+#	include <direct.h>
+#	include <io.h>
+#	define IS_ATTY					_isatty(_fileno(stdin))
 #	define LUA_BIN_EXT_NAME 		".exe"
 #	define LUA_DLL_SO_NAME 			".dll"
 #else
-#	error "OS not familiar. Set up headers accordingly, or -D__linux__ or -Dunix or -D__APPLE__ or -D_WIN32"
+#	include <unistd.h>
+#	include <dirent.h>
+#	define IS_ATTY					isatty(fileno(stdin))
+#	define LUA_BIN_EXT_NAME 		""
+#	define LUA_DLL_SO_NAME 			".so"
 #endif
 
 
-// stdlib includes
-#include <dirent.h>
+// 'cross-platform' includes
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <signal.h>
 #include <fcntl.h>
 
 
-
-// compiler/project includes
-// Please migrate your lua h's to a proper directory so versions don't collide
+// project includes
+// Please migrate your lua h's to a proper local directory so versions don't collide
 //   luajit `make install` puts them in /usr/local/include/luajit-X.X/*
 //   lua51/52/53 `make install` puts them in /usr/local/include/* with version collision
-#if defined(LUA_51)
-#	include "lua51/lua.h"
-#	include "lua51/lualib.h"
-#	include "lua51/lauxlib.h"
-#elif defined(LUA_52)
-#	include "lua52/lua.h"
-#	include "lua52/lualib.h"
-#	include "lua52/lauxlib.h"
-#elif defined(LUA_53)
-#	include "lua53/lua.h"
-#	include "lua53/lualib.h"
-#	include "lua53/lauxlib.h"
-#elif defined(LUA_JIT_51)
-#	include "luajit-2.0/lua.h"
-#	include "luajit-2.0/lualib.h"
-#	include "luajit-2.0/lauxlib.h"
-#	include "luajit-2.0/luajit.h"
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+#if defined(LUA_JIT_51)
 #	include "jitsupport.h"
-// TODO: support latest version of luajit
-#else
-#	warning "Lua version not defined."
-#	error "Define the version to use. '-DLUA_53' '-DLUA_52' '-DLUA_51' '-DLUA_JIT_51'"
 #endif
 
 
 // local src includes
 #include "darr.h"
+
+
+// TODO: This is a hack bc I didn't realize lua51 didn't have traceback
+#if LUA_VERSION_NUM <= 501
+	void luaL_traceback (lua_State *L, lua_State *L1, const char *msg, int level) {
+		lua_pushlstring(L, " ", 1);
+	}
+#endif
 
 
 
@@ -127,7 +104,7 @@
 
 // usage message
 const char HELP_MESSAGE[] =
-	"LuaConsole | Version: 8/21/2018\n\n"
+	"LuaConsole | Version: 9/2/2018\n\n"
 	LUA_VERSION " " LUA_COPYRIGHT
 	"\n"
 	LUA_CONSOLE_COPYRIGHT
@@ -142,7 +119,7 @@ const char HELP_MESSAGE[] =
 	"\t[-Dtb.var=val] [-Lfile.lua] [-Llualib" LUA_DLL_SO_NAME "] [-t{a,b}] [-r \"string\"]\n"
 	"\t[-R \"string\"] "
 		#if defined(LUA_JIT_51)
-			"[-j{cmd,cmd=arg},...]\n\t[-O{level,+flag,-flag,cmd=arg}] [-b{l,s,g,n,t,a,o,e,-} {IN,OUT}]\n\t"
+			"[-j{cmd,cmd=arg},...] [-O{level,+flag,-flag,cmd=arg}]\n\t[-b{l,s,g,n,t,a,o,e,-} {IN,OUT}] "
 		#endif
 		"[-?] [-n {arg1 ...}]\n"
 	"\n"
@@ -161,18 +138,14 @@ const char HELP_MESSAGE[] =
 	"-  \t\tProcesses input from stdin\n"
 	"-- \t\tStops processing parameters\n"
 	#if defined(LUA_JIT_51)
-		"-j \t\t LuaJIT  Performs a control command loads an extension module\n"
-		"-O \t\t LuaJIT  Sets an optimization level/parameters\n"
-		"-b \t\t LuaJIT  Saves or lists bytecode\n"
+		"-j \t\t [LuaJIT] Performs a control command loads an extension module\n"
+		"-O \t\t [LuaJIT] Sets an optimization level/parameters\n"
+		"-b \t\t [LuaJIT] Saves or lists bytecode\n"
 	#endif
 	"-? --help \tDisplays this help message\n"
 	"-n \t\tStart of parameter section\n";
 
 
-
-#if defined(LUA_JIT_51)
-	#include "jitsupport.h"
-#endif
 
 
 
@@ -319,7 +292,7 @@ int stack_dump(lua_State *L) {
 }
 
 
-// internal enums, represent lua error category
+// internal enums, represents lua error category
 typedef enum LuaConsoleError {
 	INTERNAL_ERROR = 0,
 	SYNTAX_ERROR = 1,
@@ -443,7 +416,7 @@ retry:
 			lua_pop(L, 1); // err msg
 		} else {
 			// attempt first test, return seems to work
-			size_t top = lua_gettop(L);
+			int top = lua_gettop(L);
 			status = lua_pcall(L, 0, LUA_MULTRET, 0);
 			if(status == 0) { // on success
 				top = lua_gettop(L) - top + 1; // + 1 = ignore pushed function
@@ -466,14 +439,8 @@ retry:
 			print_error(SYNTAX_ERROR, 1);
 			lua_pop(L, 2); // err msg, err handler
 		} else {
-			if((status = lua_pcall(L, 0, LUA_MULTRET, base)) != 0) {
+			if((status = lua_pcall(L, 0, LUA_MULTRET, base)) != 0)
 				lua_pop(L, 2); // err msg, err handler, also ignore it - no relevance
-			} else {
-				// code can't be `return %s;`'d and it doesn't syntax out, but it still works
-				// by design, it always returns even nil so idk if this is even possible
-				// in practice, I can't figure out how to trigger this else clause, so undefined behavior?
-				fprintf(stderr, "Please submit a github issue with this command attached.");
-			}
 		}
 	}
 	
@@ -482,15 +449,15 @@ retry:
 
 
 
-// append parameters to the stack for a (p)call to consume
+// append parameters to the stack for a pcall to consume
 static inline void inject_parameters() {
 	for(size_t i=0; i<ARGS.parameters; i++)
 		lua_pushlstring(L, ARGS.parameters_argv[i], strlen(ARGS.parameters_argv[i]));
 }
 
-// load parameters into global arg table
+// load parameters into global `arg` table
 static inline void load_parameters() {
-	lua_createtable(L, 0, ARGS.parameters);
+	lua_createtable(L, 0, (int)ARGS.parameters);
 	for(size_t i=0; i<ARGS.parameters; i++) {
 		lua_pushinteger(L, i+1);
 		lua_pushlstring(L, ARGS.parameters_argv[i], strlen(ARGS.parameters_argv[i]));
@@ -500,7 +467,7 @@ static inline void load_parameters() {
 }
 
 
-// handle execution of REPL
+// handles execution of REPL
 static inline int start_protective_mode_REPL() {
 	signal(SIGINT, SIG_IGN); // SIGINT handled in lua_main_postexist
 	
@@ -516,7 +483,7 @@ static inline int start_protective_mode_REPL() {
 	return status;
 }
 
-// handle execution of strings
+// handles execution of strings
 static int start_protective_mode_string(const char* str, size_t params) {
 	signal(SIGINT, SIG_IGN); // Ignore for now
 	
@@ -530,7 +497,7 @@ static int start_protective_mode_string(const char* str, size_t params) {
 	}
 	if(params > 0)
 		inject_parameters();
-	if((status = lua_pcall(L, params, LUA_MULTRET, base)) != 0) {
+	if((status = lua_pcall(L, (int)params, LUA_MULTRET, base)) != 0) {
 		lua_pop(L, 2); // err msg, err handler
 		return status;
 	}
@@ -547,7 +514,7 @@ static int start_protective_mode_string(const char* str, size_t params) {
 	return status;
 }
 
-// handle execution of files
+// handles execution of files
 static int start_protective_mode_file(const char* file, size_t params) {
 	signal(SIGINT, SIG_IGN); // Ignore for now
 	
@@ -561,7 +528,7 @@ static int start_protective_mode_file(const char* file, size_t params) {
 	}
 	if(params > 0)
 		inject_parameters();
-	if((status = lua_pcall(L, params, 0, base)) != 0) {
+	if((status = lua_pcall(L, (int)params, 0, base)) != 0) {
 		lua_pop(L, 2); // err msg, err handler
 		return status;
 	}
@@ -569,7 +536,7 @@ static int start_protective_mode_file(const char* file, size_t params) {
 	return status;
 }
 
-// handle execution of anything to be required
+// handles execution of anything to be required
 static inline int start_protective_mode_require(const char* file) {
 	signal(SIGINT, SIG_IGN); // Ignore for now
 	
@@ -626,7 +593,7 @@ static inline void load_globals(Array* globals, void* data) {
 		}
 		lua_pushlstring(L, arg2, strlen(arg2));
 		lua_setfield(L, -2, strnxt(cur_arg));
-		lua_pop(L, dot_count-1); // everything but root table
+		lua_pop(L, (int)dot_count - 1); // everything but root table
 		lua_setglobal(L, tabs);
 		free(tabs);
 	}
@@ -809,12 +776,21 @@ int main(int argc, char* argv[])
 	
 	// handle init environment variable
 	if(ARGS.no_env_var == 0) {
-		const char* env_init = getenv(ENV_VAR);
+		#if defined(_MSC_VER)
+			char* env_init;
+			size_t len;
+			errno_t err = _dupenv_s(&env_init, &len, ENV_VAR);
+		#else
+			char* env_init = getenv(ENV_VAR);
+		#endif
 		if(env_init != NULL) {
 			if(env_init[0] == '@')
 				start_protective_mode_file(env_init + 1, 0);
 			else start_protective_mode_string(env_init, 0);
 		}
+		#if defined(_MSC_VER)
+			free(env_init);
+		#endif
 	} else {
 		lua_pushboolean(L, 1);
 		lua_setfield(L, LUA_REGISTRYINDEX, "LUA_NOENV");
@@ -823,7 +799,7 @@ int main(int argc, char* argv[])
 	
 	
 	// copyright
-	if(ARGS.copyright_squelch == 0) {
+	if(ARGS.copyright_squelch == 0 && ARGS.post_exist == 1) {
 		fputs(LUA_VERSION " " LUA_COPYRIGHT "\n", stdout);
 		fputs(LUA_CONSOLE_COPYRIGHT "\n", stdout);
 		#if defined(LUA_JIT_51)
@@ -880,7 +856,7 @@ int main(int argc, char* argv[])
 	}
 	
 	// make sure to start in the requested directory, if any
-	check_error(ARGS.start != NULL && chdir(ARGS.start) == -1, "Error: Invalid start directory supplied.");
+	check_error(ARGS.start != NULL && _chdir(ARGS.start) == -1, "Error: Invalid start directory supplied.");
 	
 	
 	// initiate global variables set up
@@ -922,6 +898,7 @@ int main(int argc, char* argv[])
 	if(ARGS.delay_parameters == 1)
 		load_parameters();
 	
+	// files
 	if(ARGS.no_file == 0) {
 		for(size_t i=0; i<ARGS.file_count; i++) {
 			status = start_protective_mode_file(argv[i+1], (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
@@ -947,8 +924,8 @@ int main(int argc, char* argv[])
 			#if defined(_WIN32) || defined(_WIN64)
 				HANDLE hand_stdin = CreateFile("CONIN$", (GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
 				int hand_stdin_final = _open_osfhandle((intptr_t)hand_stdin, _O_TEXT);
-				_dup2(hand_stdin_final, fileno(stdin));
-				SetStdHandle(STD_INPUT_HANDLE, (HANDLE) _get_osfhandle(fileno(stdin)));
+				_dup2(hand_stdin_final, _fileno(stdin));
+				SetStdHandle(STD_INPUT_HANDLE, (HANDLE) _get_osfhandle(_fileno(stdin)));
 				_close(hand_stdin_final);
 			#else
 				fclose(stdin);
