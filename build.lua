@@ -34,10 +34,9 @@ require("luaadd")
 require("build_func")
 
 
--- TODO: local no_additions
-local lua_ver = choose_opt("lua51", "luajit-5.1", "luajit-5.1")
-local lua_define = " -DLUA_JIT_51"
-local lua_includes = choose_opt("", "/usr/local/include/luajit-2.0", "/usr/local/include/luajit-2.0")
+local lua_ver 		= choose_opt("lua51", "luajit-5.1", "luajit-5.1")
+local lua_define	= " -DLUA_JIT_51"
+local lua_includes 	= " "
 
 
 --[[
@@ -46,16 +45,16 @@ local lua_includes = choose_opt("", "/usr/local/include/luajit-2.0", "/usr/local
 --]]
 
 local gcc = {
-	gcc_name = "gcc";
-	debug = false;
-	warnings = " -Wall";
-	windows = choose_opt(true, false, false);
-	extra_warnings = "";
-	include_dir = " -I. -Iinclude";
-	library_dir = " -L. -Llib -Lobj -Ldll";
-	ccextras = " -s" .. lua_define;
-	ldextras = choose_opt(" -s", " -s -fPIC -Wl,-E", " -s -Wl,-E");
-	defines = choose_opt(" -D__USE_MINGW_ANSI_STDIO=1", "", "");
+	gcc_name		= "gcc";
+	debug			= false;
+	warnings		= " -Wall";
+	windows			= choose_opt(true, false, false);
+	extra_warnings	= "";
+	include_dir		= " -I. -Iinclude" .. lua_includes;
+	library_dir 	= " -L. -Llib -Lobj -Ldll";
+	ccextras		= " -s" .. lua_define;
+	ldextras		= choose_opt(" -s", " -s -fPIC -Wl,-E", " -s -Wl,-E");
+	defines			= choose_opt(" -D__USE_MINGW_ANSI_STDIO=1", "", "");
 }
 gcc.g = gcc.debug and 3 or 0
 gcc.O = gcc.debug and 0 or 2
@@ -64,7 +63,7 @@ local install_path = plat == os.types.Windows and (gcc.debug and ("bin\\Debug") 
 
 
 
--- this is only a print
+-- this is only a print()
 local targ_dir = (gcc.debug and "DEBUG" or "RELEASE")
 
 
@@ -108,15 +107,15 @@ end
 local std_libs = enc_dll(" dll/" .. lua_ver) .. choose_opt("", " -lm -ldl", " -lm -ldl")
 
 
-local targ1_luaw_exe = enc_exe("luaw")
-local targ1_luaw_exe_o = {"consolew.o", "jitsupport.o", "darr.o"}
-local targ1_lua_exe_libs = std_libs
+local targ1_luaw_exe		= enc_exe("luaw")
+local targ1_luaw_exe_o		= {"consolew.o", "jitsupport.o", "darr.o"}
+local targ1_lua_exe_libs	= std_libs
 
 
-local targ2_luaadd_dll_a = nil
-local targ2_luaadd_dll = enc_dll("luaadd")
-local targ2_luaadd_o = {"additions.o"}
-local targ2_luaadd_libs = std_libs
+local targ2_luaadd_dll_a	= nil
+local targ2_luaadd_dll		= enc_dll("luaadd")
+local targ2_luaadd_o		= {"additions.o"}
+local targ2_luaadd_libs		= std_libs
 
 
 
@@ -201,6 +200,6 @@ if(#targ1_compile_units + #targ2_compile_units > 0 or exe_test or force)then
 	-- setup
 	migrate_binaries(install_path, {enc_exe("luaw"), enc_dll("luaadd")})
 end
-print("Done. Up to date.")
 
+print("Done. Up to date.")
 
