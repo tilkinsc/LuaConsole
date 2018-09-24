@@ -21,30 +21,41 @@
  * SOFTWARE.
  */
 
+
 #pragma once
 
 
+#define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright (C) 2017-2018, Cody Tilkins"
+
+
 #if defined(_WIN32) || defined(_WIN64)
-#	define LUA_DLL	__declspec(dllexport)
+#	define LUA_BIN_EXT_NAME 		".exe"
+#	define LUA_DLL_SO_NAME 			".dll"
 #else
-#	define LUA_DLL	__attribute__((visibility("default")))
+#	define LUA_BIN_EXT_NAME 		""
+#	define LUA_DLL_SO_NAME 			".so"
 #endif
 
 
-// compiler/project includes
-// Please migrate your lua h's to a proper local directory so versions don't collide
-//   luajit `make install` puts them in /usr/local/include/luajit-X.X/*
-//   lua51/52/53 `make install` puts them in /usr/local/include/* with version collision
 #include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-#if defined(LUA_JIT_51)
-#	include "jitsupport.h"
+#include "luadriver.h"
+
+
+
+lua_State* L;
+LC_ARGS ARGS;
+
+
+// usage message
+static const char HELP_MESSAGE[];
+
+
+
+#if LUA_VERSION_NUM <= 501
+	void luaL_traceback (lua_State *L, lua_State *L1, const char *msg, int level);
 #endif
 
 
-#define LUA_DLL_ENTRY 	LUA_DLL int
 
-
-LUA_DLL_ENTRY luaopen_luaadd(lua_State* L);
+LC_LD_API int luacon_loaddll(LC_ARGS _ARGS);
 
