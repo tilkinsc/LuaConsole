@@ -91,6 +91,40 @@ setlocal
 	
 	
 	IF [%1] == [driver] (
+	
+		if [%2] == [luajit] (
+			echo Building luaw driver and default package...
+			call prereqs.bat switch luajit
+			IF NOT EXIST "luajit-2.0" (
+				echo No lua available! prereqs failed!
+				exit /b 1
+			)
+			echo Compiling luaw driver...
+			gcc %attrib% %dirs% -D__USE_MINGW_ANSI_STDIO=1 -DDEFAULT_LUA=\"lcluajit.dll\" -c %srcdir%\darr.c %srcdir%\luadriver.c
+			IF %errorlevel% NEQ 0 exit /b 1
+			
+			echo Compiling default luaw as package luajit...
+			gcc %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -DLUA_JIT_51 -c %srcdir%\consolew.c %srcdir%\ldata.c %srcdir%\jitsupport.c %srcdir%\darr.c
+			IF %errorlevel% NEQ 0 exit /b 1
+			
+			echo Linking luaw driver...
+			gcc %attrib% %dirs% -o luaw.exe luadriver.o darr.o
+			IF %errorlevel% NEQ 0 exit /b 1
+			
+			echo Linking default luaw as package %luaver%...
+			gcc %attrib% %dirs% -shared -o lcluajit.dll consolew.o ldata.o jitsupport.o darr.o %dlldir%\lua51.dll
+			IF %errorlevel% NEQ 0 exit /b 1
+			
+			REM Strip luaw driver if not debug
+			IF %debug% EQU 0 (
+				strip --strip-all luaw.exe
+				IF %errorlevel% NEQ 0 exit /b 1
+			)
+			
+			call :migrate
+			
+			exit /b 0
+		)
 		REM Ensure bin && bin\res exists
 		IF EXIST %root% ( rmdir /S /Q %root% )
 		mkdir %root%\res

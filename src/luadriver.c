@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 	ARGS.no_file = 1;
 	
 	// handle arguments
-	if(argv[1][0] == '-' || argv[1][0] == '/') { // don't try to execute file if it isn't first argument
+	if(argc < 2 || (argv[1][0] == '-' || argv[1][0] == '/')) { // don't try to execute file if it isn't first argument
 		ARGS.post_exist = 1;
 	} else {
 		// i<argc might not run final file?

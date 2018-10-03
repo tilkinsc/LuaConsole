@@ -23,31 +23,60 @@
 # SOFTWARE.
 
 
+help_message="Usage:\n\nbuild.sh driver {luajit,lua515,lua535,...}\nbuild.sh package {all,luajit,lua515,lua535,...}\n\nNote: Most lua versions supported, but must use 3 digit numbers.\n"
 
-debug=0
-debug_coverage=0
-no_additions=0
+if [[ -z $1 ]]; then
+	echo $help_message
+	exit 1
+fi
 
-# -DLUA_JIT_51 -DLUA_51 -DLUA_52 -DLUA_53
-luaverdef=-DLUA_JIT_51
-luaver=-lluajit
+if [[ $1 -eq "/?" ]]; then
+	echo $help_message
+	exit 1
+fi
 
-# luainc is for an external non-system-std lua include directory only
-# if its in ./include, keep luainc set to .
-luainc=.
+if [[ $1 -eq "-?" ]]; then
+	echo $help_message
+	exit 1
+fi
+
+if [[ $1 -eq "--help" ]]; then
+	echo $help_message
+	exit 1
+fi
+
+if [[ -z $2 ]]; then
+	echo Not enough arguments supplied. Missing 2nd argument.
+fi
+
+
+# --------------------------------------------------------------------
+
+
+# luainc is for an external lua headers location
+# if its in ./include, keep luainc set to `.` for null, else i.e. `C:\git\luajit-2.0\src`
+if [[ -z $luainc ]]; then
+	luainc=.
+fi
+if [[ -z $debug ]]; then
+	debug=0
+fi
+if [[ -z $debug_coverage ]]; then
+	debug_coverage=0
+fi
 
 
 # --------------------------------------------------------------------
 
 
 if [[ $debug -eq 0 ]]; then
-	attrib="-std=gnu11 -s -Wall -O2"
-	root=bin/Release
+	attrib="-std=gnu11 -Wall -O2"
+	root="bin/Release"
 else
 	attrib="-std=gnu11 -Wall -g -O0"
-	root=bin/Debug
+	root="bin/Debug"
 	if [ $debug_coverage -eq 1 ]; then
-		attrib=$attrib -coverage
+		attrib="$attrib -coverage"
 	fi
 fi
 
@@ -67,9 +96,22 @@ dirs="-L$srcdir -L$libdir -L$dlldir -I$srcdir -I$incdir -I$luainc"
 if [ -d $root ]; then rm -r --one-file-system -d $root; fi
 mkdir -p $root/res
 
+arg1=$2
+luaver=${arg1:0,3}-${arg1:3,1}.${arg1:4,1}.${arg1:5,1}
 
 # --------------------------------------------------------------------
 
+if [ $1 -eq "driver" ]; then
+	if [ $2 -eq "luajit" ]; then
+		
+	fi
+	
+	# Ensure bin && bin/res exists
+	if [ -d $root ]; then rm -r --one-file-system -d $root; fi
+	mkdir -p $root/res
+	
+	
+fi
 
 echo Compiling luaw...
 gcc $attrib $dirs $luaverdef -c $srcdir/consolew.c $srcdir/jitsupport.c $srcdir/darr.c
