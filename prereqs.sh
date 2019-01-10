@@ -22,92 +22,141 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-help_message=""
 
-if [[ -z $1 ]]; then
-	echo No arguments specified. \n
-	echo $help_message
+# - Basic Variables --------------------------------------------------
+
+
+if [ -z $ZIP ]; then ZIP=0;		fi
+if [ -z $GIT ]; then GIT=git;	fi
+if [ -z $DLM ]; then DLM=curl;	fi
+
+
+# - Basic Functions --------------------------------------------------
+
+
+function help_message() {
+	echo Usage:
+	echo \n
+	echo		prereqs.bat                              Downloads and extracts the lua files
+	echo		prereqs.bat clean                        Cleans the environment of downloaded files
+	echo		prereqs.bat -? /? --help                 Shows this help message
+	echo \n
+	echo Notes:
+	echo 	Uses `7zip` found in Program Files    ( https://www.7-zip.org/download.html )
+	echo 	Uses `bitsadmin` for downloading      ( core to most windows installations  )
+	echo 	Uses `git` found in PATH              ( https://gitforwindows.org/          )
+	echo \n
+	echo Configure above notes with set:
+	echo		ZIP, GIT, and DLM
+	echo \n
+	echo		DLM should be set to bitsadmin or wget or curl. Defaults to bitsadmin.
+	echo		ZIP should be set to an unzipper that takes the .tar or .tar.gz. Defaults to 7zip.
+	echo		GIT should be set to the git program. Defaults to git in path.
+	echo \n
+}
+
+function failure() {
+	echo An error has occured!
 	exit 1
-fi
+}
 
-if [[ $1 -eq "/?" ]]; then
-	echo $help_message
+
+# - Basic Switches ---------------------------------------------------
+
+
+if [ $1 -eq "/?" ]; then
+	help_message
 	exit 0
 fi
 
-if [[ $1 -eq "-?" ]]; then
-	echo $help_message
+if [ $1 -eq "-?" ]; then
+	help_message
 	exit 0
 fi
 
-if [[ $1 -eq "--help" ]]; then
-	echo $help_message
+if [ $1 -eq "--help" ]; then
+	help_message
 	exit 0
 fi
 
-if [[ -z $2 ]]; then
-	echo Not enough arguments supplied. Missing 2nd argument. \n
-	echo $help_message
-fi
 
-arg1=$2
-luaver=${arg1:0,3}-${arg1:3,1}.${arg1:4,1}.${arg1:5,1}
+# - Basic Cleaner ----------------------------------------------------
 
-if [[ -z GIT ]]; then
-	GIT=git
-fi
-if [[ -z luaw_cflags ]]; then
-	luaw_cflags=-DLUA_COMPAT_ALL -DLUA_COMPAT_5_2
-fi
-if [[ -z GCC ]]; then
-	GCC=gcc
-fi
-if [[ -z AR ]]; then
-	AR=ar
-fi
 
-if [[ $1 -eq "build" ]]; then
+if [ $1 -eq "clean" ]; then
+	echo Deleting luajit...
+	rm -r -d luajit-2.0
 	
-	if [[ $2 -eq "all" ]]; then
-		echo Not yet supported! \n
-		echo $help_message
-		exit 1
+	echo Deleting lua-all...
+	rm lua-all.tar
+	rm lua-all.tar.gz
+	rm -r -d lua-all
+	
+	echo Done.
+	exit 0
+fi
+
+
+# - luajit Download --------------------------------------------------
+
+
+echo Checking for cached luajit folder ...
+if [ ! -d "luajit-2.0" ]; then
+	echo Not found. Downloading...
+	$GIT clone http://luajit.org/git/luajit-2.0.git
+fi
+
+if [ ! -d "luajit-2.0" ]; then
+	echo Failure to git download luajit.
+	failure
+fi
+
+echo Cached.
+
+
+# - lua-all Download -------------------------------------------------
+
+
+# lua-all download
+echo Checking for cached lua-all.tar.gz...
+if [ ! -f "lua-all.tar.gz" ]; then
+	echo Not found. Downloading...
+	if [ $DLM -eq "curl" ]; then
+		echo Not implemented!
+		failure
 	fi
-	
-	# IF NOT [$arg1:~0,3] == lua
-	#
-	# fi
-	
-	if [[ $2 -eq "luajit" ]]; then
-	
+	if [ $DLM -eq "wget" ]; then
+		echo Not implemented!
+		failure
 	fi
-	
+	if [ ! -f "lua-all.tar.gz" ]; then
+		echo lua-all.tar.gz not downloaded.
+		failure
+	fi
 fi
 
-if [[ $1 -eq "clean" ]]; then
-	if [[ $2 -eq "all" ]]; then
+echo Cached.
+
+
+# lua-all extract
+echo Checking for cached lua-all folder...
+if [ ! -d "lua-all" ]; then
+	echo Not found. Unpacking lua-all.tar.gz
 	
+	$ZIP lua-all.tar.gz
+	$ZIP lua-all.tar
+	
+	if [ ! -d "lua-all" ]; then
+		echo Failure to unpack lua-all.
+		failure
 	fi
-	
-	
 fi
 
-if [[ $1 -eq "switch" ]]; then
-	if [[ $2 -eq "luajit" ]]; then
-	
-	fi
-	
-	
-fi
-	
+echo Cached.
 
 
+# - Exit Gracefully --------------------------------------------------
 
 
-
-
-
-
-
-
+echo Prerequisits downloaded and extracted!
 

@@ -24,13 +24,24 @@
 
 setlocal
 	
+	REM Default env vars
+	IF NOT DEFINED debug			set debug=0
+	IF NOT DEFINED debug_coverage	set debug_coverage=0
+	IF NOT DEFINED force_build		set no_build=0
+	
+	IF NOT DEFINED GCC				set GCC=gcc
+	IF NOT DEFINED AR				set AR=ar
+	IF NOT DEFINED MAKE				set MAKE=make
+	
+	IF NOT DEFINED GCC_VER			set GCC_VER=gnu99
+	
+	
 	REM Basic switches
 	if [] == [%1] (
 		echo No arguments specified.
 		echo.
 		goto help
 	)
-	
 	if [/?] == [%1] (
 		goto help
 	)
@@ -41,35 +52,58 @@ setlocal
 		goto help
 	)
 	
-	if [] == [%2] (
-		echo Not enough arguments supplied. Missing 2nd argument.
-		echo.
-		goto help
+	
+	REM --------------------------------------------------------------------
+	
+	
+	REM Cleans the build directory
+	IF [clean] == [%1] (
+		echo Cleaning build directory...
+		del include\*.h
+		del dll\*.dll
+		del obj\*.o
+		del lib\*.a
+		rmdir /S /Q bin\Release
+		
+		echo Done.
+		exit /b 0
 	)
 	
 	
 	REM --------------------------------------------------------------------
 	
 	
-	REM luainc is for an external lua headers location
-	REM if its in ./include, keep luainc set to `.` for null, else i.e. `C:\git\luajit-2.0\src`
-	IF NOT DEFINED luainc			set luainc=.
-	
-	REM These can be defaults, defaults to luajit
-	IF NOT DEFINED debug 			set debug=0
-	IF NOT DEFINED debug_coverage	set debug_coverage=0
+	REM Installs to a directory
+	if [install] == [%1] (
+		if [] == [%2] (
+			echo Please specify where to install to.
+			goto failure
+		)
+		
+		echo Installing to directory %2...
+		IF NOT EXIST "%2" (
+			echo Please create the destination folder first.
+			goto failure
+		)
+		
+		xcopy /Y bin\Release\* %2
+		
+		echo Done.
+		exit /b 0
+	)
 	
 	
 	REM --------------------------------------------------------------------
 	
 	
-	IF %debug% EQU 0 (
+	REM GCC setup
+	IF [%debug%] EQU [0] (
 		set attrib=-std=gnu11 -Wall -O2
 		set root=bin\Release
 	) else (
 		set attrib=-std=gnu11 -Wall -g -O0
 		set root=bin\Debug
-		IF %debug_coverage% EQU 1 set attrib=%attrib% -coverage
+		IF %debug_coverage% EQU 1	set attrib=%attrib% -coverage
 	)
 	
 	set objdir=obj
@@ -80,152 +114,279 @@ setlocal
 	set srcdir=src
 	set incdir=include
 	
-	set dirs=-L%srcdir% -L%libdir% -L%dlldir% -I%srcdir% -I%incdir% -I%luainc%
+	set dirs=-L%srcdir% -L%libdir% -L%dlldir% -I%srcdir% -I%incdir%
 	
 	
-	set arg1=%2
-	set luaver=%arg1:~0,3%-%arg1:~3,1%.%arg1:~4,1%.%arg1:~5,1%
+	REM --------------------------------------------------------------------
+	
+	
+	IF NOT EXIST "lua-all" (
+		echo Please run prereqs.bat to get lua-all
+		goto failure
+	)
+	
+	IF NOT EXIST "luajit-2.0" (
+		echo Please run prereqs.bat to get luajit
+		goto failure
+	)
 	
 	
 	REM --------------------------------------------------------------------
 	
 	
 	IF [%1] == [driver] (
-	
-		if [%2] == [luajit] (
-			echo Building luaw driver and default package...
-			call prereqs.bat switch luajit
-			IF NOT EXIST "luajit-2.0" (
-				echo No lua available! prereqs failed!
-				exit /b 1
-			)
-			echo Compiling luaw driver...
-			gcc %attrib% %dirs% -D__USE_MINGW_ANSI_STDIO=1 -DDEFAULT_LUA=\"lcluajit.dll\" -c %srcdir%\darr.c %srcdir%\luadriver.c
-			IF %errorlevel% NEQ 0 exit /b 1
-			
-			echo Compiling default luaw as package luajit...
-			gcc %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -DLUA_JIT_51 -c %srcdir%\consolew.c %srcdir%\ldata.c %srcdir%\jitsupport.c %srcdir%\darr.c
-			IF %errorlevel% NEQ 0 exit /b 1
-			
-			echo Linking luaw driver...
-			gcc %attrib% %dirs% -o luaw.exe luadriver.o darr.o
-			IF %errorlevel% NEQ 0 exit /b 1
-			
-			echo Linking default luaw as package %luaver%...
-			gcc %attrib% %dirs% -shared -o lcluajit.dll consolew.o ldata.o jitsupport.o darr.o %dlldir%\lua51.dll
-			IF %errorlevel% NEQ 0 exit /b 1
-			
-			REM Strip luaw driver if not debug
-			IF %debug% EQU 0 (
-				strip --strip-all luaw.exe
-				IF %errorlevel% NEQ 0 exit /b 1
-			)
-			
-			call :migrate
-			
-			exit /b 0
-		)
-		REM Ensure bin && bin\res exists
+		
+		echo Cleaning bin...
+		REM Resets bin\res
 		IF EXIST %root% ( rmdir /S /Q %root% )
 		mkdir %root%\res
 		
-		echo Building luaw driver and default package...
-		
-		call prereqs.bat switch %arg1%
-		IF NOT EXIST "%luaver%" (
-			echo No lua available! prereqs failed!
-			exit /b 1
+		IF [%2] == [luajit] (
+			echo Building luajit...
+			
+			pushd luajit-2.0\src
+				IF NOT EXIST "lua51.dll" (
+					%MAKE% -j%NUMBER_OF_PROCESSORS%
+				) ELSE (
+					IF [%force_build%] == [1] (
+						%MAKE% -j%NUMBER_OF_PROCESSORS%
+					)
+				)
+				echo Installing...
+				xcopy /Y lua.h		..\..\include
+				xcopy /Y luaconf.h	..\..\include
+				xcopy /Y lualib.h	..\..\include
+				xcopy /Y lauxlib.h	..\..\include
+				xcopy /Y luajit.h	..\..\include
+				xcopy /Y lua51.dll	..\..\dll
+			popd
+			
+			echo Finished building and linking luajit.
+		) ELSE (
+			echo Building %2...
+			
+			pushd lua-all\%2
+				IF NOT EXIST "*.dll" (
+					echo Compiling...
+					%GCC% -std=%GCC_VER% -g0 -O2 -Wall -Wextra %lua_cflags% -DLUA_BUILD_AS_DLL -c *.c
+					
+					del lua.o
+					del luac.o
+					
+					echo Linking...
+					%GCC% -std=%GCC_VER% -g0 -O2 -Wall -Wextra -shared -o %2.dll *.o
+					
+					echo Archiving...
+					%AR% rcu lib%2.a *.o
+				) ELSE (
+					IF [%force_build%] == [1] (
+						echo Compiling...
+						%GCC% -std=%GCC_VER% -g0 -O2 -Wall -Wextra %lua_cflags% -DLUA_BUILD_AS_DLL -c *.c
+						
+						del lua.o
+						del luac.o
+						
+						echo Linking...
+						%GCC% -std=%GCC_VER% -g0 -O2 -Wall -Wextra -shared -o %2.dll *.o
+						
+						echo Archiving...
+						%AR% rcu lib%2.a *.o
+					)
+				)
+				
+				echo Installing...
+				xcopy /Y lua.h			..\..\include
+				xcopy /Y luaconf.h		..\..\include
+				xcopy /Y lualib.h		..\..\include
+				xcopy /Y lauxlib.h		..\..\include
+				xcopy /Y %2.dll			..\..\dll
+				xcopy /Y lib%2.a		..\..\lib
+			popd
+			
+			echo Finished building and linking %2.
 		)
 		
-		echo Compiling luaw driver...
-		gcc %attrib% %dirs% -D__USE_MINGW_ANSI_STDIO=1 -DDEFAULT_LUA=\"lc%arg1%.dll\" -c %srcdir%\darr.c %srcdir%\luadriver.c
-		IF %errorlevel% NEQ 0 exit /b 1
+		if [%2] == [luajit] (
+			echo Compiling luaw driver...
+			%GCC% %attrib% %dirs% -D__USE_MINGW_ANSI_STDIO=1 -DDEFAULT_LUA=\"lc%2.dll\" -c %srcdir%\darr.c %srcdir%\luadriver.c
+			
+			echo Compiling default luaw driver package %2...
+			%GCC% %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -DLUA_JIT_51 -c %srcdir%\ldata.c %srcdir%\jitsupport.c %srcdir%\darr.c
+			
+			echo Linking luaw driver...
+			%GCC% %attrib% %dirs% -o luaw.exe luadriver.o darr.o
 		
-		echo Compiling default luaw as package %luaver%...
-		gcc %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -c %srcdir%\consolew.c %srcdir%\ldata.c %srcdir%\jitsupport.c %srcdir%\darr.c
-		IF %errorlevel% NEQ 0 exit /b 1
+			echo Linking default luaw driver package %2...
+			%GCC% %attrib% %dirs% -shared -o lc%2.dll ldata.o jitsupport.o darr.o %dlldir%\lua51.dll
+		) ELSE (
+			echo Compiling luaw driver...
+			%GCC% %attrib% %dirs% -D__USE_MINGW_ANSI_STDIO=1 -DDEFAULT_LUA=\"lc%2.dll\" -c %srcdir%\darr.c %srcdir%\luadriver.c
+			
+			echo Compiling default luaw driver package %2...
+			%GCC% %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -c %srcdir%\ldata.c %srcdir%\jitsupport.c %srcdir%\darr.c
+			
+			echo Linking luaw driver...
+			%GCC% %attrib% %dirs% -o luaw.exe luadriver.o darr.o
 		
-		echo Linking luaw driver...
-		gcc %attrib% %dirs% -o luaw.exe luadriver.o darr.o
-		IF %errorlevel% NEQ 0 exit /b 1
+			echo Linking default luaw driver package %2...
+			%GCC% %attrib% %dirs% -shared -o lc%2.dll ldata.o jitsupport.o darr.o %dlldir%\%2.dll
+		)
 		
-		echo Linking default luaw as package %luaver%...
-		gcc %attrib% %dirs% -shared -o lc%arg1%.dll consolew.o ldata.o jitsupport.o darr.o %dlldir%\%arg1%.dll
-		IF %errorlevel% NEQ 0 exit /b 1
 		
 		REM Strip luaw driver if not debug
+		echo Stripping...
 		IF %debug% EQU 0 (
 			strip --strip-all luaw.exe
-			IF %errorlevel% NEQ 0 exit /b 1
 		)
 		
-		call :migrate
+		REM Migrate binaries
+		echo Migrating binaries...
+		move /Y *.dll		%root%
+		move /Y *.o			%objdir%
+		move /Y *.a			%libdir%
+		move /Y *.exe		%root%
+		copy /Y %resdir%\*	%root%\res
+		copy /Y %dlldir%\*	%root%
+		copy /Y %rootdir%\*	%root%
 		
+		echo Finished.
 		exit /b 0
 	)
-	
-	
-	IF [%1] == [package] (
-		echo Linking local luaw as %luaver%...
-		
-		call prereqs.bat switch %arg1%
-		IF NOT EXIST "%luaver%" (
-			echo No lua available! prereqs failed!
-			exit /b 1
-		)
-		
-		echo Compiling luaw as package %luaver%...
-		gcc %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -c %srcdir%\consolew.c %srcdir%\ldata.c %srcdir%\jitsupport.c %srcdir%\darr.c
-		IF %errorlevel% NEQ 0 exit /b 1
-		
-		echo Linking luaw as package %luaver%...
-		gcc %attrib% %dirs% -shared -o lc%arg1%.dll consolew.o ldata.o jitsupport.o darr.o %dlldir%\%arg1%.dll
-		IF %errorlevel% NEQ 0 exit /b 1
-		
-		call :migrate
-		
-		exit /b 0
-	)
-	
-	REM IF [%1] == [adds] (
-		REM echo Compiling additions...
-		REM gcc %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -c %srcdir%\additions.c
-		REM IF %errorlevel% NEQ 0 exit /b 1
-		REM echo Linking additions...
-		REM gcc %attrib% %dirs% -shared -o luaadd.dll additions.o %dlldir%\%luaver%.dll
-		REM IF %errorlevel% NEQ 0 exit /b 1
-	REM )
 	
 	
 	REM --------------------------------------------------------------------
 	
+	
+	IF [%1] == [package] (
+		IF [%2] == [luajit] (
+			echo Building luajit...
+			
+			pushd luajit-2.0\src
+				IF NOT EXIST "lua51.dll" (
+					%MAKE% -j%NUMBER_OF_PROCESSORS%
+				) ELSE (
+					IF [%force_build%] == [1] (
+						%MAKE% -j%NUMBER_OF_PROCESSORS%
+					)
+				)
+				echo Installing...
+				xcopy /Y lua.h		..\..\include
+				xcopy /Y luaconf.h	..\..\include
+				xcopy /Y lualib.h	..\..\include
+				xcopy /Y lauxlib.h	..\..\include
+				xcopy /Y luajit.h	..\..\include
+				xcopy /Y lua51.dll	..\..\dll
+			popd
+			
+			echo Finished building and linking luajit.
+		) ELSE (
+			echo Building %2...
+			
+			pushd lua-all\%2
+				IF NOT EXIST "*.dll" (
+					echo Compiling...
+					%GCC% -std=%GCC_VER% -g0 -O2 -Wall -Wextra %lua_cflags% -DLUA_BUILD_AS_DLL -c *.c
+					
+					del lua.o
+					del luac.o
+					
+					echo Linking...
+					%GCC% -std=%GCC_VER% -g0 -O2 -Wall -Wextra -shared -o %2.dll *.o
+					
+					echo Archiving...
+					%AR% rcu lib%2.a *.o
+				) ELSE (
+					IF [%force_build%] == [1] (
+						echo Compiling...
+						%GCC% -std=%GCC_VER% -g0 -O2 -Wall -Wextra %lua_cflags% -DLUA_BUILD_AS_DLL -c *.c
+						
+						del lua.o
+						del luac.o
+						
+						echo Linking...
+						%GCC% -std=%GCC_VER% -g0 -O2 -Wall -Wextra -shared -o %2.dll *.o
+						
+						echo Archiving...
+						%AR% rcu lib%2.a *.o
+					)
+				)
+				
+				echo Installing...
+				xcopy /Y lua.h			..\..\include
+				xcopy /Y luaconf.h		..\..\include
+				xcopy /Y lualib.h		..\..\include
+				xcopy /Y lauxlib.h		..\..\include
+				xcopy /Y %2.dll			..\..\dll
+				xcopy /Y lib%2.a		..\..\lib
+			popd
+			
+			echo Finished building and linking %2.
+		)
+		
+		echo Creating local luaw package as %2...
+		
+		if [%2] == [luajit] (
+			echo Compiling luaw package %2...
+			%GCC% %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -DLUA_JIT_51 -c %srcdir%\ldata.c %srcdir%\jitsupport.c %srcdir%\darr.c
+			
+			echo Linking luaw package %2...
+			%GCC% %attrib% %dirs% -shared -o lc%2.dll ldata.o jitsupport.o darr.o %dlldir%\lua51.dll
+		) ELSE (
+			echo Compiling luaw package %2...
+			%GCC% %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -c %srcdir%\ldata.c %srcdir%\jitsupport.c %srcdir%\darr.c
+			
+			echo Linking luaw package %2...
+			%GCC% %attrib% %dirs% -shared -o lc%2.dll ldata.o jitsupport.o darr.o %dlldir%\%2.dll
+		)
+		
+		echo Finished building and linking %2.
+		
+		REM Migrate binaries
+		echo Migrating binaries...
+		move /Y *.dll		%root%
+		move /Y *.o			%objdir%
+		move /Y *.a			%libdir%
+		copy /Y %resdir%\*	%root%\res
+		copy /Y %dlldir%\*	%root%
+		copy /Y %rootdir%\*	%root%
+		
+		echo Finished.
+		exit /b 0
+	)
+	
+	
 endlocal
 
-exit /b 1
 
-
-
-:migrate
-	REM Migrate binaries
-	move /Y *.dll		%root%		
-	move /Y *.o			%objdir%	
-	move /Y *.a			%objdir%	
-	move /Y *.exe		%root%		
-	copy /Y %resdir%\*	%root%\res	
-	copy /Y %dlldir%\*	%root%		
-	copy /Y %rootdir%\*	%root%		
-	exit /b 0
-
+REM Simplex help message
 :help
-	REM Simplex help message
 	echo Usage:
 	echo.
-	echo build.bat driver {luajit,lua515,lua535,...}
-	echo build.bat package {all,luajit,lua515,lua535,...}
+	echo		build.bat build lua-x.x.x              Builds the driver with a default package.
+	echo		build.bat package lua-x.x.x            Creates packages for the driver.
+	echo		build.bat clean                        Cleans the environment of built files.
+	echo		build.bat install [directory]          Installs to a pre-created directory.
+	echo		build.bat -? /? --help                 Shows this help message
 	echo.
-	echo Note: Most lua versions supported, but must use 3 digit numbers.
+	echo Notes:
+	echo		Uses `debug` for debug binaries
+	echo		Uses `debug_coverage` for coverage enabling
+	echo		Uses `force_build` for forcing builds of packages
+	echo		Uses `GCC` for specifying GCC executable
+	echo		Uses `AR` for specifying AR executable
+	echo		Uses `MAKE` for specifying MAKE executable
+	echo		Uses `GCC_VER` for specifying lua gcc version for building lua dlls
+	echo.
+	echo Configure above notes with set:
+	echo		debug, debug_coverage, force_build, GCC, AR, MAKE, GCC_VER
+	echo.
+	echo 	Specify luajit if you want to use luajit.
 	echo.
 	exit /b 0
 
-exit /b 1
 
+REM General failure message
+:failure
+	echo An error has occured!
+	pause
+	exit /b 1
