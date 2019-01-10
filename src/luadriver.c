@@ -219,9 +219,15 @@ int main(int argc, char** argv) {
 	char luastr[260];
 	if(ARGS.luaver != 0) {
 		memset(luastr, 0, 260);
-		strcat(luastr, "lclua");
+		strcat(luastr, "lc");
 		strcat(luastr, ARGS.luaver);
+		#if defined(_WIN32) || defined(_WIN64)
+			strcat(luastr, ".dll");
+		#else
+			strcat(luastr, ".so");
+		#endif
 	}
+	
 	#if defined(_WIN32) || defined(_WIN64)
 		HMODULE luacxt;
 		check_error((luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr)) == 0, "Could not find the LuaConsole library! (Default: " DEFAULT_LUA ")");
