@@ -122,8 +122,7 @@ echo Checking for cached lua-all.tar.gz...
 if [ ! -f "lua-all.tar.gz" ]; then
 	echo Not found. Downloading...
 	if [ $DLM -eq "curl" ]; then
-		echo Not implemented!
-		failure
+		curl https://www.lua.org/ftp/lua-all.tar.gz > lua-all.tar.gz
 	fi
 	if [ $DLM -eq "wget" ]; then
 		echo Not implemented!

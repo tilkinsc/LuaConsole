@@ -94,8 +94,7 @@ setlocal
 			goto failure
 		)
 		IF [curl] == [%DLM%] (
-			echo Not implemented!
-			goto failure
+			curl https://www.lua.org/ftp/lua-all.tar.gz > lua-all.tar.gz
 		)
 		IF NOT EXIST "lua-all.tar.gz" (
 			echo lua-all.tar.gz not downloaded.
