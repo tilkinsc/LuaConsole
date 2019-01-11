@@ -56,7 +56,11 @@ typedef struct tag_LC_ARGS {
 
 
 #if defined(LC_LD_DLL)
-#	define LC_LD_API __declspec(dllexport)
+#	if defined(_WIN32) || defined(_WIN64)
+#		define LC_LD_API __declspec(dllexport)
+#	else
+#		define LC_LD_API extern
+#	endif
 #else
 #	define LC_LD_API typedef
 #endif

@@ -46,6 +46,7 @@
 #	include <windows.h>
 #else
 #	include <unistd.h>
+#	include <dlfcn.h>
 #endif
 
 #include "darr.h"
@@ -219,7 +220,7 @@ int main(int argc, char** argv) {
 	char luastr[260];
 	if(ARGS.luaver != 0) {
 		memset(luastr, 0, 260);
-		strcat(luastr, "lc");
+		strcat(luastr, "./lc");
 		strcat(luastr, ARGS.luaver);
 		#if defined(_WIN32) || defined(_WIN64)
 			strcat(luastr, ".dll");
@@ -234,7 +235,8 @@ int main(int argc, char** argv) {
 		_luacon_loaddll = (luacon_loaddll*) GetProcAddress(luacxt, "luacon_loaddll");
 	#else
 		void* luacxt;
-		check_error((luacxt = dlopen(ARGS.luaver == 0 ? DEFAULT_LUA : luastr), RTLD_NOW) == 0, "Could not find the LuaConsole library! (Default: " DEFAULT_LUA ")");
+		luacxt = dlopen(ARGS.luaver == 0 ? DEFAULT_LUA : luastr, RTLD_NOW);
+		fputs(dlerror(), stderr);
 		_luacon_loaddll = (luacon_loaddll*) dlsym(luacxt, "luacon_loaddll");
 	#endif
 	

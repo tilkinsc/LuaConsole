@@ -39,6 +39,7 @@
 #	define LUA_BIN_EXT_NAME 		".exe"
 #	define LUA_DLL_SO_NAME 			".dll"
 #else
+#	include <unistd.h>
 #	define IS_ATTY					isatty(fileno(stdin))
 #	define _chdir					chdir
 #	define LUA_BIN_EXT_NAME 		""
@@ -217,12 +218,11 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 			lua_close(gL);
 	}
 	
-	int argc = 2;
 	
 	// query the ability to post-exist
 	if(!IS_ATTY) {
 		#if defined(_WIN32) || defined(_WIN64)
-			if(GetConsoleWindow() != 0 && (argc > 1 && ARGS.post_exist == 1))
+			if(GetConsoleWindow() != 0 && ARGS.post_exist == 1)
 				ARGS.restore_console = 1;
 			else
 				ARGS.post_exist = 0;
