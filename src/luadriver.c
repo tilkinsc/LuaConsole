@@ -23,9 +23,9 @@
 
 #if !defined(DEFAULT_LUA)
 #	if defined(_WIN32) || defineD(_WIN64)
-#		define DEFAULT_LUA			"lclua535.dll"
+#		define DEFAULT_LUA			"lclua-5.3.5.dll"
 #	else
-#		defined DEFAULT_LUA			"lclua535.so"
+#		define DEFAULT_LUA			"lclua-5.3.5.so"
 #	endif
 #endif
 
@@ -215,12 +215,12 @@ int main(int argc, char** argv) {
 	if(req_pe == 1)
 		ARGS.post_exist = 1;
 	
-	luacon_loaddll* _luacon_loaddll = 0;
+	luacon_loaddll _luacon_loaddll = 0;
 	
 	char luastr[260];
 	if(ARGS.luaver != 0) {
 		memset(luastr, 0, 260);
-		strcat(luastr, "./lc");
+		strcat(luastr, "lc");
 		strcat(luastr, ARGS.luaver);
 		#if defined(_WIN32) || defined(_WIN64)
 			strcat(luastr, ".dll");
@@ -235,9 +235,10 @@ int main(int argc, char** argv) {
 		_luacon_loaddll = (luacon_loaddll*) GetProcAddress(luacxt, "luacon_loaddll");
 	#else
 		void* luacxt;
-		luacxt = dlopen(ARGS.luaver == 0 ? DEFAULT_LUA : luastr, RTLD_NOW);
-		fputs(dlerror(), stderr);
-		_luacon_loaddll = (luacon_loaddll*) dlsym(luacxt, "luacon_loaddll");
+		luacxt = dlopen(ARGS.luaver == 0 ? DEFAULT_LUA : luastr, RTLD_LAZY);
+		check_error(luacxt == 0, dlerror());
+		_luacon_loaddll = dlsym(luacxt, "luacon_loaddll");
+		check_error(_luacon_loaddll == 0, dlerror());
 	#endif
 	
 	check_error(luacxt == 0, "Could not find the LuaConsole function `luacon_loaddll`!");

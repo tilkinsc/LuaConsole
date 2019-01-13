@@ -59,12 +59,15 @@ typedef struct tag_LC_ARGS {
 #	if defined(_WIN32) || defined(_WIN64)
 #		define LC_LD_API __declspec(dllexport)
 #	else
-#		define LC_LD_API extern
+#		define LC_LD_API extern __attribute__((visibility("default")))
 #	endif
-#else
-#	define LC_LD_API typedef
-#endif
-
 
 LC_LD_API int luacon_loaddll(LC_ARGS ARGS);
+
+#else
+
+typedef int (*luacon_loaddll)(LC_ARGS);
+
+#endif
+
 
