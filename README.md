@@ -37,7 +37,7 @@ luaw -lres/testing.lua -Dtest=5 -n a b c
 luaw -Dtest=5 -n a b c - < res/testing.lua
 
 # With Shebang enhancements found below
-res\testing.lua | luaw -Dtest=5 -n a b c -
+res/testing.lua | luaw -Dtest=5 -n a b c -
 
 # Using cat
 cat res/testing.lua | luaw -Dtest=5 -n a b c -
