@@ -1,6 +1,6 @@
 /* MIT License
  * 
- * Copyright (c) 2017-2018 Cody Tilkins
+ * Copyright (c) 2017-2019 Cody Tilkins
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,7 +61,7 @@
 
 
 static const char HELP_MESSAGE[] =
-	"LuaConsole | Version: 9/24/2018\n\n"
+	"LuaConsole | Version: 1/13/2019\n\n"
 	#if LUA_VERSION_NUM <= 501
 		LUA_VERSION " | " LUA_COPYRIGHT "\n"
 	#else

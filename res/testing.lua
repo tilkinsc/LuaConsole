@@ -1,11 +1,10 @@
 
-require("luaadd")
-
-print(package.path)
+print(package)
 
 if(arg)then
 	print(#arg)
 end
+
 if({...})then
 	print(#{...})
 end

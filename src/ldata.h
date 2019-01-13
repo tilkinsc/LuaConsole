@@ -1,6 +1,6 @@
 /* MIT License
  * 
- * Copyright (c) 2017-2018 Cody Tilkins
+ * Copyright (c) 2017-2019 Cody Tilkins
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 #pragma once
 
 
-#define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright (C) 2017-2018, Cody Tilkins"
+#define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright (C) 2017-2019, Cody Tilkins"
 
 
 #if defined(_WIN32) || defined(_WIN64)
