@@ -119,7 +119,7 @@ if [ "$1" = "install" ]; then
 		failure
 	fi
 	
-	cp bin\Release\* $2
+	cp -r bin\Release\* $2
 	
 	echo "Done."
 	exit 0
