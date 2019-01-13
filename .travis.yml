@@ -1,6 +1,8 @@
 language: c
 
-cache: ~/cistore
+cache:
+  directories:
+    - $HOME/cistore
 
 dist: trusty
 sudo: true

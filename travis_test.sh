@@ -26,20 +26,19 @@ set -e
 
 # Init
 echo "> PREREQS"
-if [ ! -d "~/cistore" ]; then
-	mkdir -p ~/cistore/lua-all
-	mkdir -p ~/cistore/luajit-2.0
+if [ ! "$(ls -A $HOME/cistore/lua-all)" ]; then
+	echo "Not cached. Downloading..."
 	
 	./prereqs.sh
 	
-	cp -r lua-all ~/cistore/lua-all
-	cp -r luajit-2.0 ~/cistore/lua-all
+	cp -r lua-all $HOME/cistore
+	cp -r luajit-2.0 $HOME/cistore
 	
 	echo "Travis-CI cache created."
 else
 	echo "Cached. Migrating..."
-	ln ~/cistore/lua-all lua-all
-	ln ~/cistore/luajit-2.0 luajit-2.0
+	cp -r $HOME/cistore/lua-all lua-all
+	cp -r $HOME/cistore/luajit-2.0 luajit-2.0
 fi
 
 
@@ -77,6 +76,9 @@ popd
 gcov *.gc*
 bash <(curl -s https://codecov.io/bash)
 
+# Update cache if needed
+cp -f -r -u lua-all $HOME/cistore
+cp -f -r -u luajit-2.0 $HOME/cistore
 
 
 exit 0
