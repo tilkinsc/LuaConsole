@@ -26,7 +26,6 @@
 # Default env vars
 if [ -z "$debug" ]; then		debug=0; fi
 if [ -z "$debug_coverage" ]; then	debug_coverage=0; fi
-if [ -z "$force_build" ]; then		force_build=0; fi
 if [ -z "$GCC" ]; then			GCC="gcc"; fi
 if [ -z "$AR" ]; then			AR="ar"; fi
 if [ -z "$MAKE" ]; then			MAKE="make"; fi
@@ -172,123 +171,143 @@ fi
 # --------------------------------------------------------------------
 
 
-if [ "$1" = "driver" ]; then
-	# Ensure bin && bin/res exists
+function build_luajit() {
+	echo "Building luajit..."
 	
-	echo "Cleaning bin..."
-	# Resets bin\res
+	pushd luajit-2.0/src
+		if [ ! -f "libluajit.so" ]; then
+			$MAKE -j5
+		else
+			if [ "$force_build" = "1" ]; then
+				$MAKE -j5
+			fi
+		fi
+		
+		echo "Installing..."
+		cp lua.h ../../include
+		cp luaconf.h ../../include
+		cp lualib.h ../../include
+		cp lauxlib.h ../../include
+		cp luajit.h ../../include
+		cp libluajit.so ../../dll
+		ln -s ../../dll/libluajit.so ../../dll/libluajit-5.1.so.2
+	popd
+	
+	echo "Finished installing luajit."
+}
+
+
+function build_lua() {
+	echo "Building $1..."
+	
+	pushd lua-all/$1
+		if [ ! -f "$1.so" ]; then
+			echo "Compiling $1..."
+			
+			$GCC -std=$GCC_VER -g0 -O2 -Wall -fPIC $luaverdef -DLUA_USE_POSIX -c *.c
+			
+			rm lua.o
+			rm luac.o
+			
+			echo "Linking $1..."
+			$GCC -std=$GCC_VER -g0 -O2 -Wall -fPIC -shared -Wl,-E -o $1.so *.o -lm -ldl
+			
+			echo "Archiving $1..."
+			$AR rcu lib$1.a *.o
+		else
+			echo "$1.so already built."
+		fi
+		
+		echo "Installing..."
+		cp lua.h ../../include
+		cp luaconf.h ../../include
+		cp lualib.h ../../include
+		cp lauxlib.h ../../include
+		cp $1.so ../../dll
+	popd
+	
+	echo "Finished installing $1."
+}
+
+function build_install() {
+	echo "Installing $1..."
+	mv *.o $objdir
+	if [ "$1" = "luajit" ]; then
+		cp -r $dlldir/* $root
+	else
+		cp $dlldir/$1.so $root/dll
+	fi
+	mv lc*.so $root
+
+	echo "Finished installing $1."
+}
+
+function build_package() {
+	if [ "$1" = "luajit" ]; then
+		luaverdef="-DLUA_JIT_51"
+		luaverout="$dlldir/libluajit.so"
+	else
+		luaverout="$dlldir/$1.so"
+	fi
+	
+	echo "Compiling luaw driver package $1..."
+	$GCC $attrib $dirs -fPIC -DLC_LD_DLL $luaverdef -c $srcdir/ldata.c $srcdir/jitsupport.c $srcdir/darr.c
+	
+	echo "Linking luaw driver package $1..."
+	$GCC $attrib $dirs -fPIC -shared -Wl,-E -o lc$1.so ldata.o jitsupport.o darr.o $luaverout
+	
+	echo "Finished building driver package $1."
+}
+
+function build_driver() {
+	echo "Compiling luaw driver..."
+	$GCC $attrib $dirs -DDEFAULT_LUA=\"lc$1.so\" -c $srcdir/darr.c $srcdir/luadriver.c
+	
+	echo "Linking luaw driver..."
+	$GCC $attrib $dirs -o luaw luadriver.o darr.o -ldl
+	
+	build_package $1
+	
+	if [ "$debug" = "0" ]; then
+		echo "Stripping..."
+		strip --strip-all luaw
+	fi
+
+	echo "Finished building driver $1."
+}
+
+
+if [ "$1" = "driver" ]; then
+
+	echo "Cleaning workspace..."
+	# Resets bin
 	if [ -d "$root" ]; then
 		rm -r --one-file-system -d $root
 	fi
+	
+	# Resets dll
+	rm -r $dlldir/*.so
+	
+	# Output build structure
 	mkdir -p $root/res
-
+	mkdir -p $root/dll
+	
+	# Build dependencies
 	if [ "$2" = "luajit" ]; then
-		echo "Building luajit..."
-		
-		pushd luajit-2.0/src
-			if [ ! -f "lua51.dll" ]; then
-				$MAKE -j5
-			else
-				if [ "$force_build" = 1 ]; then
-					$MAKE -j5
-				fi
-			fi
-			
-			echo "Installing..."
-			
-			cp lua.h ../../include
-			cp luaconf.h ../../include
-			cp lualib.h ../../include
-			cp lauxlib.h ../../include
-			cp luajit.h ../../include
-			cp libluajit.so ../../dll
-		popd
-		
-		echo "Finished building and linking luajit."
+		build_luajit
 	else
-		echo "Building $2..."
-		
-		pushd lua-all/$2
-			if [ ! -f "*.so" ]; then
-				echo "Compiling..."
-				$GCC -std=$GCC_VER -g0 -O2 -Wall -Wextra $lua_cflags -DLUA_BUILD_AS_DLL -c *.c
-				
-				rm lua.o
-				rm luac.o
-				
-				echo "Linking..."
-				$GCC -std=$GCC_VER -g0 -O2 -Wall -Wextra -shared -o $2.so *.o -lm -ldl
-				
-				echo "Archiving..."
-				$AR rcu lib$2.a *.o
-			else
-				if [ "$force_build" = "1" ]; then
-					echo "Compiling..."
-					$GCC -std=$GCC_VER -g0 -O2 -Wall -Wextra $lua_cflags -DLUA_BUILD_AS_DLL -c *.c
-					
-					rm lua.o
-					rm luac.o
-					
-					echo "Linking..."
-					$GCC -std=$GCC_VER -g0 -O2 -Wall -Wextra -shared -o $2.so *.o -lm -ldl
-					
-					echo "Archiving..."
-					$AR rcu lib$2.a *.o
-				fi
-			fi
-			
-			echo "Installing..."
-			cp lua.h ../../include
-			cp luaconf.h ../../include
-			cp lualib.h ../../include
-			cp lauxlib.h ../../include
-			cp $2.so ../../dll
-		popd
-		
-		echo "Finished building and linking $2."
+		build_lua $2
 	fi
 	
-	if [ "$2" = "luajit" ]; then
-		echo "Compiling luaw driver..."
-		$GCC $attrib $dirs -DDEFAULT_LUA=\"lc$2.so\" -c $srcdir/darr.c $srcdir/luadriver.c
-		
-		echo "Compiling default luaw driver package $2..."
-		$GCC $attrib $dirs $luaverdef -Wl,-E -fPIC -DLC_LD_DLL -DLUA_JIT_51 -c $srcdir/ldata.c $srcdir/jitsupport.c $srcdir/darr.c
-		
-		echo "Linking luaw driver..."
-		$GCC $attrib $dirs -o luaw luadriver.o darr.o -ldl
-		
-		echo "Linking default luaw driver package $2..."
-		$GCC $attrib $dirs -shared -Wl,-E -fPIC -o lc$2.so ldata.o jitsupport.o darr.o $dlldir/libluajit.so
-	else
-		echo "Compiling luaw driver..."
-		$GCC $attrib $dirs -DDEFAULT_LUA=\"lc$2.so\" -c $srcdir/darr.c $srcdir/luadriver.c
-		
-		echo "Compiling default luaw driver package $2..."
-		$GCC $attrib $dirs $luaverdef -Wl,-E -fPIC -DLC_LD_DLL -c $srcdir/ldata.o $srcdir/jitsupport.c $srcdir/darr.c
-		
-		echo "Linking luaw driver..."
-		$GCC $attrib $dirs -o luaw luadriver.o darr.o -ldl
-		
-		echo "Linking default luaw driver package $2..."
-		$GCC $attrib $dirs -shared -Wl,-E -fPIC -o lc$2.so ldata.o jitsupport.o darr.o $dlldir/$2.so
-	fi
-	
-	# Strip luaw driver if not debug
-	echo "Stripping..."
-	if [ "$debug" = "0" ]; then
-		strip --strip-all luaw
-	fi
-	
+	# Build driver
+	build_driver $2
 	chmod +x luaw
-	
-	# Migrate binaries
-	mv *.so $root
-	mv *.o $objdir
+
+	# Build install
 	mv luaw $root
-	cp -r $resdir/*		$root/res
-	cp -r $dlldir/*		$root
-	cp -r $rootdir/*	$root
+	cp -r $resdir/* $root/res
+	cp -r $rootdir/* $root 1>/dev/null 2>/dev/null
+	build_install $2
 	
 	echo "Finished."
 	exit 0
@@ -299,97 +318,25 @@ fi
 
 
 if [ "$1" = "package" ]; then
-	if [ "$2" = "luajit" ]; then
-		echo "Building luajit..."
-		
-		pushd luajit-2.0/src
-			if [ ! -f "lua51.dll" ]; then
-				$MAKE -j5
-			else
-				if [ "$force_build" = "1" ]; then
-					$MAKE -j5
-				fi
-			fi
-			
-			echo "Installing..."
-			
-			cp lua.h ../../include
-			cp luaconf.h ../../include
-			cp lualib.h ../../include
-			cp lauxlib.h ../../include
-			cp luajit.h ../../include
-			cp libluajit.so ../../dll
-		popd
-		
-		echo "Finished building and linking luajit."
-	else
-		echo "Building $2..."
-		
-		pushd lua-all/$2
-			if [ ! -f "*.dll" ]; then
-				echo "Compiling..."
-				$GCC -std=$GCC_VER -g0 -O2 -Wall -Wextra -Wl,-E -fPIC $lua_cflags -DLUA_BUILD_AS_DLL -c *.c
-				
-				rm lua.o
-				rm luac.o
-				
-				echo "Linking..."
-				$GCC -std=$GCC_VER -g0 -O2 -Wall -Wextra -shared -Wl,-E -fPIC -o $2.so *.o -lm -ldl
-				
-				echo "Archiving..."
-				$AR rcu lib$2.a *.o
-			else
-				if [ "$force_build" = "1" ]; then
-					echo "Compiling..."
-					$GCC -std=$GCC_VER -g0 -O2 -Wall -Wextra -Wl,-E -fPIC $lua_cflags -DLUA_BUILD_AS_DLL -c *.c
-					
-					rm lua.o
-					rm luac.o
-					
-					echo "Linking..."
-					$GCC -std=$GCC_VER -g0 -O2 -Wall -Wextra -shared -Wl,-E -fPIC -o $2.so *.o -lm -ldl
-					
-					echo "Archiving..."
-					$AR rcu lib$2.a *.o
-				fi
-			fi
-			
-			echo "Installing..."
-			cp lua.h ../../include
-			cp luaconf.h ../../include
-			cp lualib.h ../../include
-			cp lauxlib.h ../../include
-			cp $2.so ../../dll
-		popd
-		
-		echo "Finished building nad linking $2."
+	
+	# Force driver to be built
+	if [ ! -f "$root/luaw" ]; then
+		echo "Please build the driver first."
+		exit 1
 	fi
 	
-	echo "Creating local luaw package as $2..."
+	echo "Cleaning workspace..."
+	# Resets dll
+	rm -r $dlldir/*.so
 	
 	if [ "$2" = "luajit" ]; then
-		echo "Compiling luaw package $2..."
-		$GCC $attrib $dirs $luaverdef -Wl,-E -fPIC -DLC_LD_DLL -DLUA_JIT_51 -c $srcdir/ldata.c $srcdir/jitsupport.c $srcdir/darr.c
-		
-		echo "Linking luaw package $2..."
-		$GCC $attrib $dirs -shared -Wl,-E -fPIC -o lc$2.so ldata.o jitsupport.o darr.o $dlldir/lua51.so
+		build_luajit
 	else
-		echo "Compiling luaw package $2..."
-		$GCC $attrib $dirs $luaverdef -Wl,-E -fPIC -c $srcdir/ldata.c $srcdir/jitsupport.c $srcdir/darr.c
-		
-		echo "Linking luaw package $2..."
-		$GCC $attrib $dirs -shared -Wl,-E -fPIC -o lc$2.so ldata.o jitsupport.o darr.o $dlldir/$2.so
+		build_lua $2
 	fi
 	
-	echo "Finished building and linking $2."
-	
-	# Migrate binaries
-	mv *.so $root
-	mv *.o $objdir
-	mv *.a $libdir
-	cp -r $resdir/*		$root/res
-	cp -r $dlldir/*		$root
-	cp -r $rootdir/*	$root
+	build_package $2
+	build_install $2
 	
 	echo "Finished."
 	exit 0
