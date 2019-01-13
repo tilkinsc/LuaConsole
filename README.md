@@ -36,29 +36,40 @@ luaw res/testing.lua -Dtest=5 -n a b c
 luaw -lres/testing.lua -Dtest=5 -n a b c
 luaw -Dtest=5 -n a b c - < res/testing.lua
 
-# With Windows Registry or Linux Shebang enhancements found below
+# With Shebang enhancements found below
 res\testing.lua | luaw -Dtest=5 -n a b c -
-res\testing | luaw -Dtest=5 -n a b c -
 
-# Using type/cat
-type res/testing.lua | luaw -Dtest=5 -n a b c -
+# Using cat
 cat res/testing.lua | luaw -Dtest=5 -n a b c -
 
 # From inside Lua
 luaw -e "dofile('res/testing.lua')" -Dtest=5 -n a b c
 luaw -e "dofile('testing.lua')" -s res -Dtest=5 -n a b c
 
-# Windows stdin:
+# stdin:
+luaw - |
+dofile('res/testing.lua')
+<Ctrl + d>
+<Enter>
+
+# However, instead of the above two, use: (can neglect the implied -p)
+luaw -p
+```
+
+Windows Specific:
+```batch
+REM stdin
 luaw - |
 dofile('res/testing.lua')
 <Ctrl + z>
 <Enter>
 
-# Linux stdin:
-luaw - |
-dofile('res/testing.lua')
-<Ctrl + d>
-<Enter>
+REM Using type
+type res\testing.lua | luaw -Dtest=5 -n a b c -
+
+REM With Windows Registry enchancements found below
+res\testing.lua | luaw -Dtest=5 -n a b c -
+res\testing | luaw -Dtest=5 -n a b c -
 ```
 
 # Bonus
