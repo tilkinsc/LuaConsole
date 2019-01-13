@@ -94,6 +94,7 @@ if [ "$1" = "clean" ]; then
 	echo "Cleaning build directory..."
 	rm include/*.h
 	rm dll/*.so
+	rm dll/*.so.*
 	rm obj/*.o
 	rm lib/*.a
 	rm -r -d bin/*
@@ -189,8 +190,9 @@ function build_luajit() {
 		cp lualib.h ../../include
 		cp lauxlib.h ../../include
 		cp luajit.h ../../include
+		ln libluajit.so libluajit-5.1.so.2
 		cp libluajit.so ../../dll
-		ln -s ../../dll/libluajit.so ../../dll/libluajit-5.1.so.2
+		cp libluajit-5.1.so.2 ../../dll
 	popd
 	
 	echo "Finished installing luajit."
@@ -309,6 +311,10 @@ if [ "$1" = "driver" ]; then
 	cp -r $rootdir/* $root 1>/dev/null 2>/dev/null
 	build_install $2
 	
+	#if [ "$2" = "luajit" ]; then
+	#	ln -s -r libluajit.so libluajit-5.1.so.2
+	#fi
+
 	echo "Finished."
 	exit 0
 fi
