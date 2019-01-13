@@ -26,7 +26,22 @@ set -e
 
 # Init
 echo "> PREREQS"
-./prereqs.sh
+if [ ! -d "~/cistore" ]; then
+	mkdir -p ~/cistore/lua-all
+	mkdir -p ~/cistore/luajit-2.0
+	
+	./prereqs.sh
+	
+	cp -r lua-all ~/cistore/lua-all
+	cp -r luajit-2.0 ~/cistore/lua-all
+	
+	echo "Travis-CI cache created."
+else
+	echo "Cached. Migrating..."
+	ln ~/cistore/lua-all lua-all
+	ln ~/cistore/luajit-2.0 luajit-2.0
+fi
+
 
 # Building
 echo "> BUILDING"

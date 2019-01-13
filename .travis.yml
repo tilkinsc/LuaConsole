@@ -1,5 +1,7 @@
 language: c
 
+cache: ~/cistore
+
 dist: trusty
 sudo: true
 
