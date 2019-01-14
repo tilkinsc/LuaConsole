@@ -37,7 +37,7 @@ int dojitcmd(lua_State* L, const char* cmd);
 int dojitopt(lua_State* L, const char* opt);
 int dobytecode(lua_State* L, char** argv);
 void print_jit_status(lua_State* L);
-int jitargs(lua_State* L, Array* luajit_jcmds, Array* luajit_opts, char** luajit_bc, int squelch);
+int jitargs(lua_State* L, Array* luajit_jcmds, Array* luajit_opts, char** luajit_bc, int squelch, int post_exist);
 
 #endif
 

@@ -192,7 +192,7 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 	
 	#if defined(LUA_JIT_51)
 		if(ARGS.no_libraries == 0) {
-			int status = jitargs(L, ARGS.luajit_jcmds, ARGS.luajit_opts, ARGS.luajit_bc, ARGS.copyright_squelch);
+			int status = jitargs(L, ARGS.luajit_jcmds, ARGS.luajit_opts, ARGS.luajit_bc, ARGS.copyright_squelch, ARGS.post_exist);
 			if(ARGS.luajit_bc != NULL)
 				return status;
 		}
@@ -228,7 +228,7 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 				ARGS.post_exist = 0;
 		#else
 			int fd = open("/dev/tty", O_WRONLY);
-			if(fd != -1) {
+			if(fd != -1 && ARGS.post_exist == 1) {
 				ARGS.restore_console = 1;
 				close(fd);
 			} else

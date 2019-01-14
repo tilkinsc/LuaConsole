@@ -155,7 +155,7 @@ void print_jit_status(lua_State* L) {
 	lua_pop(L, lua_gettop(L) - n);
 }
 
-int jitargs(lua_State* L, Array* luajit_jcmds, Array* luajit_opts, char** luajit_bc, int squelch) {
+int jitargs(lua_State* L, Array* luajit_jcmds, Array* luajit_opts, char** luajit_bc, int squelch, int post_exist) {
 	if(luajit_jcmds != NULL) {
 		for(size_t i=0; i<luajit_jcmds->size; i++)
 			if(dojitcmd(L, (const char*) array_get(luajit_jcmds, i)) != 0)
@@ -170,7 +170,7 @@ int jitargs(lua_State* L, Array* luajit_jcmds, Array* luajit_opts, char** luajit
 		array_free(luajit_opts);
 	}
 	
-	if(squelch == 0)
+	if(squelch == 0 && post_exist == 1)
 		print_jit_status(L);
 	
 	if(luajit_bc != NULL)
