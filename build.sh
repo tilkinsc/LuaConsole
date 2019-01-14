@@ -32,7 +32,7 @@ if [ -z "$MAKE" ]; then			MAKE="make"; fi
 if [ -z "$GCC_VER" ]; then		GCC_VER=gnu99; fi
 
 
-function help_message() {
+help_message () {
 	echo "Usage:"
 	echo "\n"
 	echo "		build.bat build lua-x.x.x              Builds the driver with a default package."
@@ -57,7 +57,7 @@ function help_message() {
 	echo "\n"
 }
 
-function failure() {
+failure () {
 	echo "An error has occured!"
 	exit 1
 }
@@ -172,7 +172,7 @@ fi
 # --------------------------------------------------------------------
 
 
-function build_luajit() {
+build_luajit () {
 	echo "Building luajit..."
 	
 	pushd luajit-2.0/src
@@ -199,7 +199,7 @@ function build_luajit() {
 }
 
 
-function build_lua() {
+build_lua () {
 	echo "Building $1..."
 	
 	pushd lua-all/$1
@@ -231,7 +231,7 @@ function build_lua() {
 	echo "Finished installing $1."
 }
 
-function build_install() {
+build_install () {
 	echo "Installing $1..."
 	mv *.o $objdir
 	if [ "$1" = "luajit" ]; then
@@ -244,7 +244,7 @@ function build_install() {
 	echo "Finished installing $1."
 }
 
-function build_package() {
+build_package () {
 	if [ "$1" = "luajit" ]; then
 		luaverdef="-DLUA_JIT_51"
 		luaverout="$dlldir/libluajit.so"
@@ -261,7 +261,7 @@ function build_package() {
 	echo "Finished building driver package $1."
 }
 
-function build_driver() {
+build_driver () {
 	echo "Compiling luaw driver..."
 	$GCC $attrib $dirs -DDEFAULT_LUA=\"lc$1.so\" -c $srcdir/darr.c $srcdir/luadriver.c
 	
