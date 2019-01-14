@@ -34,13 +34,13 @@ if [ -z "$GCC_VER" ]; then		GCC_VER=gnu99; fi
 
 help_message () {
 	echo "Usage:"
-	echo "\n"
+	echo ""
 	echo "		build.bat build lua-x.x.x              Builds the driver with a default package."
 	echo "		build.bat package lua-x.x.x            Creates packages for the driver."
 	echo "		build.bat clean                        Cleans the environment of built files."
 	echo "		build.bat install [directory]          Installs to a pre-created directory."
 	echo "		build.bat -? /? --help                 Shows this help message"
-	echo "\n"
+	echo ""
 	echo "Notes:"
 	echo "		Uses `debug` for debug binaries"
 	echo "		Uses `debug_coverage` for coverage enabling"
@@ -49,12 +49,12 @@ help_message () {
 	echo "		Uses `AR` for specifying AR executable"
 	echo "		Uses `MAKE` for specifying MAKE executable"
 	echo "		Uses `GCC_VER` for specifying lua gcc version for building lua dlls"
-	echo "\n"
+	echo ""
 	echo "Configure above notes with set:"
 	echo "		debug, debug_coverage, force_build, GCC, AR, MAKE, GCC_VER"
-	echo "\n"
+	echo ""
 	echo "	Specify luajit if you want to use luajit."
-	echo "\n"
+	echo ""
 }
 
 failure () {
@@ -65,7 +65,7 @@ failure () {
 
 # Basic switches
 if [ -z "$1" ]; then
-	echo "No arguments specified.\n"
+	echo -i "No arguments specified.\n"
 	help_message
 	exit 1
 fi
