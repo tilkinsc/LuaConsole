@@ -22,37 +22,63 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+set -e
+
+# Init
+echo "> PREREQS"
+if [ ! "$(ls -A $HOME/cistore/lua-all)" ]; then
+	echo "Not cached. Downloading..."
 	
-errors=0
-
-debug=bin/Debug
-release=bin/Release
-
-if [ -d "./bin/Debug" ]; then
-	export LUA_CPATH="./$debug/?.so;$LUA_CPATH"
-	./$debug/luaw ./res/testing.lua -lluaadd.so -Dtest=6 -n a b c
-	if [ $? -ne 0 ]; then
-		echo Testing scenario 1 failed to complete.
-		((errors++))
-	else
-		gcov *.gc*
-		bash <(curl -s https://codecov.io/bash)
-	fi
+	./prereqs.sh
+	
+	cp -r lua-all $HOME/cistore
+	cp -r luajit-2.0 $HOME/cistore
+	
+	echo "Travis-CI cache created."
 else
-	export LUA_CPATH="./$release/?.so;$LUA_CPATH"
-	./$release/luaw ./res/testing.lua -lluaadd.so -Dtest=6 -n a b c
-	if [ $? -ne 0 ]; then
-		echo Testing scenario 1 failed to complete.
-		((errors++))
-	fi
+	echo "Cached. Migrating..."
+	cp -r $HOME/cistore/lua-all lua-all
+	cp -r $HOME/cistore/luajit-2.0 luajit-2.0
 fi
 
 
+# Building
+echo "> BUILDING"
+export debug=1
+export debug_coverage=1
+./build.sh driver luajit
+./build.sh package lua-5.3.5
+./build.sh package lua-5.2.4
+./build.sh package lua-5.1.5
 
-
-if [ $errors > 0 ]; then
-	echo Exited with $errors errors!
-	exit 1
-fi
+# Testing
+echo "> TESTING"
+export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+echo $LD_LIBRARY_PATH
+pushd bin/Debug
+	echo "Test 1"
+	./luaw -e "print('Everything went okay')"
 	
+	echo "Test 2"
+	./luaw -w luajit -e "print('Everything went okay')"
+	
+	echo "Test 3"
+	./luaw -w lua-5.3.5 -e "print('Everything went okay')"
+	
+	echo "Test 4"
+	./luaw -w lua-5.2.4 -e "print('Everything went okay')"
+	
+	echo "Test 5"
+	./luaw -w lua-5.1.5 -e "print('Everything went okay')"
+popd
 
+# Code coverage
+gcov *.gc*
+bash <(curl -s https://codecov.io/bash)
+
+# Update cache if needed
+cp -f -r -u lua-all $HOME/cistore
+cp -f -r -u luajit-2.0 $HOME/cistore
+
+
+exit 0

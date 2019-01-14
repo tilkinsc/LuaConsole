@@ -1,5 +1,9 @@
 language: c
 
+cache:
+  directories:
+    - $HOME/cistore
+
 dist: trusty
 sudo: true
 
@@ -10,17 +14,12 @@ braches:
   only:
     - master
 
-cache:
-  directories:
-    - $HOME/luajit-2.0
-
 script:
-  - bash travis_dependencies.sh
-  - bash build.sh
+  - bash travis_test.sh
 
 after_success:
-  - echo "Build successful. Testing."
-  - bash travis_test.sh
+  - echo "Build and tests successful"
+
 after_failure:
-  - echo "Build failed."
+  - echo "Build and tests failed."
 
