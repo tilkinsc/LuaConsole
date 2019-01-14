@@ -33,8 +33,8 @@ LUA_VER_DEF=-DLUA_JIT_51
 LUA_VER=-lluajit-5.1
 LUA_INC=.
 
-ROOT_release=bin\Release
-ROOT_debug=bin\Debug
+ROOT_release=bin/Release
+ROOT_debug=bin/Debug
 
 ODIR=obj
 LDIR=lib
@@ -52,25 +52,25 @@ CFLAGS_END=$(CFLAGS_$(TYPE))
 Windows:
 	$(warning Make is a joke)
 	@if EXIST $(ROOTDIR) ( rmdir /S /Q $(ROOTDIR) )
-	@mkdir $(ROOTDIR)\res
+	@mkdir $(ROOTDIR)/res
 	echo Compiling luaw...
-	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) $(LUA_VER_DEF) -D__USE_MINGW_ANSI_STDIO -c $(SDIR)\consolew.c $(SDIR)\jitsupport.c $(SDIR)\darr.c
+	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) $(LUA_VER_DEF) -D__USE_MINGW_ANSI_STDIO -c $(SDIR)/consolew.c $(SDIR)/jitsupport.c $(SDIR)/darr.c
 	echo Linking luaw...
-	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) -o luaw.exe consolew.o jitsupport.o darr.o $(DLLS)\lua51.dll
+	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) -o luaw.exe consolew.o jitsupport.o darr.o $(DLLS)/lua51.dll
 	if $(TYPE) EQU release strip --strip-all luaw.exe
 	echo Compiling additions...
-	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) $(LUA_VER_DEF) -D__USE_MINGW_ANSI_STDIO -c $(SDIR)\additions.c
+	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) $(LUA_VER_DEF) -D__USE_MINGW_ANSI_STDIO -c $(SDIR)/additions.c
 	echo Linking additions...
-	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) -shared -o luaadd.dll additions.o $(DLLS)\lua51.dll
+	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) -shared -o luaadd.dll additions.o $(DLLS)/lua51.dll
 	
 	
 	-move /Y *.dll $(ROOTDIR) 1>nul 2>nul
 	-move /Y *.o $(ODIR) 1>nul 2>nul
 	-move /Y *.a $(ODIR) 1>nul 2>nul
 	-move /Y *.exe $(ROOTDIR) 1>nul 2>nul
-	-copy /Y $(DIR)\* $(ROOTDIR)\res 1>nul 2>nul
-	-copy /Y $(DLLS)\* $(ROOTDIR) 1>nul 2>nul
-	-copy /Y $(ROOT)\* $(ROOTDIR) 1>nul 2>nul
+	-copy /Y $(DIR)/* $(ROOTDIR)/res 1>nul 2>nul
+	-copy /Y $(DLLS)/* $(ROOTDIR) 1>nul 2>nul
+	-copy /Y $(ROOT)/* $(ROOTDIR) 1>nul 2>nul
 	
 MacOS: Unix
 Linux: Unix
@@ -80,12 +80,12 @@ Unix:
 	@if [ -d $(ROOTDIR) ]; then rm -r --one-file-system -d $(ROOTDIR); fi
 	@mkdir -p $(ROOTDIR)/res
 	echo Compiling luaw...
-	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) $(LUA_VER_DEF) -c $(SDIR)\consolew.c $(SDIR)\jitsupport.c $(SDIR)\darr.c
+	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) $(LUA_VER_DEF) -c $(SDIR)/consolew.c $(SDIR)/jitsupport.c $(SDIR)/darr.c
 	echo Linking luaw...
 	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) -o luaw.exe consolew.o jitsupport.o darr.o -lluajit-5.1 -lm -ldl
 	if [ $debug -eq 1 ]; then strip --strip-all luaw; fi
 	echo Compiling additions...
-	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) $(LUA_VER_DEF) -Wl,-E -fPIC -c $(SDIR)\additions.c
+	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) $(LUA_VER_DEF) -Wl,-E -fPIC -c $(SDIR)/additions.c
 	echo Linking additions...
 	gcc $(CFLAGS_END) $(DEBUG_COVERAGE) $(DIRS) -shared -Wl,-E -fPIC -o luaadd.o additions.o -lluajit-5.1
 	chmod +x luaw
