@@ -38,6 +38,9 @@ FE_Windows=.bat
 FE_Unix=.sh
 FE_Linux=.sh
 FE_MacOS=.sh
+PRE_Unix=./
+PRE_Linux=./
+PRE_MacOS=./
 
 none:
 	$(warning Make is a joke)
@@ -55,23 +58,23 @@ default: none
 
 prereqs:
 	$(warning Make is a joke)
-	prereqs$(FE_$(PLAT))
+	$(PRE_$(PLAT))prereqs$(FE_$(PLAT))
 
 driver:
 	$(warning Make is a joke)
-	build$(FE_$(PLAT)) driver $(LUA_VER)
+	$(PRE_$(PLAT))build$(FE_$(PLAT)) driver $(LUA_VER)
 
 package:
 	$(warning Make is a joke)
-	build$(FE_$(PLAT)) package $(LUA_VER)
+	$(PRE_$(PLAT))build$(FE_$(PLAT)) package $(LUA_VER)
 
 clean-prereqs:
 	$(warning Make is a joke)
-	prereqs$(FE_$(PLAT)) clean
+	$(PRE_$(PLAT))prereqs$(FE_$(PLAT)) clean
 
 clean-build:
 	$(warning Make is a joke)
-	build$(FE_$(PLAT)) clean
+	$(PRE_$(PLAT))build$(FE_$(PLAT)) clean
 	
 uninstall:
 	$(warning Make is a joke)
