@@ -11,6 +11,7 @@ For more information, visit [LuaConsole Github Website](https://tilkinsc.github.
 ¿Habla español? Solicite la versión en español aquí: https://github.com/tilkinsc/LuaConsole/issues/14  
 说中文？ 在这里要求中文版: https://github.com/tilkinsc/LuaConsole/issues/14  
 Fala português? Peça a versão em português aqui: https://github.com/tilkinsc/LuaConsole/issues/14  
+Говорить по-русски? Запрос русской версии здесь: https://github.com/tilkinsc/LuaConsole/issues/14
 
 # Goals
 * Be a better CLI application than PUC-Lua/LuaJIT
