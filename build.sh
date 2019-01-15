@@ -252,20 +252,20 @@ function build_package() {
 	fi
 	
 	echo "Compiling luaw driver package $1..."
-	$GCC $attrib $dirs -fPIC -DLC_LD_DLL $luaverdef -c $srcdir/ldata.c $srcdir/jitsupport.c $srcdir/darr.c
+	$GCC $attrib $dirs -fPIC -DLC_LD_DLL $luaverdef -c $srcdir/ldata.c $srcdir/jitsupport.c
 	
 	echo "Linking luaw driver package $1..."
-	$GCC $attrib $dirs -fPIC -shared -Wl,-E -o lc$1.so ldata.o jitsupport.o darr.o $luaverout
+	$GCC $attrib $dirs -fPIC -shared -Wl,-E -o lc$1.so ldata.o jitsupport.o $luaverout
 	
 	echo "Finished building driver package $1."
 }
 
 function build_driver() {
 	echo "Compiling luaw driver $1..."
-	$GCC $attrib $dirs -DDEFAULT_LUA=\"lc$1.so\" -c $srcdir/darr.c $srcdir/luadriver.c
+	$GCC $attrib $dirs -DDEFAULT_LUA=\"lc$1.so\" -c $srcdir/luadriver.c
 	
 	echo "Linking luaw driver $1..."
-	$GCC $attrib $dirs -o luaw luadriver.o darr.o -ldl
+	$GCC $attrib $dirs -o luaw luadriver.o -ldl
 	
 	build_package $1
 	

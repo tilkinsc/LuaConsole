@@ -291,10 +291,10 @@ setlocal
 		)
 		
 		echo Compiling luaw driver package %1...
-		%gcc% %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -c %srcdir%\ldata.c %srcdir%\jitsupport.c %srcdir%\darr.c
+		%gcc% %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -c %srcdir%\ldata.c %srcdir%\jitsupport.c
 		
 		echo Linking luaw driver package %1...
-		%GCC% %attrib% %dirs% -shared -o lc%1.dll ldata.o jitsupport.o darr.o %luaverout%
+		%GCC% %attrib% %dirs% -shared -o lc%1.dll ldata.o jitsupport.o %luaverout%
 		
 		goto :EOF
 	endlocal
@@ -302,10 +302,10 @@ setlocal
 	:build_driver
 	setlocal
 		echo Compiling luaw driver...
-		%GCC% %attrib% %dirs% -D__USE_MINGW_ANSI_STDIO=1 -DDEFAULT_LUA=\"lc%1.dll\" -c %srcdir%\darr.c %srcdir%\luadriver.c
+		%GCC% %attrib% %dirs% -D__USE_MINGW_ANSI_STDIO=1 -DDEFAULT_LUA=\"lc%1.dll\" -c %srcdir%\luadriver.c
 		
 		echo Linking luaw driver...
-		%GCC% %attrib% %dirs% -o luaw.exe luadriver.o darr.o
+		%GCC% %attrib% %dirs% -o luaw.exe luadriver.o
 		
 		call :build_package %1
 		
