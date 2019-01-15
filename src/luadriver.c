@@ -232,7 +232,7 @@ int main(int argc, char** argv) {
 	#if defined(_WIN32) || defined(_WIN64)
 		HMODULE luacxt;
 		check_error((luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr)) == 0, "Could not find the LuaConsole library! (Default: " DEFAULT_LUA ")");
-		_luacon_loaddll = (luacon_loaddll*) GetProcAddress(luacxt, "luacon_loaddll");
+		_luacon_loaddll = (luacon_loaddll) GetProcAddress(luacxt, "luacon_loaddll");
 	#else
 		void* luacxt;
 		luacxt = dlopen(ARGS.luaver == 0 ? DEFAULT_LUA : luastr, RTLD_LAZY);
