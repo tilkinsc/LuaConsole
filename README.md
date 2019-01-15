@@ -8,6 +8,10 @@ A next-gen, Cross-Platform \[Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua5.3.x\]-suppor
 
 For more information, visit [LuaConsole Github Website](https://tilkinsc.github.io/LuaConsole) and the [wiki](https://github.com/tilkinsc/LuaConsole/wiki)!  
 
+¿Habla español? Solicite la versión en español aquí: https://github.com/tilkinsc/LuaConsole/issues/14
+说中文？ 在这里要求中文版: https://github.com/tilkinsc/LuaConsole/issues/14
+Fala português? Peça a versão em português aqui: https://github.com/tilkinsc/LuaConsole/issues/14
+
 # Goals
 * Be a better CLI application than PUC-Lua/LuaJIT
 * Have low code-coverage to prevent redundancy being executed (0-30% pseudo-goal)
