@@ -31,13 +31,14 @@
 
 #	include "darr.h"
 
-int loadjitmodule(lua_State* L);
-int runcmdopt(lua_State* L, const char* opt);
-int dojitcmd(lua_State* L, const char* cmd);
-int dojitopt(lua_State* L, const char* opt);
-int dobytecode(lua_State* L, char** argv);
-void print_jit_status(lua_State* L);
-int jitargs(lua_State* L, Array* luajit_jcmds, Array* luajit_opts, char** luajit_bc, int squelch, int post_exist);
+	int loadjitmodule(lua_State* L);
+	int runcmdopt(lua_State* L, const char* opt);
+	int dojitcmd(lua_State* L, const char* cmd);
+	int dojitopt(lua_State* L, const char* opt);
+	int dobytecode(lua_State* L, char** argv);
+	void print_jit_status(lua_State* L);
 
-#endif
+	int jitargs(lua_State* L, Array* luajit_jcmds, Array* luajit_opts, char** luajit_bc, int squelch, int post_exist);
+
+#endif // EOF if defined(LUA_JIT_51)
 

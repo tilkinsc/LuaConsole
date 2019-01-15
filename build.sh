@@ -24,12 +24,12 @@
 
 
 # Default env vars
-if [ -z "$debug" ]; then			debug=0; fi
-if [ -z "$debug_coverage" ]; then	debug_coverage=0; fi
-if [ -z "$GCC" ]; then				GCC="gcc"; fi
-if [ -z "$AR" ]; then				AR="ar"; fi
-if [ -z "$MAKE" ]; then				MAKE="make"; fi
-if [ -z "$GCC_VER" ]; then			GCC_VER=gnu99; fi
+if [ -z "$debug" ]; then			debug=0;			fi
+if [ -z "$debug_coverage" ]; then	debug_coverage=0;	fi
+if [ -z "$GCC" ]; then				GCC="gcc";			fi
+if [ -z "$AR" ]; then				AR="ar";			fi
+if [ -z "$MAKE" ]; then				MAKE="make";		fi
+if [ -z "$GCC_VER" ]; then			GCC_VER=gnu99;		fi
 
 
 # On help message request

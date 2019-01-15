@@ -61,13 +61,13 @@ typedef struct tag_LC_ARGS {
 #	else
 #		define LC_LD_API extern __attribute__((visibility("default")))
 #	endif
-
-LC_LD_API int luacon_loaddll(LC_ARGS ARGS);
-
+	
+	LC_LD_API int luacon_loaddll(LC_ARGS ARGS);
+	
 #else
-
-typedef int (*luacon_loaddll)(LC_ARGS);
-
+	
+	typedef int (*luacon_loaddll)(LC_ARGS);
+	
 #endif
 
 

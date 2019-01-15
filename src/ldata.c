@@ -24,8 +24,8 @@
 
 // environment variable for lua usage
 // TODO: I want to support LUA_INIT_5_2 LUA_INIT_5_1 and LUA_INIT_5_3 (ENV_VAR_EXT) which version takes precedence and falls back to LUA_INIT afterward
-#define ENV_VAR						"LUA_INIT"
 // #define ENV_VAR_EXT				(0)
+#define ENV_VAR						"LUA_INIT"
 
 
 #include <stdlib.h>

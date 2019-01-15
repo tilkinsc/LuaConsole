@@ -22,7 +22,7 @@
  */
 
 #if !defined(DEFAULT_LUA)
-#	if defined(_WIN32) || defineD(_WIN64)
+#	if defined(_WIN32) || defined(_WIN64)
 #		define DEFAULT_LUA			"lclua-5.3.5.dll"
 #	else
 #		define DEFAULT_LUA			"lclua-5.3.5.so"
@@ -83,7 +83,6 @@ int main(int argc, char** argv) {
 	if(argc < 2 || (argv[1][0] == '-' || argv[1][0] == '/')) { // don't try to execute file if it isn't first argument
 		ARGS.post_exist = 1;
 	} else {
-		// i<argc might not run final file?
 		ARGS.no_file = 0;
 		ARGS.files_index = &(argv[1]);
 		for(ARGS.file_count=0; ARGS.file_count+1<(size_t)argc && (argv[1+ARGS.file_count][0] != '-' && argv[1+ARGS.file_count][0] != '/'); ARGS.file_count++);
