@@ -51,7 +51,7 @@ luaw -e "dofile('res/testing.lua')" -Dtest=5 -n a b c
 luaw -e "dofile('testing.lua')" -s res -Dtest=5 -n a b c
 
 # stdin:
-luaw - |
+luaw -
 dofile('res/testing.lua')
 <Ctrl + d>
 <Enter>
@@ -63,7 +63,7 @@ luaw -p
 Windows Specific:
 ```batch
 REM stdin
-luaw - |
+luaw -
 dofile('res/testing.lua')
 <Ctrl + z>
 <Enter>
