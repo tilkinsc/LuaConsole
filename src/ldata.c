@@ -60,7 +60,7 @@
 #include "consolew.h"
 
 
-static const char HELP_MESSAGE[] =
+const char HELP_MESSAGE[] =
 	"LuaConsole | Version: 1/13/2019\n\n"
 	#if LUA_VERSION_NUM <= 501
 		LUA_VERSION " | " LUA_COPYRIGHT "\n"
