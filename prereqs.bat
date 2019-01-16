@@ -29,7 +29,7 @@ setlocal
 	
 	IF NOT EXIST ZIP	set "ZIP=C:\Progra~1\7-Zip\7z.exe x -y"
 	IF NOT EXIST GIT	set "GIT=git"
-	IF NOT EXIST DLM	set "DLM=bitsadmin"
+	IF NOT EXIST DLM	set "DLM=curl"
 	
 	
 	REM - Basic Switches ---------------------------------------------------

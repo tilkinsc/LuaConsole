@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-DEBUG=0
-DEBUG_COVERAGE=0
+debug=0
+debug_coverage=0
 GCC=gcc
 AR=ar
 MAKE=make
@@ -32,9 +32,10 @@ LUA_VER=luajit
 luaverdef=
 
 PLAT=
-PLATS=Windows Unix MacOS Linux
+PLATS=Windows MSVS Unix MacOS Linux
 
 FE_Windows=.bat
+FE_MSVS=.msvs.bat
 FE_Unix=.sh
 FE_Linux=.sh
 FE_MacOS=.sh

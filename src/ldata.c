@@ -105,7 +105,6 @@ static const char HELP_MESSAGE[] =
 	"-? --help \tDisplays this help message\n"
 	"-n \t\tStart of parameter section\n";
 
-
 // one environment per process
 lua_State* L = NULL;
 

@@ -34,18 +34,18 @@ setlocal
 	
 	
 	REM Basic help switches
-	if [] == [%1] (
+	IF [] == [%1] (
 		echo No arguments specified.
 		echo.
 		goto help
 	)
-	if [/?] == [%1] (
+	IF [/?] == [%1] (
 		goto help
 	)
-	if [-?] == [%1] (
+	IF [-?] == [%1] (
 		goto help
 	)
-	if [--help] == [%1] (
+	IF [--help] == [%1] (
 		goto help
 	)
 	
@@ -60,7 +60,7 @@ setlocal
 		del dll\*.dll
 		del obj\*.o
 		del lib\*.a
-		rmdir /S /Q bin\Release
+		rmdir /S /Q bin\*
 		
 		echo Done.
 		exit /b 0
@@ -71,8 +71,8 @@ setlocal
 	
 	
 	REM Installs to a directory
-	if [install] == [%1] (
-		if [] == [%2] (
+	IF [install] == [%1] (
+		IF [] == [%2] (
 			echo Please specify where to install to.
 			goto failure
 		)
@@ -93,11 +93,25 @@ setlocal
 	REM --------------------------------------------------------------------
 	
 	
+	IF NOT EXIST "lua-all" (
+		echo Please run prereqs.bat to get lua-all
+		goto failure
+	)
+	
+	IF NOT EXIST "luajit-2.0" (
+		echo Please run prereqs.bat to get luajit
+		goto failure
+	)
+	
+	
+	REM --------------------------------------------------------------------
+	
+	
 	REM GCC setup
 	IF [%debug%] EQU [0] (
 		set attrib=-std=gnu11 -Wall -O2
 		set root=bin\Release
-	) else (
+	) ELSE (
 		set attrib=-std=gnu11 -Wall -g -O0
 		set root=bin\Debug
 		IF %debug_coverage% EQU 1	set attrib=%attrib% -coverage
@@ -117,23 +131,10 @@ setlocal
 	REM --------------------------------------------------------------------
 	
 	
-	IF NOT EXIST "lua-all" (
-		echo Please run prereqs.bat to get lua-all
-		goto failure
-	)
-	
-	IF NOT EXIST "luajit-2.0" (
-		echo Please run prereqs.bat to get luajit
-		goto failure
-	)
-	
-	
-	REM --------------------------------------------------------------------
-	
 	IF [%1] == [driver] (
 		echo Cleaning workspace...
 		REM Resets bin
-		IF EXIST %root% rmdir /S /Q %root%
+		IF EXIST "%root%" rmdir /S /Q %root%
 		
 		REM Resets dll
 		del %dlldir%\*.dll
@@ -145,7 +146,7 @@ setlocal
 		IF [%2] == [luajit] (
 			call :build_luajit
 		) ELSE (
-			IF NOT EXIST "lua-all/%2" (
+			IF NOT EXIST "lua-all\%2" (
 				echo Not a valid lua version!
 				goto failure
 			)
@@ -158,9 +159,7 @@ setlocal
 		REM Build install
 		move /Y luaw.exe %root%\luaw.exe
 		copy /Y %resdir%\*	%root%\res
-		echo wrap 1
 		copy /Y %rootdir%\*	%root%
-		echo wrap 1 eof
 		call :build_install %2
 		
 		echo Finished.
@@ -174,9 +173,9 @@ setlocal
 	IF [%1] == [package] (
 		
 		REM Force driver to be built
-		IF NOT EXIST %root%/luaw.exe (
+		IF NOT EXIST %root%\luaw.exe (
 			echo Please build the driver first.
-			exit /b 1
+			goto failure
 		)
 		
 		echo Cleaning workspace...
@@ -186,7 +185,7 @@ setlocal
 		IF [%2] == [luajit] (
 			call :build_luajit
 		) ELSE (
-			IF NOT EXIST "lua-all/%2" (
+			IF NOT EXIST "lua-all\%2" (
 				echo Not a valid lua version!
 				goto failure
 			)
@@ -199,6 +198,13 @@ setlocal
 		echo Finished.
 		exit /b 0
 	)
+	
+	
+	REM --------------------------------------------------------------------
+	
+	
+	echo This shouldn't be reached!
+	goto failure
 	
 	
 	REM --------------------------------------------------------------------
@@ -250,11 +256,11 @@ setlocal
 			)
 			
 			echo Installing...
-			xcopy /Y lua.h			..\..\include
-			xcopy /Y luaconf.h		..\..\include
-			xcopy /Y lualib.h		..\..\include
-			xcopy /Y lauxlib.h		..\..\include
-			xcopy /Y %1.dll			..\..\dll
+			xcopy /Y lua.h		..\..\include
+			xcopy /Y luaconf.h	..\..\include
+			xcopy /Y lualib.h	..\..\include
+			xcopy /Y lauxlib.h	..\..\include
+			xcopy /Y %1.dll		..\..\dll
 		popd
 		
 		echo Finished installing %1.
@@ -265,17 +271,11 @@ setlocal
 	setlocal
 		move /Y *.o %objdir%
 		IF [%1] == [luajit] (
-			echo wrap 2
 			copy /Y %dlldir%\lua51.dll %root%
-			echo wrap 2 eof
 		) ELSE (
-			echo wrap 3
 			copy /Y %dlldir%\%1.dll %root%
-			echo wrap 3 eof
 		)
-		echo wrap 4
-		move lc%1.dll %root%
-		echo wrap 4 eof
+		copy lc%1.dll %root%
 		
 		echo Finished installing %1.
 		goto :EOF
@@ -285,9 +285,9 @@ setlocal
 	setlocal
 		IF [%1] == [luajit] (
 			set luaverdef=-DLUA_JIT_51
-			set luaverout=%dlldir%/lua51.dll
+			set luaverout=%dlldir%\lua51.dll
 		) ELSE (
-			set luaverout=%dlldir%/%1.dll
+			set luaverout=%dlldir%\%1.dll
 		)
 		
 		echo Compiling luaw driver package %1...
@@ -296,6 +296,7 @@ setlocal
 		echo Linking luaw driver package %1...
 		%GCC% %attrib% %dirs% -shared -o lc%1.dll ldata.o jitsupport.o %luaverout%
 		
+		echo Finished building driver package %1.
 		goto :EOF
 	endlocal
 	

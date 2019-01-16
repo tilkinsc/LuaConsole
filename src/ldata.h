@@ -47,7 +47,7 @@ LC_ARGS ARGS;
 
 
 // usage message
-static const char HELP_MESSAGE[];
+const char HELP_MESSAGE[];
 
 
 
