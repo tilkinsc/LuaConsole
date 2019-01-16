@@ -1,0 +1,55 @@
+
+
+OOM=Error: Out of memory! %s\
+OOM_D=Error: Out of memory! %d\n
+
+MALFORMED_J_NO_PARAM=LuaJIT Warning: malformed argument `-j` has no parameter!\
+MALFORMED_O_NO_PARAM=LuaJIT Warning: malformed argument `-O` has no parameter!\
+MALFORMED_B_NO_PARAM=LuaJIT Warning: malformed argument `-b` has no parameter!\
+ERROR_INVALID_ARG=Error: Argument `%s` not recognized!\
+LC_DLL_MIA=Could not find the LuaConsole library!
+LC_DLL_NO_FUNC=Could not find the LuaConsole function `luacon_loaddll`!
+
+STACK_DUMP_BEGIN=--------------- Stack Dump ----------------\
+SD_STRING=%d:(String):`%s`\
+SD_BOOL=%d:(Boolean):`%s`\
+SD_NUMB=%d:(Number):`%g`\
+SD_FUNC=%d:(Function):`@0x%p`\
+SD_TABLE=%d:(Table):`@0x%p`\
+SD_UD=%d:(Userdata):`@0x%p`\
+SD_LUD=%d:(LUserdata):`0x@%p`\
+SD_THREAD=%d:(Thread):`0x%p`\
+SD_NONE=%d:(None)\
+SD_OBJ=%d:(Object):%s:`0x@%p`\
+STACK_DUMP_DONE=----------- Stack Dump Finished -----------\
+
+LUA_ERROR= (Runtime) | Stack Top: %zu | %s%s\
+
+LUA_ERROR_INTERNAL= (Internal)
+LUA_ERROR_SYNTAX= (Syntax)
+LUA_ERROR_RUNTIME= (Runtime)
+LUA_ERROR_RAW= | Stack Top: %zu | %s%s\
+
+SIGINT=Interrupted!
+REPL_LINE_TOO_LONG=Input line is too long!\
+
+GLOBALS_ERROR_BAD_D=Error: Incorrect -D specified. Use format 'name=value'.
+GLOBALS_ERROR_PARSE_D=Error: Parsing -D specified. Use format 'subtab.name=value'.
+
+LIBRARIES_ERROR_START=%s%s%s\
+LIBRARIES_ERROR_1=Error: 
+LIBRARIES_ERROR_END= could not be required because no `require()`.
+
+LDATA_BAD_SD=Error: Invalid start directory supplied.
+LDATA_BAD_STDIN=LuaConsole had an error in stdin!\
+LDATA_END_FILE=LuaConsole ended on file `%s`!\
+
+JS_NOT_A_STRING=(error object is not a string)
+JS_ERROR=LuaJIT Error: %s\
+JS_BAD_COMMAND=LuaJIT Error: unknown luaJIT command or jit.* modules not installed\
+JS_JIT_ON=JIT: ON
+JS_JIT_OFF=JIT: OFF
+JS_FAILED_CONTROL_CMD=LuaJIT Warning: Failed to execute control command or load extension module!\
+JS_FAILED_SET_O=LuaJIT Warning: Failed to set with -O!\
+
+
