@@ -1,0 +1,55 @@
+
+
+OOM=错误： 内存不足！%s\
+OOM_D=错误： 内存不足！ %d\n
+
+MALFORMED_J_NO_PARAM=LuaJIT 警告： 格式错误的参数 `-j` 没有参数！\
+MALFORMED_O_NO_PARAM=LuaJIT 警告： 格式错误的参数 `-O` 没有参数！\
+MALFORMED_B_NO_PARAM=LuaJIT 警告： 格式错误的参数 `-b` 没有参数！\
+ERROR_INVALID_ARG=错误： 争论 `%s` 无法识别！\
+LC_DLL_MIA=找不到 LuaConsole 库！
+LC_DLL_NO_FUNC=找不到 LuaConsole 函数 `luacon_loaddll`！
+
+STACK_DUMP_BEGIN=--------------- 堆栈转储 ----------------\
+SD_STRING=%d:(串):`%s`\
+SD_BOOL=%d:(布尔):`%s`\
+SD_NUMB=%d:(数):`%g`\
+SD_FUNC=%d:(功能):`@0x%p`\
+SD_TABLE=%d:(表):`@0x%p`\
+SD_UD=%d:(Userdata):`@0x%p`\
+SD_LUD=%d:(LUserdata):`0x@%p`\
+SD_THREAD=%d:(线):`0x%p`\
+SD_NONE=%d:(没有)\
+SD_OBJ=%d:(宾语):%s:`0x@%p`\
+STACK_DUMP_DONE=----------- 堆栈转储完成 -----------\
+
+LUA_ERROR= (运行) | 堆栈顶部： %zu | %s%s\
+
+LUA_ERROR_INTERNAL= (内部)
+LUA_ERROR_SYNTAX= (句法)
+LUA_ERROR_RUNTIME= (运行)
+LUA_ERROR_RAW= | 堆栈顶部： %zu | %s%s\
+
+SIGINT=中断！
+REPL_LINE_TOO_LONG=输入线太长了！\
+
+GLOBALS_ERROR_BAD_D=错误： 指定了错误的 -D. 使用格式 '名称=值'.
+GLOBALS_ERROR_PARSE_D=错误： 指定了错误的 -D. 使用格式 '表.名称=值'.
+
+LIBRARIES_ERROR_START=%s%s%s\
+LIBRARIES_ERROR_1=错误： 
+LIBRARIES_ERROR_END= 不能要求因为没有 `require()`.
+
+LDATA_BAD_SD=错误： 提供的启动目录无效.
+LDATA_BAD_STDIN=LuaConsole 在 stdin 中出错了！
+LDATA_END_FILE=LuaConsole 以 `%s` 文件结束！\
+
+JS_NOT_A_STRING=(错误对象不是字符串)
+JS_ERROR=LuaJIT 错误： %s\
+JS_BAD_COMMAND=LuaJIT 错误： 未安装未知的 luaJIT 命令或 jit.* 模块\
+JS_JIT_ON=JIT: 上
+JS_JIT_OFF=JIT: 关闭
+JS_FAILED_CONTROL_CMD=LuaJIT 警告： 无法执行控制命令或加载扩展模块！\
+JS_FAILED_SET_O=LuaJIT 警告： 无法使用 -O 设置！\
+
+

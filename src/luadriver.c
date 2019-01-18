@@ -51,16 +51,20 @@
 
 #include "darr.h"
 #include "luadriver.h"
+#include "lang.h"
 
 
 // struct for args to be seen across functions
 static LC_ARGS ARGS;
+static LangCache* lang;
+
+#define lsub(str) langfile_get(lang, str)
 
 
 // easy macros for error handling
 static inline void check_error_OOM(int cond, int line) {
 	if(cond == 1) {
-		fprintf(stderr, "ERROR: Out of memory! %d\n", line);
+		fprintf(stderr, lsub("OOM"), line);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -74,6 +78,12 @@ static inline void check_error(int cond, const char* str) {
 
 
 int main(int argc, char** argv) {
+	
+	lang = langfile_load("root/lang/english.txt");
+	if(lang == 0) {
+		puts("Failed to load lang file!");
+		return EXIT_FAILURE;
+	}
 	
 	// default vars
 	ARGS.post_exist = 0;
@@ -179,7 +189,7 @@ int main(int argc, char** argv) {
 			char* jcmd = argv[i] + 2;
 			if(*jcmd == ' ' || *jcmd == '\0') {
 				if(i + 1 >= argc) {
-					fputs("LuaJIT Warning: malformed argument `-j` has no parameter!\n", stderr);
+					fputs(lsub("MALFORMED_J_NO_PARAM"), stderr);
 					break;
 				} else
 					jcmd = argv[i+1];
@@ -192,20 +202,20 @@ int main(int argc, char** argv) {
 			check_error_OOM(ARGS.luajit_opts == NULL, __LINE__);
 			if(strlen(argv[i]) > 2)
 				array_push(ARGS.luajit_opts, argv[i] + 2);
-			else fputs("LuaJIT Warning: malformed argument `-O` has no parameter!\n", stderr);
+			else fputs(lsub("MALFORMED_O_NO_PARAM"), stderr);
 			break;
 		case 'b':
 			if(i + 1 < argc)
 				ARGS.luajit_bc = argv + i;
 			else
-				fputs("LuaJIT Warning: malformed argument `-b` has no parameter!\n", stderr);
+				fputs(lsub("MALFORMED_B_NO_PARAM"), stderr);
 			break;
 		case '?':
 			ARGS.do_help = 1;
 			i = argc;
 			break;
 		default:
-			fprintf(stdout, "Error: Argument `%s` not recognized!\n", argv[i]);
+			fprintf(stdout, lsub("ERROR_INVALID_ARG"), argv[i]);
 			return EXIT_FAILURE;
 		}
 	}
@@ -230,7 +240,7 @@ int main(int argc, char** argv) {
 	
 	#if defined(_WIN32) || defined(_WIN64)
 		HMODULE luacxt;
-		check_error((luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr)) == 0, "Could not find the LuaConsole library! (Default: " DEFAULT_LUA ")");
+		check_error((luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr)) == 0, lsub("LC_DLL_MIA"));
 		_luacon_loaddll = (luacon_loaddll) GetProcAddress(luacxt, "luacon_loaddll");
 	#else
 		void* luacxt;
@@ -240,9 +250,9 @@ int main(int argc, char** argv) {
 		check_error(_luacon_loaddll == 0, dlerror());
 	#endif
 	
-	check_error(luacxt == 0, "Could not find the LuaConsole function `luacon_loaddll`!");
+	check_error(luacxt == 0, lsub("LC_DLL_NO_FUNC"));
 	int status = 0;
-	status = _luacon_loaddll(ARGS);
+	status = _luacon_loaddll(ARGS, lang);
 	
 	#if defined(_WIN32) || defined(_WIN64)
 		FreeLibrary(luacxt);

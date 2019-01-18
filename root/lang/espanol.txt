@@ -33,7 +33,7 @@ SIGINT=¡Interrumpido!
 REPL_LINE_TOO_LONG=¡La línea de entrada es demasiado larga!\
 
 GLOBALS_ERROR_BAD_D=Error: ¡Incorrecta -D especificada. Use el formato 'nombre=valor'!
-GLOBALS_ERROR_PARSE_D=Error: ¡Parseado -D especificado. Use el formato 'tab.nombre=valor'!
+GLOBALS_ERROR_PARSE_D=Error: ¡Incorrecta -D especificada. Use el formato 'tab.nombre=valor'!
 
 LIBRARIES_ERROR_START=%s%s%s\
 LIBRARIES_ERROR_1=Error: 

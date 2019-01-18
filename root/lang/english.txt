@@ -34,7 +34,7 @@ SIGINT=Interrupted!
 REPL_LINE_TOO_LONG=Input line is too long!\
 
 GLOBALS_ERROR_BAD_D=Error: Incorrect -D specified. Use format 'name=value'.
-GLOBALS_ERROR_PARSE_D=Error: Parsing -D specified. Use format 'subtab.name=value'.
+GLOBALS_ERROR_PARSE_D=Error: Incorrect -D specified. Use format 'subtab.name=value'.
 
 LIBRARIES_ERROR_START=%s%s%s\
 LIBRARIES_ERROR_1=Error: 

@@ -59,7 +59,6 @@ setlocal
 		del include\*.h
 		del dll\*.dll
 		del obj\*.o
-		del lib\*.a
 		rmdir /S /Q bin\*
 		
 		echo Done.
@@ -141,6 +140,7 @@ setlocal
 		
 		REM Output build structure
 		mkdir %root%\res
+		mkdir %root%\lang
 		
 		REM Build dependencies
 		IF [%2] == [luajit] (
@@ -158,8 +158,8 @@ setlocal
 		
 		REM Build install
 		move /Y luaw.exe %root%\luaw.exe
-		copy /Y %resdir%\*	%root%\res
-		copy /Y %rootdir%\*	%root%
+		xcopy /E /Y %resdir%\*	%root%\res
+		xcopy /E /Y %rootdir%\*	%root%
 		call :build_install %2
 		
 		echo Finished.
@@ -248,9 +248,6 @@ setlocal
 				
 				echo Linking %1...
 				%GCC% -std=%GCC_VER% -g0 -O2 -Wall -shared -o %1.dll *.o
-				
-				echo Archiving %1...
-				%AR% rcu lib%1.a *.o
 			) ELSE (
 				echo %1 already cached.
 			)
@@ -276,6 +273,7 @@ setlocal
 			copy /Y %dlldir%\%1.dll %root%
 		)
 		copy lc%1.dll %root%
+		move lc%1.dll %dlldir%
 		
 		echo Finished installing %1.
 		goto :EOF

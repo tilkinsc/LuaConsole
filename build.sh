@@ -295,6 +295,7 @@ if [ "$1" = "driver" ]; then
 	# Output build structure
 	mkdir -p $root/res
 	mkdir -p $root/dll
+	mkdir -p $root/lang
 	
 	# Build dependencies
 	if [ "$2" = "luajit" ]; then

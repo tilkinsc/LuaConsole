@@ -46,6 +46,8 @@
 #	define LUA_DLL_SO_NAME 			".so"
 #endif
 
+#define lsub(str) langfile_get(lang, str)
+
 
 #include "lua.h"
 #include "lualib.h"
@@ -55,6 +57,7 @@
 #endif
 
 #include "darr.h"
+#include "lang.h"
 #include "luadriver.h"
 #include "ldata.h"
 #include "consolew.h"
@@ -119,9 +122,10 @@ lua_State* L = NULL;
 
 
 // handles arguments, cwd, loads necessary data, executes lua
-LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
+LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 {
 	ARGS = _ARGS; // global args for all
+	lang = _lang;
 	
 	// print out help
 	if(ARGS.do_help == 1) {
@@ -236,7 +240,7 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 	}
 	
 	// make sure to start in the requested directory, if any
-	check_error(ARGS.start != NULL && _chdir(ARGS.start) == -1, "Error: Invalid start directory supplied.");
+	check_error(ARGS.start != NULL && _chdir(ARGS.start) == -1, lsub("LDATA_BAD_SD"));
 	
 	
 	// initiate global variables set up
@@ -255,7 +259,7 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 	if(ARGS.do_stdin == 1) {
 		status = start_protective_mode_file(0, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 		if(status != 0) {
-			fprintf(stderr, "LuaConsole had an error in stdin!\n!");
+			fprintf(stderr, lsub("LDATA_BAD_STDIN"));
 			goto exit;
 		}
 	}
@@ -305,7 +309,7 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 		for(size_t i=0; i<ARGS.file_count; i++) {
 			status = start_protective_mode_file(ARGS.files_index[i], (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 			if(status != 0) {
-				fprintf(stderr, "LuaConsole ended on file `%s`!\n", ARGS.files_index[i]);
+				fprintf(stderr, lsub("LDATA_END_FILE"), ARGS.files_index[i]);
 				goto exit;
 			}
 		}

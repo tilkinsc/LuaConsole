@@ -1,0 +1,55 @@
+
+
+OOM=Erro: Sem memória! %s\
+OOM_D=Erro: Sem memória! %d\n
+
+MALFORMED_J_NO_PARAM=LuaJIT Aviso: o argumento malformado `-j` não possui parâmetro!\
+MALFORMED_O_NO_PARAM=LuaJIT Aviso: o argumento malformado `-O` não possui parâmetro!\
+MALFORMED_B_NO_PARAM=LuaJIT Aviso: o argumento malformado `-b` não possui parâmetro!\
+ERROR_INVALID_ARG=Erro: Argumento `% s` não reconhecido!\
+LC_DLL_MIA=Não foi possível encontrar a biblioteca LuaConsole!
+LC_DLL_NO_FUNC=Não foi possível encontrar a função LuaConsole `luacon_loaddll`!
+
+STACK_DUMP_BEGIN=--------------- Despejo de Pilha ----------------\
+SD_STRING=%d:(Corda):`%s`\
+SD_BOOL=%d:(Boleano):`%s`\
+SD_NUMB=%d:(Número):`%g`\
+SD_FUNC=%d:(Função):`@0x%p`\
+SD_TABLE=%d:(Mesa):`@0x%p`\
+SD_UD=%d:(Userdata):`@0x%p`\
+SD_LUD=%d:(LUserdata):`0x@%p`\
+SD_THREAD=%d:(Fio):`0x%p`\
+SD_NONE=%d:(Nenhuma)\
+SD_OBJ=%d:(Objeto):%s:`0x@%p`\
+STACK_DUMP_DONE=----------- Despejo de Pilha Concluído -----------\
+
+LUA_ERROR= (Tempo de Execução) | Parte Superior da Pilha: %zu | %s%s\
+
+LUA_ERROR_INTERNAL= (Interna)
+LUA_ERROR_SYNTAX= (Sintaxe)
+LUA_ERROR_RUNTIME= (Tempo de Execução)
+LUA_ERROR_RAW= | Parte Superior da Pilha: %zu | %s%s\
+
+SIGINT=Interrompida!
+REPL_LINE_TOO_LONG=A linha de entrada é muito longa!\
+
+GLOBALS_ERROR_BAD_D=Erro: Incorreto -D especificado. Use o formato 'nome=valor'.
+GLOBALS_ERROR_PARSE_D=Erro: Incorreto -D especificado. Use o formato 'tab.nome=valor'.
+
+LIBRARIES_ERROR_START=%s%s%s\
+LIBRARIES_ERROR_1=Erro: 
+LIBRARIES_ERROR_END= não pode ser necessário porque não `require()`.
+
+LDATA_BAD_SD=Erro: Diretório inicial inválido fornecido.
+LDATA_BAD_STDIN=LuaConsole teve um erro no stdin!\
+LDATA_END_FILE=LuaConsole terminou no arquivo `%s`!\
+
+JS_NOT_A_STRING=(objeto de erro não é uma string)
+JS_ERROR=LuaJIT Erro: %s\
+JS_BAD_COMMAND=LuaJIT Erro: comando luaJIT desconhecido ou jit.* módulos não instalados\
+JS_JIT_ON=JIT: EM
+JS_JIT_OFF=JIT: FORA
+JS_FAILED_CONTROL_CMD=LuaJIT Aviso: Falha ao executar o comando de controle ou carregar o módulo de extensão!\
+JS_FAILED_SET_O=LuaJIT Aviso: falha ao definir com -O!\
+
+

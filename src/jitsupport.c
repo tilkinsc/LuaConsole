@@ -24,10 +24,23 @@
 #if defined(LUA_JIT_51)
 #	include "jitsupport.h"
 
+#	include "lang.h"
 
+#	define lsub(str) langfile_get(lang, str)
+	
+	// lang cache
+	extern LangCache* lang;
+	
 	// LuaJIT functions slightly modified for LuaConsole
 	// TODO: optimize
-
+	//	Write a error handler?
+	//	Support non string returns?
+	//	Normalize error messages
+	//	Fix weird passing of jitargs
+	//	Mash some of this in few functions as possible
+	//	
+	
+	
 	// Load add-on module
 	int loadjitmodule(lua_State* L) {
 		lua_getglobal(L, "require");
@@ -39,15 +52,15 @@
 			if (msg && !strncmp(msg, "module ", 7))
 				goto nomodule;
 			msg = lua_tostring(L, -1);
-			if(msg == NULL) msg = "(error object is not a string)";
-			fprintf(stderr, "LuaJIT Error: %s\n", msg);
+			if(msg == NULL) msg = lsub("JS_NOT_A_STRING");
+			fprintf(stderr, lsub("JS_ERROR"), msg);
 			lua_pop(L, 1);
 			return 1;
 		}
 		lua_getfield(L, -1, "start");
 		if (lua_isnil(L, -1)) {
 	nomodule:
-			fputs("LuaJIT Error: unknown luaJIT command or jit.* modules not installed\n", stderr);
+			fputs(lsub("JS_BAD_COMMAND"), stderr);
 			return 1;
 		}
 		lua_remove(L, -2); // Drop module table
@@ -76,8 +89,8 @@
 		int status = 0;
 		if((status = lua_pcall(L, narg, 0, 0)) != 0) {
 			const char* msg = lua_tostring(L, -1);
-			if(msg == NULL) msg = "(error object is not a string)";
-			fprintf(stderr, "LuaJIT Error: %s\n", msg);
+			if(msg == NULL) msg = lsub("JS_NOT_A_STRING");
+			fprintf(stderr, lsub("JS_ERROR"), msg);
 			lua_pop(L, 1);
 		}
 		return status;
@@ -129,8 +142,8 @@
 		int status = 0;
 		if((status = lua_pcall(L, narg, 0, 0)) != 0) {
 			const char* msg = lua_tostring(L, -1);
-			if(msg == NULL) msg = "(error object is not a string)";
-			fprintf(stderr, "LuaJIT Error: %s\n", msg);
+			if(msg == NULL) msg = lsub("JS_NOT_A_STRING");
+			fprintf(stderr, lsub("JS_ERROR"), msg);
 			lua_pop(L, 1);
 		}
 		return status;
@@ -145,7 +158,7 @@
 		lua_remove(L, -2); // _LOADED.jit.status
 		int n = lua_gettop(L);
 		lua_call(L, 0, LUA_MULTRET);
-		fputs(lua_toboolean(L, n) ? "JIT: ON" : "JIT: OFF", stdout);
+		fputs(lua_toboolean(L, n) ? lsub("JS_JIT_ON") : lsub("JS_JIT_OFF"), stdout);
 		const char* s = NULL;
 		for (n++; (s = lua_tostring(L, n)); n++) {
 			putc(' ', stdout);
@@ -160,14 +173,14 @@
 		if(luajit_jcmds != NULL) {
 			for(size_t i=0; i<luajit_jcmds->size; i++)
 				if(dojitcmd(L, (const char*) array_get(luajit_jcmds, i)) != 0)
-					fputs("LuaJIT Warning: Failed to execute control command or load extension module!\n", stderr);
+					fputs(lsub("JS_FAILED_CONTROL_CMD"), stderr);
 			array_free(luajit_jcmds);
 		}
 
 		if(luajit_opts != NULL) {
 			for(size_t i=0; i<luajit_opts->size; i++)
 				if(dojitopt(L, (const char*) array_get(luajit_opts, i)) != 0)
-					fputs("LuaJIT Warning: Failed to set with -O!\n", stderr);
+					fputs(lsub("JS_FAILED_SET_O"), stderr);
 			array_free(luajit_opts);
 		}
 		

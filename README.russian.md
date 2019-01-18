@@ -1,5 +1,5 @@
 # LuaConsole
-| License | Codecov.io | Gitter.im | Travis-CI | Appveyor |
+| Лицензия | Codecov.io | Gitter.im | Travis-CI | Appveyor |
 | ------- | ---------- | --------- | --------- | -------- |
 | [![License](https://img.shields.io/github/license/tilkinsc/LuaConsole.svg)](https://github.com/tilkinsc/LuaConsole/blob/master/LICENSE) | [![Codecov](https://codecov.io/gh/tilkinsc/LuaConsole/coverage.svg?branch=master)](https://codecov.io/gh/tilkinsc/LuaConsole) | [![Gitter.im](https://badges.gitter.im/tilkinsc/LuaConsole.png)](https://gitter.im/LuaConsole) | [![travis-ci](https://travis-ci.org/tilkinsc/LuaConsole.svg?branch=master)](https://travis-ci.org/tilkinsc/LuaConsole) | ![appveyor](https://ci.appveyor.com/api/projects/status/github/tilkinsc/LuaConsole?svg=true) OFF |  
 
@@ -11,45 +11,45 @@
 
 
 https://github.com/tilkinsc/LuaConsole  
-A next-gen, Cross-Platform \[Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua5.3.x\]-supporting CLI made to supersede PUC-Lua and LuaJIT interpreter  
+Кроссплатформенная следующего поколения \[Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua5.3.x \] поддерживающая CLI, заменяющая интерпретаторы PUC-Lua и LuaJIT  
 
-For more information, visit [LuaConsole Github Website](https://tilkinsc.github.io/LuaConsole) and the [wiki](https://github.com/tilkinsc/LuaConsole/wiki)!  
+Для получения дополнительной информации посетите [веб-сайт LuaConsole Github] (https://tilkinsc.github.io/LuaConsole) и [wiki] (https://github.com/tilkinsc/LuaConsole/wiki)!  
 
-# Goals
-* Be a better CLI application than PUC-Lua/LuaJIT
-* Have low code-coverage to prevent redundancy being executed (0-30% pseudo-goal)
-* Support everything compatible with PUC-Lua and LuaJIT
-* Prevent messy, obfuscating code
-* Be CLI dependant and independant  
+# цели
+* Будьте лучшим приложением CLI, чем PUC-Lua/LuaJIT
+* Низкое покрытие кода для предотвращения выполнения избыточности (псевдо-цель 0-30%)
+* Поддержка всего совместимого с PUC-Lua и LuaJIT
+* Предотвратить грязный, запутывающий код
+* Быть зависимым от CLI и независимым 
 
-# Building
+# Строительство
 [Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
 
-# Using with LuaRocks
+# Использование с LuaRocks
 [Windows MinGW](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW)  
 [Linux GCC](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Linux-GCC)  
 [Mac GCC](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Mac-GCC)  
 
-# Using with LuaDIST
+# Использование с LuaDIST
 [Windows/Unix LuaDIST](https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS)
 
-# Testing
+# тестирование
 ```bash
-# Help command
+# Справочная команда
 luaw --help /? -?
 
-# From the command
+# Из команды
 luaw res/testing.lua -Dtest=5 -n a b c
 luaw -lres/testing.lua -Dtest=5 -n a b c
 luaw -Dtest=5 -n a b c - < res/testing.lua
 
-# With Shebang enhancements found below
+# С улучшениями Shebang, найденными ниже
 res/testing.lua | luaw -Dtest=5 -n a b c -
 
-# Using cat
+# Изнутри cat
 cat res/testing.lua | luaw -Dtest=5 -n a b c -
 
-# From inside Lua
+# Изнутри Lua
 luaw -e "dofile('res/testing.lua')" -Dtest=5 -n a b c
 luaw -e "dofile('testing.lua')" -s res -Dtest=5 -n a b c
 
@@ -59,11 +59,11 @@ dofile('res/testing.lua')
 <Ctrl + d>
 <Enter>
 
-# However, instead of the above two, use: (can neglect the implied -p)
+# Однако вместо двух вышеперечисленных используйте: (может пренебречь подразумеваемым -p)
 luaw -p
 ```
 
-Windows Specific:
+Специфичный для Windows:
 ```batch
 REM stdin
 luaw -
@@ -71,14 +71,14 @@ dofile('res/testing.lua')
 <Ctrl + z>
 <Enter>
 
-REM Using type
+REM Изнутри type
 type res\testing.lua | luaw -Dtest=5 -n a b c -
 
-REM With Windows Registry enchancements found below
+REM С улучшениями Windows Registry найденными ниже
 res\testing.lua | luaw -Dtest=5 -n a b c -
 res\testing | luaw -Dtest=5 -n a b c -
 ```
 
-# Bonus
+# бонус
 * [Windows Bonus Flashy Icons and Ease of Open](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus---Flashy-Icons-and-Ease-of-Open)  
 * Linux Bonus Shebangs -- WIP, not yet made
