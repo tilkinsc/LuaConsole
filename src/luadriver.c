@@ -79,7 +79,7 @@ static inline void check_error(int cond, const char* str) {
 
 int main(int argc, char** argv) {
 	
-	lang = langfile_load("root/lang/english.txt");
+	lang = langfile_load("lang/english.txt");
 	if(lang == 0) {
 		puts("Failed to load lang file!");
 		return EXIT_FAILURE;
