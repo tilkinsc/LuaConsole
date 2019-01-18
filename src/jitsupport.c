@@ -26,7 +26,7 @@
 
 #	include "lang.h"
 
-#	define lsub(str) langfile_get(lang, str)
+#	define _(str) langfile_get(lang, str)
 	
 	// lang cache
 	extern LangCache* lang;
@@ -52,15 +52,15 @@
 			if (msg && !strncmp(msg, "module ", 7))
 				goto nomodule;
 			msg = lua_tostring(L, -1);
-			if(msg == NULL) msg = lsub("JS_NOT_A_STRING");
-			fprintf(stderr, lsub("JS_ERROR"), msg);
+			if(msg == NULL) msg = _("JS_NOT_A_STRING");
+			fprintf(stderr, _("JS_ERROR"), msg);
 			lua_pop(L, 1);
 			return 1;
 		}
 		lua_getfield(L, -1, "start");
 		if (lua_isnil(L, -1)) {
 	nomodule:
-			fputs(lsub("JS_BAD_COMMAND"), stderr);
+			fputs(_("JS_BAD_COMMAND"), stderr);
 			return 1;
 		}
 		lua_remove(L, -2); // Drop module table
@@ -89,8 +89,8 @@
 		int status = 0;
 		if((status = lua_pcall(L, narg, 0, 0)) != 0) {
 			const char* msg = lua_tostring(L, -1);
-			if(msg == NULL) msg = lsub("JS_NOT_A_STRING");
-			fprintf(stderr, lsub("JS_ERROR"), msg);
+			if(msg == NULL) msg = _("JS_NOT_A_STRING");
+			fprintf(stderr, _("JS_ERROR"), msg);
 			lua_pop(L, 1);
 		}
 		return status;
@@ -142,8 +142,8 @@
 		int status = 0;
 		if((status = lua_pcall(L, narg, 0, 0)) != 0) {
 			const char* msg = lua_tostring(L, -1);
-			if(msg == NULL) msg = lsub("JS_NOT_A_STRING");
-			fprintf(stderr, lsub("JS_ERROR"), msg);
+			if(msg == NULL) msg = _("JS_NOT_A_STRING");
+			fprintf(stderr, _("JS_ERROR"), msg);
 			lua_pop(L, 1);
 		}
 		return status;
@@ -158,7 +158,7 @@
 		lua_remove(L, -2); // _LOADED.jit.status
 		int n = lua_gettop(L);
 		lua_call(L, 0, LUA_MULTRET);
-		fputs(lua_toboolean(L, n) ? lsub("JS_JIT_ON") : lsub("JS_JIT_OFF"), stdout);
+		fputs(lua_toboolean(L, n) ? _("JS_JIT_ON") : _("JS_JIT_OFF"), stdout);
 		const char* s = NULL;
 		for (n++; (s = lua_tostring(L, n)); n++) {
 			putc(' ', stdout);
@@ -173,14 +173,14 @@
 		if(luajit_jcmds != NULL) {
 			for(size_t i=0; i<luajit_jcmds->size; i++)
 				if(dojitcmd(L, (const char*) array_get(luajit_jcmds, i)) != 0)
-					fputs(lsub("JS_FAILED_CONTROL_CMD"), stderr);
+					fputs(_("JS_FAILED_CONTROL_CMD"), stderr);
 			array_free(luajit_jcmds);
 		}
 
 		if(luajit_opts != NULL) {
 			for(size_t i=0; i<luajit_opts->size; i++)
 				if(dojitopt(L, (const char*) array_get(luajit_opts, i)) != 0)
-					fputs(lsub("JS_FAILED_SET_O"), stderr);
+					fputs(_("JS_FAILED_SET_O"), stderr);
 			array_free(luajit_opts);
 		}
 		

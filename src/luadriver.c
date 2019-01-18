@@ -58,13 +58,13 @@
 static LC_ARGS ARGS;
 static LangCache* lang;
 
-#define lsub(str) langfile_get(lang, str)
+#define _(str) langfile_get(lang, str)
 
 
 // easy macros for error handling
 static inline void check_error_OOM(int cond, int line) {
 	if(cond == 1) {
-		fprintf(stderr, lsub("OOM"), line);
+		fprintf(stderr, _("OOM"), line);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -189,7 +189,7 @@ int main(int argc, char** argv) {
 			char* jcmd = argv[i] + 2;
 			if(*jcmd == ' ' || *jcmd == '\0') {
 				if(i + 1 >= argc) {
-					fputs(lsub("MALFORMED_J_NO_PARAM"), stderr);
+					fputs(_("MALFORMED_J_NO_PARAM"), stderr);
 					break;
 				} else
 					jcmd = argv[i+1];
@@ -202,20 +202,20 @@ int main(int argc, char** argv) {
 			check_error_OOM(ARGS.luajit_opts == NULL, __LINE__);
 			if(strlen(argv[i]) > 2)
 				array_push(ARGS.luajit_opts, argv[i] + 2);
-			else fputs(lsub("MALFORMED_O_NO_PARAM"), stderr);
+			else fputs(_("MALFORMED_O_NO_PARAM"), stderr);
 			break;
 		case 'b':
 			if(i + 1 < argc)
 				ARGS.luajit_bc = argv + i;
 			else
-				fputs(lsub("MALFORMED_B_NO_PARAM"), stderr);
+				fputs(_("MALFORMED_B_NO_PARAM"), stderr);
 			break;
 		case '?':
 			ARGS.do_help = 1;
 			i = argc;
 			break;
 		default:
-			fprintf(stdout, lsub("ERROR_INVALID_ARG"), argv[i]);
+			fprintf(stdout, _("ERROR_INVALID_ARG"), argv[i]);
 			return EXIT_FAILURE;
 		}
 	}
@@ -240,7 +240,7 @@ int main(int argc, char** argv) {
 	
 	#if defined(_WIN32) || defined(_WIN64)
 		HMODULE luacxt;
-		check_error((luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr)) == 0, lsub("LC_DLL_MIA"));
+		check_error((luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr)) == 0, _("LC_DLL_MIA"));
 		_luacon_loaddll = (luacon_loaddll) GetProcAddress(luacxt, "luacon_loaddll");
 	#else
 		void* luacxt;
@@ -250,7 +250,7 @@ int main(int argc, char** argv) {
 		check_error(_luacon_loaddll == 0, dlerror());
 	#endif
 	
-	check_error(luacxt == 0, lsub("LC_DLL_NO_FUNC"));
+	check_error(luacxt == 0, _("LC_DLL_NO_FUNC"));
 	int status = 0;
 	status = _luacon_loaddll(ARGS, lang);
 	

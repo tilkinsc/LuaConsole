@@ -39,7 +39,7 @@
 #define DO_EXT_ERROR_RETS			(0)
 
 
-#define lsub(str) langfile_get(lang, str)
+#define _(str) langfile_get(lang, str)
 
 
 #include <stdlib.h>
@@ -78,44 +78,44 @@ typedef enum LuaConsoleError {
 // prints out anything left on the stack in a verbose way
 static inline int stack_dump(lua_State* L) {
 	int i = lua_gettop(L);
-	printf(lsub("STACK_DUMP_BEGIN"));
+	printf(_("STACK_DUMP_BEGIN"));
 	while(i) {
 		int t = lua_type(L, i); // get type number
 		switch (t) { // switch type number
 		case LUA_TSTRING:
-			fprintf(stdout, lsub("SD_STRING"), i, lua_tostring(L, i));
+			fprintf(stdout, _("SD_STRING"), i, lua_tostring(L, i));
 			break;
 		case LUA_TBOOLEAN:
-			fprintf(stdout, lsub("SD_BOOL"), i, lua_toboolean(L, i) ? "true" : "false");
+			fprintf(stdout, _("SD_BOOL"), i, lua_toboolean(L, i) ? "true" : "false");
 			break;
 		case LUA_TNUMBER:
-			fprintf(stdout, lsub("SD_NUMB"), i, lua_tonumber(L, i));
+			fprintf(stdout, _("SD_NUMB"), i, lua_tonumber(L, i));
 			break;
 		case LUA_TFUNCTION:
-			fprintf(stdout, lsub("SD_FUNC"), i, lua_topointer(L, i));
+			fprintf(stdout, _("SD_FUNC"), i, lua_topointer(L, i));
 			break;
 		case LUA_TTABLE:
-			fprintf(stdout, lsub("SD_TABLE"), i, lua_topointer(L, i));
+			fprintf(stdout, _("SD_TABLE"), i, lua_topointer(L, i));
 			break;
 		case LUA_TUSERDATA:
-			fprintf(stdout, lsub("SD_UD"), i, lua_topointer(L, i));
+			fprintf(stdout, _("SD_UD"), i, lua_topointer(L, i));
 			break;
 		case LUA_TLIGHTUSERDATA:
-			fprintf(stdout, lsub("SD_LUD"), i, lua_topointer(L, i));
+			fprintf(stdout, _("SD_LUD"), i, lua_topointer(L, i));
 			break;
 		case LUA_TTHREAD:
-			fprintf(stdout, lsub("SD_THREAD"), i, lua_topointer(L, i));
+			fprintf(stdout, _("SD_THREAD"), i, lua_topointer(L, i));
 			break;
 		case LUA_TNONE:
-			fprintf(stdout, lsub("SD_NONE"), i);
+			fprintf(stdout, _("SD_NONE"), i);
 			break;
 		default:
-			fprintf(stdout, lsub("SD_OBJ"), i, lua_typename(L, t), lua_topointer(L, i));
+			fprintf(stdout, _("SD_OBJ"), i, lua_typename(L, t), lua_topointer(L, i));
 			break;
 		}
 		i--;
 	}
-	printf(lsub("STACK_DUMP_DONE"));
+	printf(_("STACK_DUMP_DONE"));
 	return 0;
 }
 
@@ -124,7 +124,7 @@ static inline int stack_dump(lua_State* L) {
 // easy macros for error handling
 static inline void check_error_OOM(int cond, int line) {
 	if(cond == 1) {
-		fprintf(stderr, lsub("OOM_D"), line);
+		fprintf(stderr, _("OOM_D"), line);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -219,7 +219,7 @@ static int lua_print_error(lua_State* L) {
 	#endif
 	
 	size_t top = lua_gettop(L);
-	fprintf(stderr, lsub("LUA_ERROR"), top, msg, type);
+	fprintf(stderr, _("LUA_ERROR"), top, msg, type);
 	#if DO_VERBOSE_ERRORS > 0
 		fprintf(stderr, "%s\n", tb);
 		#if DO_VERBOSE_ERRORS > 1
@@ -236,19 +236,19 @@ static int lua_print_error(lua_State* L) {
 static inline void print_error(LuaConsoleError error, int offset) {
 	switch(error) {
 	case INTERNAL_ERROR:
-		fprintf(stderr, lsub("LUA_ERROR_INTERNAL"));
+		fprintf(stderr, _("LUA_ERROR_INTERNAL"));
 		break;
 	case SYNTAX_ERROR:
-		fprintf(stderr, lsub("LUA_ERROR_SYNTAX"));
+		fprintf(stderr, _("LUA_ERROR_SYNTAX"));
 		break;
 	case RUNTIME_ERROR:
-		fprintf(stderr, lsub("LUA_ERROR_RUNTIME"));
+		fprintf(stderr, _("LUA_ERROR_RUNTIME"));
 		break;
 	}
 	const char* type = "";
 	const char* msg = error_test_meta(&type);
 	size_t top = lua_gettop(L);
-	fprintf(stderr, lsub("LUA_ERROR_RAW"), top - offset, msg, type);
+	fprintf(stderr, _("LUA_ERROR_RAW"), top - offset, msg, type);
 	#if DO_VERBOSE_ERRORS > 0
 		if(top - offset > 1)
 			stack_dump(L);
@@ -296,9 +296,9 @@ retry:
 		fputs(">", stdout);
 		while((ch = fgetc(stdin)) != '\n') {
 			if(ch == -1) // sigint
-				return luaL_error(L, lsub("SIGINT"));
+				return luaL_error(L, _("SIGINT"));
 			if(i == PRIMARY_REPL_BUFFER_SIZE - 1) { // if max input reached
-				fputs(lsub("REPL_LINE_TOO_LONG"), stdout);
+				fputs(_("REPL_LINE_TOO_LONG"), stdout);
 				fflush(stdin);
 				goto retry;
 			}
@@ -445,7 +445,7 @@ static inline void load_globals(Array* globals, void* data) {
 	char* str = (char*) data + 2; // gather argument, ignore -D/-d
 	
 	char* m_args = strsplit(str, '=', strlen(str) + 1, 2); // split argument between '=', max is two (left and right)
-	check_error(m_args == NULL, lsub("GLOBALS_ERROR_BAD_D"));
+	check_error(m_args == NULL, _("GLOBALS_ERROR_BAD_D"));
 	
 	char* arg1 = m_args; // left arg of '='
 	char* arg2 = strnxt(arg1); // right arg of '='
@@ -456,7 +456,7 @@ static inline void load_globals(Array* globals, void* data) {
 		lua_setglobal(L, arg1);
 	} else if(dot_count > 0) { // if there are subtables
 		char* tabs = strsplit(arg1, '.', strlen(arg1) + 1, -1);
-		check_error(tabs == NULL, lsub("GLOBALS_ERROR_PARSE_D"));
+		check_error(tabs == NULL, _("GLOBALS_ERROR_PARSE_D"));
 		
 		lua_getglobal(L, tabs); // select first table, create if none
 		int istab = lua_istable(L, -1);
@@ -495,7 +495,7 @@ static inline void load_libraries(Array* libraries, void* data) {
 			if(ARGS.no_libraries == 0)
 				start_protective_mode_require(str1);
 			else
-				fprintf(stderr, lsub("LIBRARIES_ERROR_START"), lsub("LIBRARIES_ERROR_1"), name, lsub("LIBRARIES_ERROR_END"));
+				fprintf(stderr, _("LIBRARIES_ERROR_START"), _("LIBRARIES_ERROR_1"), name, _("LIBRARIES_ERROR_END"));
 			return;
 		}
 	}

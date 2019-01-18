@@ -46,7 +46,7 @@
 #	define LUA_DLL_SO_NAME 			".so"
 #endif
 
-#define lsub(str) langfile_get(lang, str)
+#define _(str) langfile_get(lang, str)
 
 
 #include "lua.h"
@@ -240,7 +240,7 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	}
 	
 	// make sure to start in the requested directory, if any
-	check_error(ARGS.start != NULL && _chdir(ARGS.start) == -1, lsub("LDATA_BAD_SD"));
+	check_error(ARGS.start != NULL && _chdir(ARGS.start) == -1, _("LDATA_BAD_SD"));
 	
 	
 	// initiate global variables set up
@@ -259,7 +259,7 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	if(ARGS.do_stdin == 1) {
 		status = start_protective_mode_file(0, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 		if(status != 0) {
-			fprintf(stderr, lsub("LDATA_BAD_STDIN"));
+			fprintf(stderr, _("LDATA_BAD_STDIN"));
 			goto exit;
 		}
 	}
@@ -309,7 +309,7 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 		for(size_t i=0; i<ARGS.file_count; i++) {
 			status = start_protective_mode_file(ARGS.files_index[i], (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 			if(status != 0) {
-				fprintf(stderr, lsub("LDATA_END_FILE"), ARGS.files_index[i]);
+				fprintf(stderr, _("LDATA_END_FILE"), ARGS.files_index[i]);
 				goto exit;
 			}
 		}
