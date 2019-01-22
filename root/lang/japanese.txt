@@ -1,0 +1,55 @@
+
+
+OOM=エラー: メモリ不足です! %ls\
+OOM_D=エラー: メモリ不足です! %d\n
+
+MALFORMED_J_NO_PARAM=警告: 不正な引数 `-j` にはパラメータがありません!\
+MALFORMED_O_NO_PARAM=警告: 不正な引数 `-O` にはパラメータがありません!\
+MALFORMED_B_NO_PARAM=警告: 不正な引数 `-b` にはパラメータがありません!\
+ERROR_INVALID_ARG=エラー: 引数 `%ls` が認識されていません!\
+LC_DLL_MIA=LuaConsole ライブラリが見つかりませんでした!
+LC_DLL_NO_FUNC=LuaConsole の関数 `luacon_loaddll` が見つかりませんでした!
+
+STACK_DUMP_BEGIN=--------------- スタックダンプ ----------------\
+SD_STRING=%d:(ひも):`%ls`\
+SD_BOOL=%d:(ブール値):`%ls`\
+SD_NUMB=%d:(数):`%g`\
+SD_FUNC=%d:(関数):`@0x%p`\
+SD_TABLE=%d:(表):`@0x%p`\
+SD_UD=%d:(Userdata):`@0x%p`\
+SD_LUD=%d:(LUserdata):`0x@%p`\
+SD_THREAD=%d:(糸):`0x%p`\
+SD_NONE=%d:(無し)\
+SD_OBJ=%d:(対象):%ls:`0x@%p`\
+STACK_DUMP_DONE=----------- スタックダンプ終了 -----------\
+
+LUA_ERROR= (ランタイム) | スタックトップ: %zu | %ls%ls\
+
+LUA_ERROR_INTERNAL= (内部)
+LUA_ERROR_SYNTAX= (構文)
+LUA_ERROR_RUNTIME= (ランタイム)
+LUA_ERROR_RAW= | スタックトップ: %zu | %ls%ls\
+
+SIGINT=中断しました!
+REPL_LINE_TOO_LONG=入力行が長すぎます!\
+
+GLOBALS_ERROR_BAD_D=エラー: 誤った -D が指定されました. フォーマットを使用 '名=値'!
+GLOBALS_ERROR_PARSE_D=エラー: 誤った -D が指定されました. フォーマットを使用 '表.名=値'!
+
+LIBRARIES_ERROR_START=%ls%ls%ls\
+LIBRARIES_ERROR_1=エラー: 
+LIBRARIES_ERROR_END= は必須ではありませんでした`require（）`がないからです!
+
+LDATA_BAD_SD=エラー: 無効な開始ディレクトリが指定されました!
+LDATA_BAD_STDIN=LuaConsole の stdin でエラーが発生しました!\
+LDATA_END_FILE=LuaConsole はファイル `%ls` で終わりました!\
+
+JS_NOT_A_STRING=(エラー オブジェクトは文字列ではありません)
+JS_ERROR=LuaJIT エラー: %ls\
+JS_BAD_COMMAND=LuaJIT エラー: 不明な luaJIT コマンドまたは jit.* モジュールがインストールされていません\
+JS_JIT_ON=JIT: に
+JS_JIT_OFF=JIT: オフ
+JS_FAILED_CONTROL_CMD=LuaJIT 警告: 制御コマンドの実行または拡張モジュールのロードに失敗しました!\
+JS_FAILED_SET_O=LuaJIT 警告: -O  で設定できませんでした!\
+
+
