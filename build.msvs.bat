@@ -156,8 +156,8 @@ setlocal
 		
 		REM Build install
 		move /Y luaw.exe %root%\luaw.exe
-		copy /Y %resdir%\* %root%\res
-		copy /Y %rootdir%\* %root%
+		xcopy /E /Y %resdir%\*	%root%\res
+		xcopy /E /Y %rootdir%\*	%root%
 		call :build_install %2
 		
 		echo Finished.
@@ -245,9 +245,9 @@ setlocal
 				echo Building %1...
 				
 				IF EXIST "lua.c"	del lua.c
-				IF EXIST "luac.c"	del luac.c
+				REM IF EXIST "luac.c"	del luac.c
 				
-				cl.exe /O2 /D_USRDLL /D_WINDLL /DLUA_BUILD_AS_DLL *.c /link /DLL /OUT:%1.dll
+				cl.exe /O2 /D_USRDLL /D_WINDLL /DLUA_BUILD_AS_DLL *.c /link /DLL /EXPORT:luac_main=main /OUT:%1.dll
 			) ELSE (
 				echo %1 already cached.
 			)

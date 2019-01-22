@@ -27,6 +27,7 @@
 if [ -z "$debug" ]; then			debug=0;			fi
 if [ -z "$debug_coverage" ]; then	debug_coverage=0;	fi
 if [ -z "$GCC" ]; then				GCC="gcc";			fi
+if [ -z "$OBJCOPY" ]; then			OBJCOPY="objcopy";	fi
 if [ -z "$AR" ]; then				AR="ar";			fi
 if [ -z "$MAKE" ]; then				MAKE="make";		fi
 if [ -z "$GCC_VER" ]; then			GCC_VER=gnu99;		fi
@@ -47,12 +48,13 @@ function help_message() {
 	echo "		Uses `debug` for debug binaries"
 	echo "		Uses `debug_coverage` for coverage enabling"
 	echo "		Uses `GCC` for specifying GCC executable"
+	echo "		Uses `OBJCOPY` for modifying GCC objects"
 	echo "		Uses `AR` for specifying AR executable"
 	echo "		Uses `MAKE` for specifying MAKE executable"
 	echo "		Uses `GCC_VER` for specifying lua gcc version for building lua dlls"
 	echo ""
 	echo "Configure above notes with set:"
-	echo "		debug, debug_coverage, GCC, AR, MAKE, GCC_VER"
+	echo "		debug, debug_coverage, GCC, OBJCOPY, AR, MAKE, GCC_VER"
 	echo ""
 	echo "	Specify luajit if you want to use luajit"
 	echo ""
@@ -208,7 +210,7 @@ function build_lua() {
 			$GCC -std=$GCC_VER -g0 -O2 -Wall -fPIC $luaverdef -DLUA_USE_POSIX -c *.c
 			
 			rm lua.o
-			rm luac.o
+			$OBJCOPY --redefine-sym main=luac_main luac.o
 			
 			echo "Linking $1..."
 			$GCC -std=$GCC_VER -g0 -O2 -Wall -fPIC -shared -Wl,-E -o $1.so *.o -lm -ldl

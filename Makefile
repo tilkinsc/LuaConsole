@@ -23,6 +23,7 @@
 debug=0
 debug_coverage=0
 GCC=gcc
+OBJCOPY=objcopy
 AR=ar
 MAKE=make
 GCC_VER=gnu99

@@ -28,6 +28,7 @@ setlocal
 	IF NOT DEFINED debug			set debug=0
 	IF NOT DEFINED debug_coverage	set debug_coverage=0
 	IF NOT DEFINED GCC				set GCC=gcc
+	IF NOT DEFINED OBJCOPY			set OBJCOPY=objcopy
 	IF NOT DEFINED AR				set AR=ar
 	IF NOT DEFINED MAKE				set MAKE=make
 	IF NOT DEFINED GCC_VER			set GCC_VER=gnu99
@@ -244,10 +245,10 @@ setlocal
 				%GCC% -std=%GCC_VER% -g0 -O2 -Wall %luaverdef% -c *.c
 				
 				del lua.o
-				del luac.o
+				%OBJCOPY% --redefine-sym main=luac_main luac.o
 				
 				echo Linking %1...
-				%GCC% -std=%GCC_VER% -g0 -O2 -Wall -shared -o %1.dll *.o
+				%GCC% -std=%GCC_VER% -Wl,--require-defined,luac_main -g0 -O2 -Wall -shared -o %1.dll *.o
 			) ELSE (
 				echo %1 already cached.
 			)
@@ -334,6 +335,7 @@ REM Simplex help message
 	echo		Uses `debug` for debug binaries
 	echo		Uses `debug_coverage` for coverage enabling
 	echo		Uses `GCC` for specifying GCC executable
+	echo		Uses `OBJCOPY` for modifying GCC objects
 	echo		Uses `AR` for specifying AR executable
 	echo		Uses `MAKE` for specifying MAKE executable
 	echo		Uses `GCC_VER` for specifying lua gcc version for building lua dlls
