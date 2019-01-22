@@ -77,7 +77,7 @@ static inline const char* langfile_get(LangCache* lc, const char* key) {
 		char* current = (char*) array_get(lc->lines, i);
 		if(memcmp(current, key, strlen(key)) == 0) {
 			while(*current++ != '=');
-			return current;
+			return (const char*) current;
 		}
 	}
 	return 0;

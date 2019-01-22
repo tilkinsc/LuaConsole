@@ -64,7 +64,7 @@
 
 
 const char HELP_MESSAGE[] =
-	"LuaConsole | Version: 1/13/2019\n\n"
+	"LuaConsole | Version: 1/22/2019\n\n"
 	#if LUA_VERSION_NUM <= 501
 		LUA_VERSION " | " LUA_COPYRIGHT "\n"
 	#else
@@ -91,7 +91,9 @@ const char HELP_MESSAGE[] =
 	"-R \t\tPrevents lua environment variables from loading\n"
 	"-s \t\tIssues a new current directory\n"
 	"-p \t\tActivates REPL mode after all or no supplied scripts\n"
-	"-c \t\tNo copyright on init\n"
+	#if !defined(LUA_JIT_51)
+		"-c \t\tWith the following arguments, interface to luac\n"
+	#endif
 	"-d \t\tDefines a global variable as value after '='\n"
 	"-l \t\tExecutes a module before specified script or post-exist\n"
 	"-t[a,b] \tLoads parameters after -l's and -e\n"
@@ -120,6 +122,9 @@ lua_State* L = NULL;
 	}
 #endif
 
+#if !defined(LUA_JIT_51)
+	extern int luac_main(int argc, char* argv[]);
+#endif
 
 // handles arguments, cwd, loads necessary data, executes lua
 LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
@@ -222,6 +227,17 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	}
 	
 	
+	int status = 0;
+	
+	#if !defined(LUA_JIT_51)
+		// handle exclusively compilation
+		if(ARGS.do_luac == 1) {
+			luac_main(ARGS.luac_argc, ARGS.luac_argv);
+			goto exit;
+		}
+	#endif
+	
+	
 	// query the ability to post-exist
 	if(!IS_ATTY) {
 		#if defined(_WIN32) || defined(_WIN64)
@@ -255,7 +271,6 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 		load_parameters();
 	
 	// stdin
-	int status = 0;
 	if(ARGS.do_stdin == 1) {
 		status = start_protective_mode_file(0, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 		if(status != 0) {

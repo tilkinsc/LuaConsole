@@ -40,6 +40,9 @@ typedef struct tag_LC_ARGS {
 	char** parameters_argv;
 	char** luajit_bc;
 	char** files_index;
+	char** luac_argv;
+	int luac_argc;
+	int do_luac;
 	int do_help;
 	int do_stdin;
 	int restore_console;
