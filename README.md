@@ -38,6 +38,10 @@ For more information, visit [LuaConsole Github Website](https://tilkinsc.github.
 # Help command
 luaw --help /? -?
 
+# REPL Mode
+luaw
+luaw -p
+
 # From the command
 luaw res/testing.lua -Dtest=5 -n a b c
 luaw -lres/testing.lua -Dtest=5 -n a b c

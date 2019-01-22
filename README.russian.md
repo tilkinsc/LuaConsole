@@ -38,6 +38,10 @@ https://github.com/tilkinsc/LuaConsole
 # Справочная команда
 luaw --help /? -?
 
+# Режим REPL
+luaw
+luaw -p
+
 # Из команды
 luaw res/testing.lua -Dtest=5 -n a b c
 luaw -lres/testing.lua -Dtest=5 -n a b c
