@@ -52,6 +52,8 @@ static inline Array* array_new(size_t init_size, size_t increment) {
 }
 
 static inline void array_free(void* arr) {
+	if(arr == 0)
+		return;
 	Array* a = (Array*) arr;
 	free(a->data);
 	free(a);

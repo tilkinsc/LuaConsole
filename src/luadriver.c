@@ -314,6 +314,13 @@ int main(int argc, char** argv) {
 	int status = 0;
 	status = _luacon_loaddll(ARGS, lang);
 	
+	// todo: clean arrays
+	langfile_free(lang);
+	array_free(ARGS.globals);
+	array_free(ARGS.libraries);
+	array_free(ARGS.luajit_jcmds);
+	array_free(ARGS.luajit_opts);
+	
 	#if defined(_WIN32) || defined(_WIN64)
 		FreeLibrary(luacxt);
 	#else

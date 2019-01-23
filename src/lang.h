@@ -84,6 +84,11 @@ static inline const char* langfile_get(LangCache* lc, const char* key) {
 }
 
 static inline void langfile_free(void* lc) {
-	free((LangCache*) lc);
+	if(lc == 0)
+		return;
+	LangCache* _lc = (LangCache*) lc;
+	array_free(_lc->lines);
+	free(_lc->buffer);
+	free((LangCache*) _lc);
 }
 
