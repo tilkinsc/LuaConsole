@@ -169,7 +169,9 @@
 	}
 
 
-	int jitargs(lua_State* L, Array* luajit_jcmds, Array* luajit_opts, char** luajit_bc, int squelch, int post_exist) {
+	int jitargs(lua_State* L, Array* luajit_jcmds, Array* luajit_opts,
+			char** luajit_bc, int squelch, int post_exist)
+	{
 		if(luajit_jcmds != NULL) {
 			for(size_t i=0; i<luajit_jcmds->size; i++)
 				if(dojitcmd(L, (const char*) array_get(luajit_jcmds, i)) != 0)
@@ -189,6 +191,7 @@
 		
 		if(luajit_bc != NULL)
 			return dobytecode(L, luajit_bc);
+		
 		return 0; // success
 	}
 

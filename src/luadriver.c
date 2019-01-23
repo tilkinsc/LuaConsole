@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
 		
 		setlocale(LC_ALL, "");
 		
-		switch(GetUserDefaultUILanguage() | 0xFF) { // first byte is language id
+		switch(GetUserDefaultUILanguage() | 0xFF) { // first byte is lang id
 		case 0x09: // english
 			language = "lang/english.txt";
 			break;
@@ -131,12 +131,22 @@ int main(int argc, char** argv) {
 	ARGS.no_file = 1;
 	
 	// handle post-exist
-	if(argc < 2 || (argv[1][0] == '-' || argv[1][0] == '/')) { // don't try to execute file if it isn't first argument
+	// don't try to execute file if it isn't first argument
+	// don't post-exist if files present, must explicitly ask for it
+	if(argc < 2 || (argv[1][0] == '-' || argv[1][0] == '/')) {
 		ARGS.post_exist = 1;
 	} else {
 		ARGS.no_file = 0;
+		// count files
 		ARGS.files_index = &(argv[1]);
-		for(ARGS.file_count=0; ARGS.file_count+1<(size_t)argc && (argv[1+ARGS.file_count][0] != '-' && argv[1+ARGS.file_count][0] != '/'); ARGS.file_count++);
+		for(ARGS.file_count=0;
+			ARGS.file_count + 1 < ((size_t) argc)
+			&& (
+				   argv[1 + ARGS.file_count][0] != '-'
+				&& argv[1 + ARGS.file_count][0] != '/'
+			);
+			ARGS.file_count++
+		);
 	}
 	
 	// process switches
@@ -151,11 +161,6 @@ int main(int argc, char** argv) {
 		default:
 			continue;
 		}
-		// TODO: convert to strcmp
-		//	Check for if argv[i+1] exists, as a switch can be submitted at the end and crash
-		if(strlen(argv[i]) == 6) // a way of handling `--help` for common unix
-			if(memcmp(argv[i], "--help", 6) == 0)
-				argv[i][1] = '?';
 		switch(argv[i][1]) { // set variables up for later parsing
 		case 'w': case 'W':
 			ARGS.luaver = (argv[i][2] == 0 ? argv[i+1] : argv[i]+2);
@@ -180,14 +185,14 @@ int main(int argc, char** argv) {
 			break;
 		case 'd': case 'D':
 			if(ARGS.globals == NULL)
-				ARGS.globals = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(char*));
+				ARGS.globals = array_new(DEFINES_INIT, DEFINES_EXPANSION);
 			check_error_OOM(ARGS.globals == NULL, __LINE__);
 			array_push(ARGS.globals, argv[i][2] == 0 ? argv[i+1] : argv[i]+2);
 			break;
 		case 'l': case 'L':
 			ARGS.post_exist = 0;
 			if(ARGS.libraries == NULL)
-				ARGS.libraries = array_new(LIBRARIES_INIT, LIBRARIES_EXPANSION, sizeof(char*));
+				ARGS.libraries = array_new(LIBRARIES_INIT, LIBRARIES_EXPANSION);
 			check_error_OOM(ARGS.libraries == NULL, __LINE__);
 			array_push(ARGS.libraries, argv[i][2] == 0 ? argv[i+1] : argv[i]+2);
 			break;
@@ -228,11 +233,13 @@ int main(int argc, char** argv) {
 			ARGS.do_stdin = 1;
 			break;
 		case '-':
+			if(memcmp(argv[i], "--help", 6) == 0)
+				ARGS.do_help = 1;
 			i = argc;
 			break;
 		case 'j':
 			if(ARGS.luajit_jcmds == NULL)
-				ARGS.luajit_jcmds = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(const char*));
+				ARGS.luajit_jcmds = array_new(DEFINES_INIT, DEFINES_EXPANSION);
 			check_error_OOM(ARGS.luajit_jcmds == NULL, __LINE__);
 			
 			char* jcmd = argv[i] + 2;
@@ -247,7 +254,7 @@ int main(int argc, char** argv) {
 			break;
 		case 'O':
 			if(ARGS.luajit_opts == NULL)
-				ARGS.luajit_opts = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(const char*));
+				ARGS.luajit_opts = array_new(DEFINES_INIT, DEFINES_EXPANSION);
 			check_error_OOM(ARGS.luajit_opts == NULL, __LINE__);
 			if(strlen(argv[i]) > 2)
 				array_push(ARGS.luajit_opts, argv[i] + 2);
@@ -290,17 +297,20 @@ int main(int argc, char** argv) {
 	
 	#if defined(_WIN32) || defined(_WIN64)
 		HMODULE luacxt;
-		check_error((luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr)) == 0, _("LC_DLL_MIA"));
+		luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr);
+		check_error(luacxt == 0, _("LC_DLL_MIA"));
+		
 		_luacon_loaddll = (luacon_loaddll) GetProcAddress(luacxt, "luacon_loaddll");
+		check_error(_luacon_loaddll == 0, _("LC_DLL_NO_FUNC"));
 	#else
 		void* luacxt;
 		luacxt = dlopen(ARGS.luaver == 0 ? DEFAULT_LUA : luastr, RTLD_LAZY);
 		check_error(luacxt == 0, dlerror());
+		
 		_luacon_loaddll = dlsym(luacxt, "luacon_loaddll");
 		check_error(_luacon_loaddll == 0, dlerror());
 	#endif
 	
-	check_error(luacxt == 0, _("LC_DLL_NO_FUNC"));
 	int status = 0;
 	status = _luacon_loaddll(ARGS, lang);
 	

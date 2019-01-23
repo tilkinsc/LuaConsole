@@ -23,7 +23,8 @@
 
 
 // environment variable for lua usage
-// TODO: I want to support LUA_INIT_5_2 LUA_INIT_5_1 and LUA_INIT_5_3 (ENV_VAR_EXT) which version takes precedence and falls back to LUA_INIT afterward
+// TODO: I want to support LUA_INIT_5_2 LUA_INIT_5_1 and LUA_INIT_5_3 (ENV_VAR_EXT)
+// 		which version takes precedence and falls back to LUA_INIT afterward
 // #define ENV_VAR_EXT				(0)
 #define ENV_VAR						"LUA_INIT"
 
@@ -77,9 +78,9 @@ const char HELP_MESSAGE[] =
 	#endif
 	"\nSupports Lua5.3, Lua5.2, Lua5.1, LuaJIT5.1\n"
 	"\n"
-	"Usage: luaw" LUA_BIN_EXT_NAME " [FILES] [-w] [-v] [-r] [-R] [-s PATH] [-p] [-c] [-Dvar=val]\n"
+	"Usage: luaw" LUA_BIN_EXT_NAME " [-c] [FILES] [-w] [-v] [-q] [-r] [-R] [-s PATH] [-p] [-Dvar=val]\n"
 	"\t[-Dtb.var=val] [-Lfile.lua] [-Llualib" LUA_DLL_SO_NAME "] [-t{a,b}] [-e \"string\"]\n"
-	"\t[-E \"string\"] "
+	"\t[-E \"string\"] [-] [--] "
 		#if defined(LUA_JIT_51)
 			"[-j{cmd,cmd=arg},...] [-O{level,+flag,-flag,cmd=arg}]\n\t[-b{l,s,g,n,t,a,o,e,-} {IN,OUT}] "
 		#endif
@@ -87,6 +88,7 @@ const char HELP_MESSAGE[] =
 	"\n"
 	"-w \t\tWith Lua version x.x.x\n"
 	"-v \t\tPrints the Lua version in use\n"
+	"-q \t\tRemove copyright/luajit message\n"
 	"-r \t\tPrevents lua core libraries from loading\n"
 	"-R \t\tPrevents lua environment variables from loading\n"
 	"-s \t\tIssues a new current directory\n"
@@ -200,7 +202,10 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	
 	#if defined(LUA_JIT_51)
 		if(ARGS.no_libraries == 0) {
-			int status = jitargs(L, ARGS.luajit_jcmds, ARGS.luajit_opts, ARGS.luajit_bc, ARGS.copyright_squelch, ARGS.post_exist);
+			int status = jitargs(L,
+				ARGS.luajit_jcmds, ARGS.luajit_opts, ARGS.luajit_bc,
+				ARGS.copyright_squelch, ARGS.post_exist);
+			
 			if(ARGS.luajit_bc != NULL)
 				return status;
 		}
@@ -256,7 +261,7 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	}
 	
 	// make sure to start in the requested directory, if any
-	check_error(ARGS.start != NULL && _chdir(ARGS.start) == -1, _("LDATA_BAD_SD"));
+	check_error((ARGS.start != NULL && _chdir(ARGS.start) == -1), _("LDATA_BAD_SD"));
 	
 	
 	// initiate global variables set up
@@ -272,7 +277,8 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	
 	// stdin
 	if(ARGS.do_stdin == 1) {
-		status = start_protective_mode_file(0, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+		status = start_protective_mode_file(0,
+			(ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 		if(status != 0) {
 			fprintf(stderr, _("LDATA_BAD_STDIN"));
 			goto exit;
@@ -281,7 +287,9 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	
 	if(ARGS.restore_console == 1) {
 		#if defined(_WIN32) || defined(_WIN64)
-			HANDLE hand_stdin = CreateFile("CONIN$", (GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+			HANDLE hand_stdin = CreateFile("CONIN$",
+				(GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ,
+				0, OPEN_EXISTING, 0, 0);
 			int hand_stdin_final = _open_osfhandle((intptr_t)hand_stdin, _O_TEXT);
 			_dup2(hand_stdin_final, _fileno(stdin));
 			SetStdHandle(STD_INPUT_HANDLE, (HANDLE) _get_osfhandle(_fileno(stdin)));
@@ -295,7 +303,8 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	
 	// run executable string before -l's
 	if(ARGS.run_str != 0 && ARGS.run_after_libs == 0)
-		start_protective_mode_string(ARGS.run_str, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+		start_protective_mode_string(ARGS.run_str,
+			(ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 	
 	
 	// do passed libraries/modules
@@ -307,7 +316,8 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	
 	// run executable string after -l's
 	if(ARGS.run_str != 0 && ARGS.run_after_libs == 1)
-		start_protective_mode_string(ARGS.run_str, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+		start_protective_mode_string(ARGS.run_str,
+			(ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 	
 	
 	
@@ -322,7 +332,8 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	// files
 	if(ARGS.no_file == 0) {
 		for(size_t i=0; i<ARGS.file_count; i++) {
-			status = start_protective_mode_file(ARGS.files_index[i], (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+			status = start_protective_mode_file(ARGS.files_index[i],
+				(ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 			if(status != 0) {
 				fprintf(stderr, _("LDATA_END_FILE"), ARGS.files_index[i]);
 				goto exit;

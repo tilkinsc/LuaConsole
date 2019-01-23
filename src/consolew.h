@@ -27,15 +27,15 @@
 
 
 // REPL line buffer length
-#define REPL_BUFFER_SIZE			(2048)							// REPL input buffer size
-#define PRIMARY_REPL_BUFFER_SIZE	(REPL_BUFFER_SIZE + 1)			// + 1 is for `\0`
-#define SECONDARY_REPL_BUFFER_SIZE	(PRIMARY_REPL_BUFFER_SIZE + 8)	// + 8 is for `return ;`
+#define REPL_BUFFER_SIZE			(2048)
+#define PRIMARY_REPL_BUFFER_SIZE	(REPL_BUFFER_SIZE + 1)			// for `\0`
+#define SECONDARY_REPL_BUFFER_SIZE	(PRIMARY_REPL_BUFFER_SIZE + 8)	// for `return ;`
 
 
 // controls verbosity of error output (0 off) (1 traceback) (2 stack_dump)
 #define DO_VERBOSE_ERRORS			(2)
 
-// controls whether boolean and number should be tostring'd if error returns a non-string
+// controls whether boolean and number should be tostring'd if return non-string error
 #define DO_EXT_ERROR_RETS			(0)
 
 
@@ -140,7 +140,9 @@ static inline void check_error(int cond, const char* str) {
 
 // returns a malloc'd string copy with each split item being separated by \0
 // supersedes use of strtok, which brutalizes information we need
-static inline char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
+static inline char* strsplit(const char* str1, const char lookout,
+		size_t len, size_t max)
+{
 	char* cpy = malloc(len);
 	check_error_OOM(cpy == NULL, __LINE__);
 	memcpy(cpy, str1, len);
@@ -187,11 +189,11 @@ static inline size_t strcnt(const char* str1, char c) {
 static inline const char* error_test_meta(const char** out_type) {
 	const char* msg = lua_tostring(L, -1); // attempt tostring
 	if(msg == NULL) { // if failed
-		int meta = luaL_callmeta(L, -1, "__tostring"); // call the metatable __tostring
+		int meta = luaL_callmeta(L, -1, "__tostring"); // call metatable __tostring
 		int ret = lua_type(L, -1); 
 		if(meta != 0) {
 			#if DO_EXT_ERROR_RETS == 1
-				if(ret == LUA_TSTRING || (ret == LUA_TNUMBER || ret == LUA_TBOOLEAN)
+				if(ret == LUA_TSTRING || (ret == LUA_TNUMBER || ret == LUA_TBOOLEAN))
 					msg = lua_tostring(L, -1);
 			#else
 				if(ret == LUA_TSTRING)
@@ -444,7 +446,8 @@ static inline int start_protective_mode_require(const char* file) {
 static inline void load_globals(Array* globals, void* data) {
 	char* str = (char*) data + 2; // gather argument, ignore -D/-d
 	
-	char* m_args = strsplit(str, '=', strlen(str) + 1, 2); // split argument between '=', max is two (left and right)
+	// split argument between '=', max is two (left and right)
+	char* m_args = strsplit(str, '=', strlen(str) + 1, 2);
 	check_error(m_args == NULL, _("GLOBALS_ERROR_BAD_D"));
 	
 	char* arg1 = m_args; // left arg of '='
@@ -495,11 +498,16 @@ static inline void load_libraries(Array* libraries, void* data) {
 			if(ARGS.no_libraries == 0)
 				start_protective_mode_require(str1);
 			else
-				fprintf(stderr, _("LIBRARIES_ERROR_START"), _("LIBRARIES_ERROR_1"), name, _("LIBRARIES_ERROR_END"));
+				fprintf(stderr, _("LIBRARIES_ERROR_START"),
+								_("LIBRARIES_ERROR_1"),
+								name,
+								_("LIBRARIES_ERROR_END"));
 			return;
 		}
 	}
-	start_protective_mode_file(name, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+	start_protective_mode_file(name,
+		(ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+		
 	free(str1);
 }
 

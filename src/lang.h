@@ -39,7 +39,7 @@ static inline LangCache* langfile_load(const char* path) {
 	buffer[size] = 0;
 	lc->buffer = buffer;
 	
-	Array* array = array_new(10, 1, sizeof(char*));
+	Array* array = array_new(10, 1);
 	if(array == 0) {
 		fputs("Out of memory!\n", stderr);
 		return 0;
