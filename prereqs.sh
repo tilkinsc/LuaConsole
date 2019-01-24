@@ -27,14 +27,14 @@
 
 
 if [ -z "$ZIP" ]; then ZIP="tar xzf";	fi
-if [ -z "$GIT" ]; then GIT="git";	fi
-if [ -z "$DLM" ]; then DLM="curl";	fi
+if [ -z "$GIT" ]; then GIT="git";		fi
+if [ -z "$DLM" ]; then DLM="curl";		fi
 
 
 # - Basic Functions --------------------------------------------------
 
 
-function help_message() {
+help_message() {
 	echo "Usage:"
 	echo "\n"
 	echo "		prereqs.sh                              Downloads and extracts the dependencies"
@@ -57,7 +57,7 @@ function help_message() {
 	exit 0
 }
 
-function failure() {
+failure() {
 	echo "An error has occured!"
 	exit 1
 }
