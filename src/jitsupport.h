@@ -28,6 +28,7 @@
 #	include "lualib.h"
 #	include "lauxlib.h"
 #	include "luajit.h"
+#	include "luadriver.h"
 
 #	include "darr.h"
 
@@ -38,8 +39,7 @@
 	int dobytecode(lua_State* L, char** argv);
 	void print_jit_status(lua_State* L);
 
-	int jitargs(lua_State* L, Array* luajit_jcmds, Array* luajit_opts,
-				char** luajit_bc, int squelch, int post_exist);
+	int jitargs(lua_State* L, LC_ARGS ARGS);
 
 #endif // EOF if defined(LUA_JIT_51)
 

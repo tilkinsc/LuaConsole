@@ -35,12 +35,15 @@ typedef struct tag_LC_ARGS {
 	char* run_str;
 	Array* globals;
 	Array* libraries;
-	Array* luajit_jcmds;
-	Array* luajit_opts;
 	char** parameters_argv;
-	char** luajit_bc;
 	char** files_index;
 	char** luac_argv;
+	char** jitjcmd;
+	char** jitocmd;
+	char** jitbcmd;
+	int jitjcmd_argc;
+	int jitocmd_argc;
+	int jitbcmd_argc;
 	int luac_argc;
 	int do_luac;
 	int do_help;

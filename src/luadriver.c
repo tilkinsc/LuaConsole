@@ -239,34 +239,17 @@ int main(int argc, char** argv) {
 			i = argc;
 			break;
 		case 'j':
-			if(ARGS.luajit_jcmds == NULL)
-				ARGS.luajit_jcmds = array_new(DEFINES_INIT, DEFINES_EXPANSION);
-			check_error_OOM(ARGS.luajit_jcmds == NULL, __LINE__);
-			
-			char* jcmd = argv[i] + 2;
-			if(*jcmd == ' ' || *jcmd == '\0') {
-				if(i + 1 >= argc) {
-					fprintf(stderr, _("MALFORMED_J_NO_PARAM"));
-					break;
-				} else
-					jcmd = argv[i+1];
-			}
-			array_push(ARGS.luajit_jcmds, jcmd);
+			ARGS.jitjcmd = argv;
+			ARGS.jitjcmd_argc = i;
 			break;
 		case 'O':
-			if(ARGS.luajit_opts == NULL)
-				ARGS.luajit_opts = array_new(DEFINES_INIT, DEFINES_EXPANSION);
-			check_error_OOM(ARGS.luajit_opts == NULL, __LINE__);
-			if(strlen(argv[i]) > 2)
-				array_push(ARGS.luajit_opts, argv[i] + 2);
-			else
-				fprintf(stderr, _("MALFORMED_O_NO_PARAM"));
+			ARGS.jitocmd = argv;
+			ARGS.jitocmd_argc = i;
 			break;
 		case 'b':
-			if(i + 1 < argc)
-				ARGS.luajit_bc = argv + i;
-			else
-				fprintf(stderr, _("MALFORMED_B_NO_PARAM"));
+			ARGS.post_exist = 0;
+			ARGS.jitbcmd = argv;
+			ARGS.jitbcmd_argc = i;
 			break;
 		case '?':
 			ARGS.do_help = 1;
@@ -319,8 +302,6 @@ int main(int argc, char** argv) {
 	langfile_free(lang);
 	array_free(ARGS.globals);
 	array_free(ARGS.libraries);
-	array_free(ARGS.luajit_jcmds);
-	array_free(ARGS.luajit_opts);
 	
 	#if defined(_WIN32) || defined(_WIN64)
 		FreeLibrary(luacxt);

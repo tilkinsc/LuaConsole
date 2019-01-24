@@ -22,6 +22,7 @@
  */
  
 #if defined(LUA_JIT_51)
+#	include "luadriver.h"
 #	include "jitsupport.h"
 
 #	include "lang.h"
@@ -169,26 +170,31 @@
 	}
 
 
-	int jitargs(lua_State* L, Array* luajit_jcmds, Array* luajit_opts,
-			char** luajit_bc, int squelch, int post_exist)
-	{
-		if(luajit_jcmds != NULL) {
-			for(size_t i=0; i<luajit_jcmds->size; i++)
-				if(dojitcmd(L, (const char*) array_get(luajit_jcmds, i)) != 0)
-					fputs(_("JS_FAILED_CONTROL_CMD"), stderr);
-		}
-
-		if(luajit_opts != NULL) {
-			for(size_t i=0; i<luajit_opts->size; i++)
-				if(dojitopt(L, (const char*) array_get(luajit_opts, i)) != 0)
-					fputs(_("JS_FAILED_SET_O"), stderr);
+	int jitargs(lua_State* L, LC_ARGS ARGS) {
+		
+		if(ARGS.jitjcmd != NULL) {
+			const char* cmd = (*(ARGS.jitjcmd[ARGS.jitjcmd_argc] + 2) == '\0')
+				? ARGS.jitjcmd[ARGS.jitjcmd_argc + 1]
+				: ARGS.jitjcmd[ARGS.jitjcmd_argc] + 2;
+			
+			if(cmd == 0)
+				fputs(_("MALFORMED_J_NO_PARAM"), stderr);
+			
+			if(dojitcmd(L, cmd) == 1)
+				fputs(_("JS_FAILED_CONTROL_CMD"), stderr);
 		}
 		
-		if(squelch == 0 && post_exist == 1)
+		if(ARGS.jitocmd != NULL) {
+			if(dojitopt(L, ARGS.jitocmd[ARGS.jitocmd_argc] + 2) == 1)
+				fputs(_("JS_FAILED_SET_O"), stderr);
+		}
+		
+		if(ARGS.copyright_squelch == 0 && ARGS.post_exist == 1)
 			print_jit_status(L);
 		
-		if(luajit_bc != NULL)
-			return dobytecode(L, luajit_bc);
+		if(ARGS.jitbcmd != NULL)
+			return dobytecode(L, ARGS.jitbcmd + ARGS.jitjcmd_argc + 1);
+		
 		
 		return 0; // success
 	}

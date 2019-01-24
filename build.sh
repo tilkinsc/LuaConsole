@@ -237,6 +237,7 @@ build_install () {
 	mv *.o $objdir
 	if [ "$1" = "luajit" ]; then
 		cp -r $dlldir/* $root
+		mkdir $root/jit
 	else
 		cp $dlldir/$1.so $root/dll
 	fi
@@ -302,6 +303,11 @@ if [ "$1" = "driver" ]; then
 	# Build dependencies
 	if [ "$2" = "luajit" ]; then
 		build_luajit
+		if [ ! -d "$root/jit" ]; then
+			mkdir -p $root/jit
+			cp -r luajit-2.0/src/jit/* $root/jit
+			ls $root/jit
+		fi
 	else
 		if [ ! -d "lua-all/$2" ]; then
 			echo Not a valid lua version!
@@ -342,6 +348,11 @@ if [ "$1" = "package" ]; then
 	
 	if [ "$2" = "luajit" ]; then
 		build_luajit
+		if [ ! -d "$root/jit" ]; then
+			mkdir -p $root/jit
+			cp -r luajit-2.0/src/jit/* $root/jit
+			ls $root/jit
+		fi
 	else
 		if [ ! -d "lua-all/$2" ]; then
 			echo Not a valid lua version!

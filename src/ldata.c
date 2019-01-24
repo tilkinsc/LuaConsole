@@ -202,11 +202,8 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	
 	#if defined(LUA_JIT_51)
 		if(ARGS.no_libraries == 0) {
-			int status = jitargs(L,
-				ARGS.luajit_jcmds, ARGS.luajit_opts, ARGS.luajit_bc,
-				ARGS.copyright_squelch, ARGS.post_exist);
-			
-			if(ARGS.luajit_bc != NULL)
+			int status = jitargs(L, ARGS);
+			if(status != 0)
 				return status;
 		}
 	#endif

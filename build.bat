@@ -60,7 +60,8 @@ setlocal
 		del include\*.h
 		del dll\*.dll
 		del obj\*.o
-		rmdir /S /Q bin\*
+		rmdir /S /Q bin\Release
+		rmdir /S /Q bin\Debug
 		
 		echo Done.
 		exit /b 0
@@ -146,6 +147,8 @@ setlocal
 		REM Build dependencies
 		IF [%2] == [luajit] (
 			call :build_luajit
+			mkdir %root%\jit
+			xcopy /E /Y luajit-2.0\src\jit\* %root%\jit
 		) ELSE (
 			IF NOT EXIST "lua-all\%2" (
 				echo Not a valid lua version!
@@ -185,6 +188,8 @@ setlocal
 		
 		IF [%2] == [luajit] (
 			call :build_luajit
+			mkdir %root%\jit
+			xcopy /E /Y luajit-2.0\src\jit\* %root%\jit
 		) ELSE (
 			IF NOT EXIST "lua-all\%2" (
 				echo Not a valid lua version!

@@ -1,6 +1,9 @@
 
 #pragma once
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "darr.h"
 
 typedef struct LangCache {
