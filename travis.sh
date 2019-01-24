@@ -72,10 +72,10 @@ pushd bin/Debug
 	./luaw -w lua-5.1.5 -e "print('Everything went okay')"
 	
 	echo "Test 6"
-	./luaw "res/testing.lua" -Dtest=5 -n a b c
+	./luaw res/testing.lua -Dtest=5 -n a b c
 	
 	echo "Test 7"
-	./luaw -c -o testing.luac "res/testing.lua"
+	./luaw -b res/testing.lua testing.luac
 	./luaw testing.luac -Dtest=5 -n a b c
 	
 	echo "Test 8"

@@ -444,10 +444,8 @@ static inline int start_protective_mode_require(const char* file) {
 
 // parses globals dynamic array and sets up global variables properly
 static inline void load_globals(Array* globals, void* data) {
-	char* str = (char*) data + 2; // gather argument, ignore -D/-d
-	
 	// split argument between '=', max is two (left and right)
-	char* m_args = strsplit(str, '=', strlen(str) + 1, 2);
+	char* m_args = strsplit((char*) data, '=', strlen((char*) data) + 1, 2);
 	check_error(m_args == NULL, _("GLOBALS_ERROR_BAD_D"));
 	
 	char* arg1 = m_args; // left arg of '='

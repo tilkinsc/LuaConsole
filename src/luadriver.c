@@ -223,6 +223,7 @@ int main(int argc, char** argv) {
 			ARGS.run_str = (argv[i][2] == 0 ? argv[i+1] : argv[i]+2);
 			break;
 		case 'c': case 'C':
+			ARGS.post_exist = 0;
 			ARGS.do_luac = 1;
 			ARGS.luac_argc = argc - i;
 			ARGS.luac_argv = &(argv[i]);

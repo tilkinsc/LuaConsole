@@ -265,10 +265,8 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	
 	
 	// initiate global variables set up
-	if(ARGS.globals != NULL) {
+	if(ARGS.globals != NULL)
 		array_consume(ARGS.globals, load_globals);
-		array_free(ARGS.globals);
-	}
 	
 	
 	// load parameters early
@@ -308,10 +306,8 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 	
 	
 	// do passed libraries/modules
-	if(ARGS.libraries != NULL) {
+	if(ARGS.libraries != NULL)
 		array_consume(ARGS.libraries, load_libraries);
-		array_free(ARGS.libraries);
-	}
 	
 	
 	// run executable string after -l's

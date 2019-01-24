@@ -176,14 +176,12 @@
 			for(size_t i=0; i<luajit_jcmds->size; i++)
 				if(dojitcmd(L, (const char*) array_get(luajit_jcmds, i)) != 0)
 					fputs(_("JS_FAILED_CONTROL_CMD"), stderr);
-			array_free(luajit_jcmds);
 		}
 
 		if(luajit_opts != NULL) {
 			for(size_t i=0; i<luajit_opts->size; i++)
 				if(dojitopt(L, (const char*) array_get(luajit_opts, i)) != 0)
 					fputs(_("JS_FAILED_SET_O"), stderr);
-			array_free(luajit_opts);
 		}
 		
 		if(squelch == 0 && post_exist == 1)
