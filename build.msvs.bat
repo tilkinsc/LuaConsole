@@ -348,7 +348,3 @@ REM General failure message
 	pause
 	exit /b 1
 
-:end
-
-
-

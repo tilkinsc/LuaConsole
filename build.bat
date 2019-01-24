@@ -353,5 +353,4 @@ REM General failure message
 	echo An error has occured!
 	pause
 	exit /b 1
-
-:end
+	

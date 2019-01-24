@@ -28,6 +28,8 @@ AR=ar
 MAKE=make
 GCC_VER=gnu99
 
+PREFIX=
+
 # Set this to different things if needed between lua5.1.x and lua5.2.x and lua5.3.x. luajit has no effect
 LUA_VER=luajit
 luaverdef=
@@ -37,13 +39,19 @@ PLATS=Windows MSVS Unix MacOS Linux
 
 FE_Windows=.bat
 FE_MSVS=.msvs.bat
+FE_MSVC=.msvs.bat
 FE_Unix=.sh
 FE_Linux=.sh
 FE_MacOS=.sh
+PRE_Windows=
+PRE_MSVS=
+PRE_MSVC=
 PRE_Unix=./
 PRE_Linux=./
 PRE_MacOS=./
 
+
+# No need to modify below
 none:
 	$(warning Make is a joke)
 	@echo "Please do 'make PLAT=plat' where `plat` is one of these:"
@@ -52,11 +60,15 @@ none:
 	@echo "Set `LUA_VER` to `luajit` or `lua-5.x.x` to change version, default `luajit`"
 	@echo "Set `luaverdef` to change lua build defines (not needed for luajit), default null"
 	@echo "Set `debug` to 1 for debug or 0 for release, default `0`"
+	@echo "Set `PREFIX` to a path to install to. Using target `install` only
 
 help: none
 default: none
 
-.PHONY: PLAT $(PLATS) LUA_VER luaverdef GCC_VER MAKE AR GCC AR DEBUG DEBUG_COVERAGE
+.PHONY: PLAT $(PLATS) LUA_VER luaverdef GCC_VER MAKE OBJCOPY AR GCC AR PREFIX \
+		debug debug_coverage PLATS FE_Windows FE_MSVS FE_Unix FE_Linux FE_MacOS \
+		PRE_Unix PRE_Linux PRE_MacOS
+
 
 prereqs:
 	$(warning Make is a joke)
@@ -70,19 +82,26 @@ package:
 	$(warning Make is a joke)
 	$(PRE_$(PLAT))build$(FE_$(PLAT)) package $(LUA_VER)
 
-clean-prereqs:
-	$(warning Make is a joke)
-	$(PRE_$(PLAT))prereqs$(FE_$(PLAT)) clean
 
 clean-build:
 	$(warning Make is a joke)
 	$(PRE_$(PLAT))build$(FE_$(PLAT)) clean
-	
+
+clean-prereqs:
+	$(warning Make is a joke)
+	$(PRE_$(PLAT))prereqs$(FE_$(PLAT)) clean
+
+
+reset-prereqs:
+	$(warning Make is a joke)
+	$(PRE_$(PLAT))prereqs$(FE_$(PLAT)) reset
+
+
 uninstall:
 	$(warning Make is a joke)
-	$(error This program requires the user to install themselves. Please delete it yourself.)
+	$(error This program deletes by manual removal. Please delete it yourself.)
 
 install:
 	$(warning Make is a joke)
-	$(error This program builds to ./bin/[Release/Debug]/*. Please install it yourself.)
+	$($PRE_$(PLAT))build$(FE_$(PLAT)) install $(PREFIX)
 
