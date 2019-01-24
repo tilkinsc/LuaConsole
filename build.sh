@@ -24,46 +24,50 @@
 
 
 # Default env vars
-if [ -z "$debug" ]; then		debug=0; fi
-if [ -z "$debug_coverage" ]; then	debug_coverage=0; fi
-if [ -z "$GCC" ]; then			GCC="gcc"; fi
-if [ -z "$AR" ]; then			AR="ar"; fi
-if [ -z "$MAKE" ]; then			MAKE="make"; fi
-if [ -z "$GCC_VER" ]; then		GCC_VER=gnu99; fi
+if [ -z "$debug" ]; then			debug=0;			fi
+if [ -z "$debug_coverage" ]; then	debug_coverage=0;	fi
+if [ -z "$GCC" ]; then				GCC="gcc";			fi
+if [ -z "$OBJCOPY" ]; then			OBJCOPY="objcopy";	fi
+if [ -z "$AR" ]; then				AR="ar";			fi
+if [ -z "$MAKE" ]; then				MAKE="make";		fi
+if [ -z "$GCC_VER" ]; then			GCC_VER=gnu99;		fi
 
 
-help_message () {
+# On help message request
+function help_message() {
 	echo "Usage:"
 	echo ""
-	echo "		build.bat build lua-x.x.x              Builds the driver with a default package."
-	echo "		build.bat package lua-x.x.x            Creates packages for the driver."
-	echo "		build.bat clean                        Cleans the environment of built files."
-	echo "		build.bat install [directory]          Installs to a pre-created directory."
+	echo "		build.bat build lua-x.x.x              Builds the driver with a default package"
+	echo "		build.bat package lua-x.x.x            Creates packages for the driver"
+	echo "		build.bat clean                        Cleans the environment of built files"
+	echo "		build.bat install [directory]          Installs to a pre-created directory"
 	echo "		build.bat -? /? --help                 Shows this help message"
 	echo ""
 	echo "Notes:"
+	echo "      After building, you may need to configure LD_LIBRARY_PATH to bin/* to run"
 	echo "		Uses `debug` for debug binaries"
 	echo "		Uses `debug_coverage` for coverage enabling"
-	echo "		Uses `force_build` for forcing builds of packages"
 	echo "		Uses `GCC` for specifying GCC executable"
+	echo "		Uses `OBJCOPY` for modifying GCC objects"
 	echo "		Uses `AR` for specifying AR executable"
 	echo "		Uses `MAKE` for specifying MAKE executable"
 	echo "		Uses `GCC_VER` for specifying lua gcc version for building lua dlls"
 	echo ""
 	echo "Configure above notes with set:"
-	echo "		debug, debug_coverage, force_build, GCC, AR, MAKE, GCC_VER"
+	echo "		debug, debug_coverage, GCC, OBJCOPY, AR, MAKE, GCC_VER"
 	echo ""
-	echo "	Specify luajit if you want to use luajit."
+	echo "	Specify luajit if you want to use luajit"
 	echo ""
 }
 
-failure () {
+# On failure found
+function failure() {
 	echo "An error has occured!"
 	exit 1
 }
 
 
-# Basic switches
+# Basic help switches
 if [ -z "$1" ]; then
 	echo -i "No arguments specified.\n"
 	help_message
@@ -179,9 +183,7 @@ build_luajit () {
 		if [ ! -f "libluajit.so" ]; then
 			$MAKE -j5
 		else
-			if [ "$force_build" = "1" ]; then
-				$MAKE -j5
-			fi
+			echo "libluajit.so already cached."
 		fi
 		
 		echo "Installing..."
@@ -205,11 +207,10 @@ build_lua () {
 	pushd lua-all/$1
 		if [ ! -f "$1.so" ]; then
 			echo "Compiling $1..."
-			
 			$GCC -std=$GCC_VER -g0 -O2 -Wall -fPIC $luaverdef -DLUA_USE_POSIX -c *.c
 			
 			rm lua.o
-			rm luac.o
+			$OBJCOPY --redefine-sym main=luac_main luac.o
 			
 			echo "Linking $1..."
 			$GCC -std=$GCC_VER -g0 -O2 -Wall -fPIC -shared -Wl,-E -o $1.so *.o -lm -ldl
@@ -217,7 +218,7 @@ build_lua () {
 			echo "Archiving $1..."
 			$AR rcu lib$1.a *.o
 		else
-			echo "$1.so already built."
+			echo "$1.so already cached."
 		fi
 		
 		echo "Installing..."
@@ -253,20 +254,20 @@ build_package () {
 	fi
 	
 	echo "Compiling luaw driver package $1..."
-	$GCC $attrib $dirs -fPIC -DLC_LD_DLL $luaverdef -c $srcdir/ldata.c $srcdir/jitsupport.c $srcdir/darr.c
+	$GCC $attrib $dirs -fPIC -DLC_LD_DLL $luaverdef -c $srcdir/ldata.c $srcdir/jitsupport.c
 	
 	echo "Linking luaw driver package $1..."
-	$GCC $attrib $dirs -fPIC -shared -Wl,-E -o lc$1.so ldata.o jitsupport.o darr.o $luaverout
+	$GCC $attrib $dirs -fPIC -shared -Wl,-E -o lc$1.so ldata.o jitsupport.o $luaverout
 	
 	echo "Finished building driver package $1."
 }
 
 build_driver () {
 	echo "Compiling luaw driver..."
-	$GCC $attrib $dirs -DDEFAULT_LUA=\"lc$1.so\" -c $srcdir/darr.c $srcdir/luadriver.c
+	$GCC $attrib $dirs -DDEFAULT_LUA=\"lc$1.so\" -c $srcdir/luadriver.c
 	
-	echo "Linking luaw driver..."
-	$GCC $attrib $dirs -o luaw luadriver.o darr.o -ldl
+	echo "Linking luaw driver $1..."
+	$GCC $attrib $dirs -o luaw luadriver.o -ldl
 	
 	build_package $1
 	
@@ -277,6 +278,9 @@ build_driver () {
 
 	echo "Finished building driver $1."
 }
+
+
+# --------------------------------------------------------------------
 
 
 if [ "$1" = "driver" ]; then
@@ -293,11 +297,16 @@ if [ "$1" = "driver" ]; then
 	# Output build structure
 	mkdir -p $root/res
 	mkdir -p $root/dll
+	mkdir -p $root/lang
 	
 	# Build dependencies
 	if [ "$2" = "luajit" ]; then
 		build_luajit
 	else
+		if [ ! -d "lua-all/$2" ]; then
+			echo Not a valid lua version!
+			failure
+		fi
 		build_lua $2
 	fi
 	
@@ -311,10 +320,6 @@ if [ "$1" = "driver" ]; then
 	cp -r $rootdir/* $root 1>/dev/null 2>/dev/null
 	build_install $2
 	
-	#if [ "$2" = "luajit" ]; then
-	#	ln -s -r libluajit.so libluajit-5.1.so.2
-	#fi
-
 	echo "Finished."
 	exit 0
 fi
@@ -338,6 +343,10 @@ if [ "$1" = "package" ]; then
 	if [ "$2" = "luajit" ]; then
 		build_luajit
 	else
+		if [ ! -d "lua-all/$2" ]; then
+			echo Not a valid lua version!
+			failure
+		fi
 		build_lua $2
 	fi
 	

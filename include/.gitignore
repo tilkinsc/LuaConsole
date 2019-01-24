@@ -1,7 +1,3 @@
 !.gitignore 
 
-lua.h
-lualib.h
-luaconf.h
-lauxlib.h
-luajit.h
+*.h

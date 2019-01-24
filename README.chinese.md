@@ -1,5 +1,5 @@
 # LuaConsole
-| License | Codecov.io | Gitter.im | Travis-CI | Appveyor |
+| 执照 | Codecov.io | Gitter.im | Travis-CI | Appveyor |
 | ------- | ---------- | --------- | --------- | -------- |
 | [![License](https://img.shields.io/github/license/tilkinsc/LuaConsole.svg)](https://github.com/tilkinsc/LuaConsole/blob/master/LICENSE) | [![Codecov](https://codecov.io/gh/tilkinsc/LuaConsole/coverage.svg?branch=master)](https://codecov.io/gh/tilkinsc/LuaConsole) | [![Gitter.im](https://badges.gitter.im/tilkinsc/LuaConsole.png)](https://gitter.im/LuaConsole) | [![travis-ci](https://travis-ci.org/tilkinsc/LuaConsole.svg?branch=master)](https://travis-ci.org/tilkinsc/LuaConsole) | ![appveyor](https://ci.appveyor.com/api/projects/status/github/tilkinsc/LuaConsole?svg=true) OFF |  
 
@@ -11,49 +11,49 @@
 
 
 https://github.com/tilkinsc/LuaConsole  
-A next-gen, Cross-Platform \[Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua5.3.x\]-supporting CLI made to supersede PUC-Lua and LuaJIT interpreter  
+下一代，跨平台 \[Lua-5.1.x，LuaJIT-2.0，Lua-5.2.x，Lua5.3.x \] 支持 CLI 取代 PUC-Lua 和 LuaJIT 解释器  
 
-For more information, visit [LuaConsole Github Website](https://tilkinsc.github.io/LuaConsole) and the [wiki](https://github.com/tilkinsc/LuaConsole/wiki)!  
+有关更多信息, 请访问[LuaConsole Github网站]（https://tilkinsc.github.io/LuaConsole）和[wiki]（https://github.com/tilkinsc/LuaConsole/wiki）！  
 
-# Goals
-* Be a better CLI application than PUC-Lua/LuaJIT
-* Have low code-coverage to prevent redundancy being executed (0-30% pseudo-goal)
-* Support everything compatible with PUC-Lua and LuaJIT
-* Prevent messy, obfuscating code
-* Be CLI dependant and independant  
+# 目标
+* 比 PUC-Lua/LuaJIT 更好的 CLI 应用程序
+* 具有低代码覆盖率以防止执行冗余（0-30% 伪目标）
+* 支持与 PUC-Lua 和 LuaJIT 兼容的所有内容
+* 防止混乱, 混淆代码
+* 取决于 CLI 并且是独立的
 
-# Building
+# 建造
 [Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
 
-# Using with LuaRocks
+# 与 LuaRocks一起使用
 [Windows MinGW](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW)  
 [Linux GCC](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Linux-GCC)  
 [Mac GCC](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Mac-GCC)  
 
-# Using with LuaDIST
+# 与 LuaDIST一起使用
 [Windows/Unix LuaDIST](https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS)
 
-# Testing
+# 测试
 ```bash
-# Help command
+# 帮助命令
 luaw --help /? -?
 
-# REPL Mode
+# REPL 模式
 luaw
 luaw -p
 
-# From the command
+# 从命令
 luaw res/testing.lua -Dtest=5 -n a b c
 luaw -lres/testing.lua -Dtest=5 -n a b c
 luaw -Dtest=5 -n a b c - < res/testing.lua
 
-# With Shebang enhancements found below
+# 在下面找到 Shebang 增强功能
 res/testing.lua | luaw -Dtest=5 -n a b c -
 
-# Using cat
+# 使用 cat
 cat res/testing.lua | luaw -Dtest=5 -n a b c -
 
-# From inside Lua
+# 从 Lua 里面
 luaw -e "dofile('res/testing.lua')" -Dtest=5 -n a b c
 luaw -e "dofile('testing.lua')" -s res -Dtest=5 -n a b c
 
@@ -63,11 +63,11 @@ dofile('res/testing.lua')
 <Ctrl + d>
 <Enter>
 
-# However, instead of the above two, use: (can neglect the implied -p)
+# 但是, 请使用以下代码: (可以忽略隐含的 -p)
 luaw -p
 ```
 
-Windows Specific:
+Windows 特定:
 ```batch
 REM stdin
 luaw -
@@ -75,14 +75,14 @@ dofile('res/testing.lua')
 <Ctrl + z>
 <Enter>
 
-REM Using type
+REM 使用 type
 type res\testing.lua | luaw -Dtest=5 -n a b c -
 
-REM With Windows Registry enchancements found below
+REM 使用下面的 Windows Registry 增强功能
 res\testing.lua | luaw -Dtest=5 -n a b c -
 res\testing | luaw -Dtest=5 -n a b c -
 ```
 
-# Bonus
+# 奖金
 * [Windows Bonus Flashy Icons and Ease of Open](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus---Flashy-Icons-and-Ease-of-Open)  
 * Linux Bonus Shebangs -- WIP, not yet made

@@ -26,13 +26,38 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 typedef struct tagArray {
 	size_t size;
 	size_t cap;
 	size_t increment;
-	size_t type_size;
 	void** data;
 } Array;
+
+
+
+static inline Array* array_new(size_t init_size, size_t increment) {
+	Array* arr = malloc(sizeof(Array));
+	if(arr == 0)
+		return 0;
+	arr->size = 0;
+	arr->cap = init_size;
+	arr->increment = increment;
+	arr->data = malloc(init_size * sizeof(void*));
+	if(arr->data == 0) {
+		free(arr);
+		return 0;
+	}
+	return arr;
+}
+
+static inline void array_free(void* arr) {
+	if(arr == 0)
+		return;
+	Array* a = (Array*) arr;
+	free(a->data);
+	free(a);
+}
 
 
 static int array_ensure_size(Array* arr, size_t size) {
@@ -43,15 +68,6 @@ static int array_ensure_size(Array* arr, size_t size) {
 		arr->cap += arr->increment * ((((arr->size + size) - arr->cap) % arr->increment) + 1);
 	}
 	return 1;
-}
-
-
-Array* array_new(size_t init_size, size_t increment, size_t type_size);
-
-static inline void array_free(void* arr) {
-	Array* a = (Array*) arr;
-	free(a->data);
-	free(a);
 }
 
 

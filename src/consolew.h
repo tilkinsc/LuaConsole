@@ -27,16 +27,19 @@
 
 
 // REPL line buffer length
-#define REPL_BUFFER_SIZE			(2048)							// REPL input buffer size
-#define PRIMARY_REPL_BUFFER_SIZE	(REPL_BUFFER_SIZE + 1)			// + 1 is for `\0`
-#define SECONDARY_REPL_BUFFER_SIZE	(PRIMARY_REPL_BUFFER_SIZE + 8)	// + 8 is for `return ;`
+#define REPL_BUFFER_SIZE			(2048)
+#define PRIMARY_REPL_BUFFER_SIZE	(REPL_BUFFER_SIZE + 1)			// for `\0`
+#define SECONDARY_REPL_BUFFER_SIZE	(PRIMARY_REPL_BUFFER_SIZE + 8)	// for `return ;`
 
 
 // controls verbosity of error output (0 off) (1 traceback) (2 stack_dump)
 #define DO_VERBOSE_ERRORS			(2)
 
-// controls whether boolean and number should be tostring'd if error returns a non-string
+// controls whether boolean and number should be tostring'd if return non-string error
 #define DO_EXT_ERROR_RETS			(0)
+
+
+#define _(str) langfile_get(lang, str)
 
 
 #include <stdlib.h>
@@ -49,6 +52,10 @@
 #include "lauxlib.h"
 
 #include "ldata.h"
+
+
+// lang cache
+extern LangCache* lang;
 
 
 // buffers for REPL
@@ -71,44 +78,44 @@ typedef enum LuaConsoleError {
 // prints out anything left on the stack in a verbose way
 static inline int stack_dump(lua_State* L) {
 	int i = lua_gettop(L);
-	printf("--------------- Stack Dump ----------------\n");
+	printf(_("STACK_DUMP_BEGIN"));
 	while(i) {
 		int t = lua_type(L, i); // get type number
 		switch (t) { // switch type number
 		case LUA_TSTRING:
-			fprintf(stdout, "%d:(String):`%s`\n", i, lua_tostring(L, i));
+			fprintf(stdout, _("SD_STRING"), i, lua_tostring(L, i));
 			break;
 		case LUA_TBOOLEAN:
-			fprintf(stdout, "%d:(Boolean):`%s`\n", i, lua_toboolean(L, i) ? "true" : "false");
+			fprintf(stdout, _("SD_BOOL"), i, lua_toboolean(L, i) ? "true" : "false");
 			break;
 		case LUA_TNUMBER:
-			fprintf(stdout, "%d:(Number):`%g`\n", i, lua_tonumber(L, i));
+			fprintf(stdout, _("SD_NUMB"), i, lua_tonumber(L, i));
 			break;
 		case LUA_TFUNCTION:
-			fprintf(stdout, "%d:(Function):`@0x%p`\n", i, lua_topointer(L, i));
+			fprintf(stdout, _("SD_FUNC"), i, lua_topointer(L, i));
 			break;
 		case LUA_TTABLE:
-			fprintf(stdout, "%d:(Table):`@0x%p`\n", i, lua_topointer(L, i));
+			fprintf(stdout, _("SD_TABLE"), i, lua_topointer(L, i));
 			break;
 		case LUA_TUSERDATA:
-			fprintf(stdout, "%d:(Userdata):`@0x%p`\n", i, lua_topointer(L, i));
+			fprintf(stdout, _("SD_UD"), i, lua_topointer(L, i));
 			break;
 		case LUA_TLIGHTUSERDATA:
-			fprintf(stdout, "%d:(LUserdata):`0x@%p`\n", i, lua_topointer(L, i));
+			fprintf(stdout, _("SD_LUD"), i, lua_topointer(L, i));
 			break;
 		case LUA_TTHREAD:
-			fprintf(stdout, "%d:(Thread):`0x%p`\n", i, lua_topointer(L, i));
+			fprintf(stdout, _("SD_THREAD"), i, lua_topointer(L, i));
 			break;
 		case LUA_TNONE:
-			fprintf(stdout, "%d:(None)\n", i);
+			fprintf(stdout, _("SD_NONE"), i);
 			break;
 		default:
-			fprintf(stdout, "%d:(Object):%s:`0x@%p`\n", i, lua_typename(L, t), lua_topointer(L, i));
+			fprintf(stdout, _("SD_OBJ"), i, lua_typename(L, t), lua_topointer(L, i));
 			break;
 		}
 		i--;
 	}
-	printf("----------- Stack Dump Finished -----------\n");
+	printf(_("STACK_DUMP_DONE"));
 	return 0;
 }
 
@@ -117,7 +124,7 @@ static inline int stack_dump(lua_State* L) {
 // easy macros for error handling
 static inline void check_error_OOM(int cond, int line) {
 	if(cond == 1) {
-		fprintf(stderr, "ERROR: Out of memory! %d\n", line);
+		fprintf(stderr, _("OOM_D"), line);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -133,7 +140,9 @@ static inline void check_error(int cond, const char* str) {
 
 // returns a malloc'd string copy with each split item being separated by \0
 // supersedes use of strtok, which brutalizes information we need
-static inline char* strsplit(const char* str1, const char lookout, size_t len, size_t max) {
+static inline char* strsplit(const char* str1, const char lookout,
+		size_t len, size_t max)
+{
 	char* cpy = malloc(len);
 	check_error_OOM(cpy == NULL, __LINE__);
 	memcpy(cpy, str1, len);
@@ -180,11 +189,11 @@ static inline size_t strcnt(const char* str1, char c) {
 static inline const char* error_test_meta(const char** out_type) {
 	const char* msg = lua_tostring(L, -1); // attempt tostring
 	if(msg == NULL) { // if failed
-		int meta = luaL_callmeta(L, -1, "__tostring"); // call the metatable __tostring
+		int meta = luaL_callmeta(L, -1, "__tostring"); // call metatable __tostring
 		int ret = lua_type(L, -1); 
 		if(meta != 0) {
 			#if DO_EXT_ERROR_RETS == 1
-				if(ret == LUA_TSTRING || (ret == LUA_TNUMBER || ret == LUA_TBOOLEAN)
+				if(ret == LUA_TSTRING || (ret == LUA_TNUMBER || ret == LUA_TBOOLEAN))
 					msg = lua_tostring(L, -1);
 			#else
 				if(ret == LUA_TSTRING)
@@ -212,7 +221,7 @@ static int lua_print_error(lua_State* L) {
 	#endif
 	
 	size_t top = lua_gettop(L);
-	fprintf(stderr, " (Runtime) | Stack Top: %zu | %s%s\n", top, msg, type);
+	fprintf(stderr, _("LUA_ERROR"), top, msg, type);
 	#if DO_VERBOSE_ERRORS > 0
 		fprintf(stderr, "%s\n", tb);
 		#if DO_VERBOSE_ERRORS > 1
@@ -229,19 +238,19 @@ static int lua_print_error(lua_State* L) {
 static inline void print_error(LuaConsoleError error, int offset) {
 	switch(error) {
 	case INTERNAL_ERROR:
-		fprintf(stderr, " (Internal)");
+		fprintf(stderr, _("LUA_ERROR_INTERNAL"));
 		break;
 	case SYNTAX_ERROR:
-		fprintf(stderr, " (Syntax)");
+		fprintf(stderr, _("LUA_ERROR_SYNTAX"));
 		break;
 	case RUNTIME_ERROR:
-		fprintf(stderr, " (Runtime)");
+		fprintf(stderr, _("LUA_ERROR_RUNTIME"));
 		break;
 	}
 	const char* type = "";
 	const char* msg = error_test_meta(&type);
 	size_t top = lua_gettop(L);
-	fprintf(stderr, " | Stack Top: %zu | %s%s\n", top - offset, msg, type);
+	fprintf(stderr, _("LUA_ERROR_RAW"), top - offset, msg, type);
 	#if DO_VERBOSE_ERRORS > 0
 		if(top - offset > 1)
 			stack_dump(L);
@@ -289,9 +298,9 @@ retry:
 		fputs(">", stdout);
 		while((ch = fgetc(stdin)) != '\n') {
 			if(ch == -1) // sigint
-				return luaL_error(L, "Interrupted!");
+				return luaL_error(L, _("SIGINT"));
 			if(i == PRIMARY_REPL_BUFFER_SIZE - 1) { // if max input reached
-				fputs("Input line is too long!\n", stdout);
+				fputs(_("REPL_LINE_TOO_LONG"), stdout);
 				fflush(stdin);
 				goto retry;
 			}
@@ -437,8 +446,9 @@ static inline int start_protective_mode_require(const char* file) {
 static inline void load_globals(Array* globals, void* data) {
 	char* str = (char*) data + 2; // gather argument, ignore -D/-d
 	
-	char* m_args = strsplit(str, '=', strlen(str) + 1, 2); // split argument between '=', max is two (left and right)
-	check_error(m_args == NULL, "Error: Incorrect -D specified. Use format 'name=value'.");
+	// split argument between '=', max is two (left and right)
+	char* m_args = strsplit(str, '=', strlen(str) + 1, 2);
+	check_error(m_args == NULL, _("GLOBALS_ERROR_BAD_D"));
 	
 	char* arg1 = m_args; // left arg of '='
 	char* arg2 = strnxt(arg1); // right arg of '='
@@ -449,7 +459,7 @@ static inline void load_globals(Array* globals, void* data) {
 		lua_setglobal(L, arg1);
 	} else if(dot_count > 0) { // if there are subtables
 		char* tabs = strsplit(arg1, '.', strlen(arg1) + 1, -1);
-		check_error(tabs == NULL, "Error: Parsing -D specified. Use format 'subtab.name=value'.");
+		check_error(tabs == NULL, _("GLOBALS_ERROR_PARSE_D"));
 		
 		lua_getglobal(L, tabs); // select first table, create if none
 		int istab = lua_istable(L, -1);
@@ -488,11 +498,16 @@ static inline void load_libraries(Array* libraries, void* data) {
 			if(ARGS.no_libraries == 0)
 				start_protective_mode_require(str1);
 			else
-				fprintf(stderr, "%s%s%s\n", "Error: ", name, " could not be required because no `require()`.");
+				fprintf(stderr, _("LIBRARIES_ERROR_START"),
+								_("LIBRARIES_ERROR_1"),
+								name,
+								_("LIBRARIES_ERROR_END"));
 			return;
 		}
 	}
-	start_protective_mode_file(name, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+	start_protective_mode_file(name,
+		(ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+		
 	free(str1);
 }
 

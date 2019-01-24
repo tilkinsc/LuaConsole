@@ -24,6 +24,12 @@
 
 #pragma once
 
+#include "lang.h"
+
+#include "lua.h"
+#include "luadriver.h"
+
+
 
 #define LUA_CONSOLE_COPYRIGHT	"LuaConsole Copyright (C) 2017-2019, Cody Tilkins"
 
@@ -37,17 +43,14 @@
 #endif
 
 
-#include "lua.h"
-#include "luadriver.h"
-
-
 
 lua_State* L;
 LC_ARGS ARGS;
+LangCache* lang;
 
 
 // usage message
-static const char HELP_MESSAGE[];
+const char HELP_MESSAGE[];
 
 
 
@@ -56,6 +59,5 @@ static const char HELP_MESSAGE[];
 #endif
 
 
-
-LC_LD_API int luacon_loaddll(LC_ARGS _ARGS);
+LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang);
 

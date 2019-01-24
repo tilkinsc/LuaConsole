@@ -15,7 +15,7 @@ braches:
     - master
 
 script:
-  - bash travis_test.sh
+  - bash travis.sh
 
 after_success:
   - echo "Build and tests successful"

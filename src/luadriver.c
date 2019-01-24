@@ -22,7 +22,7 @@
  */
 
 #if !defined(DEFAULT_LUA)
-#	if defined(_WIN32) || defineD(_WIN64)
+#	if defined(_WIN32) || defined(_WIN64)
 #		define DEFAULT_LUA			"lclua-5.3.5.dll"
 #	else
 #		define DEFAULT_LUA			"lclua-5.3.5.so"
@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <locale.h>
 
 #if defined(_WIN32) || defined(_WIN64)
 #	define WIN32_LEAN_AND_MEAN
@@ -51,23 +52,27 @@
 
 #include "darr.h"
 #include "luadriver.h"
+#include "lang.h"
 
 
 // struct for args to be seen across functions
 static LC_ARGS ARGS;
+static LangCache* lang;
+
+#define _(str) langfile_get(lang, str)
 
 
 // easy macros for error handling
 static inline void check_error_OOM(int cond, int line) {
 	if(cond == 1) {
-		fprintf(stderr, "ERROR: Out of memory! %d\n", line);
+		fprintf(stderr, _("OOM"), line);
 		exit(EXIT_FAILURE);
 	}
 }
 
 static inline void check_error(int cond, const char* str) {
 	if(cond == 1) {
-		fputs(str, stderr);
+		fprintf(stderr, str);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -75,19 +80,76 @@ static inline void check_error(int cond, const char* str) {
 
 int main(int argc, char** argv) {
 	
+	const char* language = 0;
+	#if defined(_WIN32) || defined(_WIN64)
+		const char english[] = "lang/english.txt";
+		const char chinese[] = "lang/chinese.txt";
+		const char russian[] = "lang/russian.txt";
+		const char portuguese[] = "lang/portuguese.txt";
+		const char spanish[] = "lang/spanish.txt";
+		
+		setlocale(LC_ALL, "");
+		
+		switch(GetUserDefaultUILanguage() | 0xFF) { // first byte is lang id
+		case 0x09: // english
+			language = "lang/english.txt";
+			break;
+		case 0x04: // chinese
+			language = "lang/chinese.txt";
+			break;
+		case 0x11: // japanese
+			language = "lang/japanese.txt";
+			break;
+		case 0x19: // russian
+			language = "lang/russian.txt";
+			break;
+		case 0x16: // portuguese
+			language = "lang/portuguese.txt";
+			break;
+		case 0x0A: // spanish
+			language = "lang/spanish.txt";
+			break;
+		default: // needs translation >:(
+			language = "lang/english.txt";
+			break;
+		}
+	#else
+		language = "lang/english.txt";
+	#endif
+	
+	language = "lang/english.txt";
+	
+	// load language file
+	lang = langfile_load(language);
+	if(lang == 0) {
+		puts("Failed to load lang file!");
+		return EXIT_FAILURE;
+	}
+	
 	// default vars
 	ARGS.post_exist = 0;
 	ARGS.no_file = 1;
 	
-	// handle arguments
-	if(argc < 2 || (argv[1][0] == '-' || argv[1][0] == '/')) { // don't try to execute file if it isn't first argument
+	// handle post-exist
+	// don't try to execute file if it isn't first argument
+	// don't post-exist if files present, must explicitly ask for it
+	if(argc < 2 || (argv[1][0] == '-' || argv[1][0] == '/')) {
 		ARGS.post_exist = 1;
 	} else {
-		// i<argc might not run final file?
 		ARGS.no_file = 0;
+		// count files
 		ARGS.files_index = &(argv[1]);
-		for(ARGS.file_count=0; ARGS.file_count+1<(size_t)argc && (argv[1+ARGS.file_count][0] != '-' && argv[1+ARGS.file_count][0] != '/'); ARGS.file_count++);
+		for(ARGS.file_count=0;
+			ARGS.file_count + 1 < ((size_t) argc)
+			&& (
+				   argv[1 + ARGS.file_count][0] != '-'
+				&& argv[1 + ARGS.file_count][0] != '/'
+			);
+			ARGS.file_count++
+		);
 	}
+	
+	// process switches
 	int req_pe = 0;
 	for(size_t i=1; i<(size_t)argc; i++) {
 		if(ARGS.parameters_argv != NULL) // if we have args around, break
@@ -99,10 +161,6 @@ int main(int argc, char** argv) {
 		default:
 			continue;
 		}
-		// TODO: convert to strcmp
-		if(strlen(argv[i]) == 6) // a way of handling `--help` for common unix
-			if(memcmp(argv[i], "--help", 6) == 0)
-				argv[i][1] = '?';
 		switch(argv[i][1]) { // set variables up for later parsing
 		case 'w': case 'W':
 			ARGS.luaver = (argv[i][2] == 0 ? argv[i+1] : argv[i]+2);
@@ -122,20 +180,19 @@ int main(int argc, char** argv) {
 		case 'p': case 'P':
 			req_pe = 1;
 			break;
-		case 'c': case 'C':
+		case 'q': case 'Q':
 			ARGS.copyright_squelch = 1;
 			break;
 		case 'd': case 'D':
 			if(ARGS.globals == NULL)
-				ARGS.globals = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(char*));
+				ARGS.globals = array_new(DEFINES_INIT, DEFINES_EXPANSION);
 			check_error_OOM(ARGS.globals == NULL, __LINE__);
-			array_push(ARGS.globals, argv[i]);
-			// TODO: fix the fact you can't do `-D DEFINE` only `-DDEFINE`
+			array_push(ARGS.globals, argv[i][2] == 0 ? argv[i+1] : argv[i]+2);
 			break;
 		case 'l': case 'L':
 			ARGS.post_exist = 0;
 			if(ARGS.libraries == NULL)
-				ARGS.libraries = array_new(LIBRARIES_INIT, LIBRARIES_EXPANSION, sizeof(char*));
+				ARGS.libraries = array_new(LIBRARIES_INIT, LIBRARIES_EXPANSION);
 			check_error_OOM(ARGS.libraries == NULL, __LINE__);
 			array_push(ARGS.libraries, argv[i][2] == 0 ? argv[i+1] : argv[i]+2);
 			break;
@@ -165,22 +222,30 @@ int main(int argc, char** argv) {
 			ARGS.run_after_libs = 0;
 			ARGS.run_str = (argv[i][2] == 0 ? argv[i+1] : argv[i]+2);
 			break;
+		case 'c': case 'C':
+			ARGS.do_luac = 1;
+			ARGS.luac_argc = argc - i;
+			ARGS.luac_argv = &(argv[i]);
+			i = argc;
+			break;
 		case '\0':
 			ARGS.post_exist = 0;
 			ARGS.do_stdin = 1;
 			break;
 		case '-':
+			if(memcmp(argv[i], "--help", 6) == 0)
+				ARGS.do_help = 1;
 			i = argc;
 			break;
 		case 'j':
 			if(ARGS.luajit_jcmds == NULL)
-				ARGS.luajit_jcmds = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(const char*));
+				ARGS.luajit_jcmds = array_new(DEFINES_INIT, DEFINES_EXPANSION);
 			check_error_OOM(ARGS.luajit_jcmds == NULL, __LINE__);
 			
 			char* jcmd = argv[i] + 2;
 			if(*jcmd == ' ' || *jcmd == '\0') {
 				if(i + 1 >= argc) {
-					fputs("LuaJIT Warning: malformed argument `-j` has no parameter!\n", stderr);
+					fprintf(stderr, _("MALFORMED_J_NO_PARAM"));
 					break;
 				} else
 					jcmd = argv[i+1];
@@ -189,24 +254,25 @@ int main(int argc, char** argv) {
 			break;
 		case 'O':
 			if(ARGS.luajit_opts == NULL)
-				ARGS.luajit_opts = array_new(DEFINES_INIT, DEFINES_EXPANSION, sizeof(const char*));
+				ARGS.luajit_opts = array_new(DEFINES_INIT, DEFINES_EXPANSION);
 			check_error_OOM(ARGS.luajit_opts == NULL, __LINE__);
 			if(strlen(argv[i]) > 2)
 				array_push(ARGS.luajit_opts, argv[i] + 2);
-			else fputs("LuaJIT Warning: malformed argument `-O` has no parameter!\n", stderr);
+			else
+				fprintf(stderr, _("MALFORMED_O_NO_PARAM"));
 			break;
 		case 'b':
 			if(i + 1 < argc)
 				ARGS.luajit_bc = argv + i;
 			else
-				fputs("LuaJIT Warning: malformed argument `-b` has no parameter!\n", stderr);
+				fprintf(stderr, _("MALFORMED_B_NO_PARAM"));
 			break;
 		case '?':
 			ARGS.do_help = 1;
 			i = argc;
 			break;
 		default:
-			fprintf(stdout, "Error: Argument `%s` not recognized!\n", argv[i]);
+			fprintf(stdout, _("ERROR_INVALID_ARG"), argv[i]);
 			return EXIT_FAILURE;
 		}
 	}
@@ -231,19 +297,29 @@ int main(int argc, char** argv) {
 	
 	#if defined(_WIN32) || defined(_WIN64)
 		HMODULE luacxt;
-		check_error((luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr)) == 0, "Could not find the LuaConsole library! (Default: " DEFAULT_LUA ")");
-		_luacon_loaddll = (luacon_loaddll*) GetProcAddress(luacxt, "luacon_loaddll");
+		luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr);
+		check_error(luacxt == 0, _("LC_DLL_MIA"));
+		
+		_luacon_loaddll = (luacon_loaddll) GetProcAddress(luacxt, "luacon_loaddll");
+		check_error(_luacon_loaddll == 0, _("LC_DLL_NO_FUNC"));
 	#else
 		void* luacxt;
 		luacxt = dlopen(ARGS.luaver == 0 ? DEFAULT_LUA : luastr, RTLD_LAZY);
 		check_error(luacxt == 0, dlerror());
+		
 		_luacon_loaddll = dlsym(luacxt, "luacon_loaddll");
 		check_error(_luacon_loaddll == 0, dlerror());
 	#endif
 	
-	check_error(luacxt == 0, "Could not find the LuaConsole function `luacon_loaddll`!");
 	int status = 0;
-	status = _luacon_loaddll(ARGS);
+	status = _luacon_loaddll(ARGS, lang);
+	
+	// todo: clean arrays
+	langfile_free(lang);
+	array_free(ARGS.globals);
+	array_free(ARGS.libraries);
+	array_free(ARGS.luajit_jcmds);
+	array_free(ARGS.luajit_opts);
 	
 	#if defined(_WIN32) || defined(_WIN64)
 		FreeLibrary(luacxt);

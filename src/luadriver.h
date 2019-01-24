@@ -24,6 +24,7 @@
 #pragma once
 // This is a template for DLLs to be built off, using consolew.h and ldata.h
 
+#include "lang.h"
 #include "darr.h"
 
 typedef struct tag_LC_ARGS {
@@ -39,6 +40,9 @@ typedef struct tag_LC_ARGS {
 	char** parameters_argv;
 	char** luajit_bc;
 	char** files_index;
+	char** luac_argv;
+	int luac_argc;
+	int do_luac;
 	int do_help;
 	int do_stdin;
 	int restore_console;
@@ -61,13 +65,13 @@ typedef struct tag_LC_ARGS {
 #	else
 #		define LC_LD_API extern __attribute__((visibility("default")))
 #	endif
-
-LC_LD_API int luacon_loaddll(LC_ARGS ARGS);
-
+	
+	LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang);
+	
 #else
-
-typedef int (*luacon_loaddll)(LC_ARGS);
-
+	
+	typedef int (*luacon_loaddll)(LC_ARGS, LangCache*);
+	
 #endif
 
 

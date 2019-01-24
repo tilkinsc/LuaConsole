@@ -1,0 +1,54 @@
+
+OOM=Ошибка: недостаточно памяти! %s\
+OOM_D=Ошибка: недостаточно памяти! %d\n
+
+MALFORMED_J_NO_PARAM=Предупреждение LuaJIT: неправильно сформированный аргумент `-j` не имеет параметра!\
+MALFORMED_O_NO_PARAM=Предупреждение LuaJIT: неправильно сформированный аргумент `-O` не имеет параметра!\
+MALFORMED_B_NO_PARAM=Предупреждение LuaJIT: неправильно сформированный аргумент `-b` не имеет параметра!\
+ERROR_INVALID_ARG=Ошибка: аргумент `%s` не распознан!\
+LC_DLL_MIA=Не удалось найти библиотеку LuaConsole!
+LC_DLL_NO_FUNC=Не удалось найти функцию LuaConsole `luacon_loaddll`!
+
+STACK_DUMP_BEGIN=--------------- Стек дамп ----------------\
+SD_STRING=%d:(строка):`%s`\
+SD_BOOL=%d:(логический):`%s`\
+SD_NUMB=%d:(Число):`%g`\
+SD_FUNC=%d:(функция):`@0x%p`\
+SD_TABLE=%d:(Таблица):`@0x%p`\
+SD_UD=%d:(Userdata):`@0x%p`\
+SD_LUD=%d:(LUserdata):`0x@%p`\
+SD_THREAD=%d:(Нить):`0x%p`\
+SD_NONE=%d:(Никто)\
+SD_OBJ=%d:(объект):%s:`0x@%p`\
+STACK_DUMP_DONE=----------- Дамп стека закончен -----------\
+
+LUA_ERROR= (время выполнения) | Верхняя часть стека: %zu | %s%s\
+
+LUA_ERROR_INTERNAL= (внутренний)
+LUA_ERROR_SYNTAX= (Синтаксис)
+LUA_ERROR_RUNTIME= (время выполнения)
+LUA_ERROR_RAW= | Верхняя часть стека: %zu | %s%s\
+
+SIGINT=Прерванный!
+REPL_LINE_TOO_LONG=Строка ввода слишком длинная!\
+
+GLOBALS_ERROR_BAD_D=Ошибка: указано неверное значение -D. Используйте формат "имя=значение".
+GLOBALS_ERROR_PARSE_D=Ошибка: указано неверное значение -D. Используйте формат "tab.имя=значение".
+
+LIBRARIES_ERROR_START=%s%s%s\
+LIBRARIES_ERROR_1=Ошибка: 
+LIBRARIES_ERROR_END= не может быть обязательным, потому что нет `require()`.
+
+LDATA_BAD_SD=Ошибка: Указан неверный стартовый каталог
+LDATA_BAD_STDIN=LuaConsole произошла ошибка в stdin!\
+LDATA_END_FILE=LuaConsole завершился для файла `%s`!\
+
+JS_NOT_A_STRING=(ошибка объект не является строкой)
+JS_ERROR=LuaJIT Ошибка: %s\
+JS_BAD_COMMAND=Ошибка LuaJIT: неизвестная команда luaJIT или jit.* модули не установлены!\
+JS_JIT_ON=JIT: на
+JS_JIT_OFF=JIT: от
+JS_FAILED_CONTROL_CMD=Предупреждение LuaJIT: Не удалось выполнить команду управления или загрузить модуль расширения!\
+JS_FAILED_SET_O=Предупреждение LuaJIT: Не удалось установить с -O!\
+
+

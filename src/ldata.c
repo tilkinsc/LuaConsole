@@ -23,9 +23,10 @@
 
 
 // environment variable for lua usage
-// TODO: I want to support LUA_INIT_5_2 LUA_INIT_5_1 and LUA_INIT_5_3 (ENV_VAR_EXT) which version takes precedence and falls back to LUA_INIT afterward
-#define ENV_VAR						"LUA_INIT"
+// TODO: I want to support LUA_INIT_5_2 LUA_INIT_5_1 and LUA_INIT_5_3 (ENV_VAR_EXT)
+// 		which version takes precedence and falls back to LUA_INIT afterward
 // #define ENV_VAR_EXT				(0)
+#define ENV_VAR						"LUA_INIT"
 
 
 #include <stdlib.h>
@@ -46,6 +47,8 @@
 #	define LUA_DLL_SO_NAME 			".so"
 #endif
 
+#define _(str) langfile_get(lang, str)
+
 
 #include "lua.h"
 #include "lualib.h"
@@ -55,13 +58,14 @@
 #endif
 
 #include "darr.h"
+#include "lang.h"
 #include "luadriver.h"
 #include "ldata.h"
 #include "consolew.h"
 
 
-static const char HELP_MESSAGE[] =
-	"LuaConsole | Version: 1/13/2019\n\n"
+const char HELP_MESSAGE[] =
+	"LuaConsole | Version: 1/22/2019\n\n"
 	#if LUA_VERSION_NUM <= 501
 		LUA_VERSION " | " LUA_COPYRIGHT "\n"
 	#else
@@ -74,9 +78,9 @@ static const char HELP_MESSAGE[] =
 	#endif
 	"\nSupports Lua5.3, Lua5.2, Lua5.1, LuaJIT5.1\n"
 	"\n"
-	"Usage: luaw" LUA_BIN_EXT_NAME " [FILES] [-w] [-v] [-r] [-R] [-s PATH] [-p] [-c] [-Dvar=val]\n"
+	"Usage: luaw" LUA_BIN_EXT_NAME " [-c] [FILES] [-w] [-v] [-q] [-r] [-R] [-s PATH] [-p] [-Dvar=val]\n"
 	"\t[-Dtb.var=val] [-Lfile.lua] [-Llualib" LUA_DLL_SO_NAME "] [-t{a,b}] [-e \"string\"]\n"
-	"\t[-E \"string\"] "
+	"\t[-E \"string\"] [-] [--] "
 		#if defined(LUA_JIT_51)
 			"[-j{cmd,cmd=arg},...] [-O{level,+flag,-flag,cmd=arg}]\n\t[-b{l,s,g,n,t,a,o,e,-} {IN,OUT}] "
 		#endif
@@ -84,11 +88,14 @@ static const char HELP_MESSAGE[] =
 	"\n"
 	"-w \t\tWith Lua version x.x.x\n"
 	"-v \t\tPrints the Lua version in use\n"
+	"-q \t\tRemove copyright/luajit message\n"
 	"-r \t\tPrevents lua core libraries from loading\n"
 	"-R \t\tPrevents lua environment variables from loading\n"
 	"-s \t\tIssues a new current directory\n"
 	"-p \t\tActivates REPL mode after all or no supplied scripts\n"
-	"-c \t\tNo copyright on init\n"
+	#if !defined(LUA_JIT_51)
+		"-c \t\tWith the following arguments, interface to luac\n"
+	#endif
 	"-d \t\tDefines a global variable as value after '='\n"
 	"-l \t\tExecutes a module before specified script or post-exist\n"
 	"-t[a,b] \tLoads parameters after -l's and -e\n"
@@ -105,7 +112,6 @@ static const char HELP_MESSAGE[] =
 	"-? --help \tDisplays this help message\n"
 	"-n \t\tStart of parameter section\n";
 
-
 // one environment per process
 lua_State* L = NULL;
 
@@ -118,11 +124,15 @@ lua_State* L = NULL;
 	}
 #endif
 
+#if !defined(LUA_JIT_51)
+	extern int luac_main(int argc, char* argv[]);
+#endif
 
 // handles arguments, cwd, loads necessary data, executes lua
-LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
+LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang)
 {
 	ARGS = _ARGS; // global args for all
+	lang = _lang;
 	
 	// print out help
 	if(ARGS.do_help == 1) {
@@ -192,7 +202,10 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 	
 	#if defined(LUA_JIT_51)
 		if(ARGS.no_libraries == 0) {
-			int status = jitargs(L, ARGS.luajit_jcmds, ARGS.luajit_opts, ARGS.luajit_bc, ARGS.copyright_squelch, ARGS.post_exist);
+			int status = jitargs(L,
+				ARGS.luajit_jcmds, ARGS.luajit_opts, ARGS.luajit_bc,
+				ARGS.copyright_squelch, ARGS.post_exist);
+			
 			if(ARGS.luajit_bc != NULL)
 				return status;
 		}
@@ -219,6 +232,17 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 	}
 	
 	
+	int status = 0;
+	
+	#if !defined(LUA_JIT_51)
+		// handle exclusively compilation
+		if(ARGS.do_luac == 1) {
+			luac_main(ARGS.luac_argc, ARGS.luac_argv);
+			goto exit;
+		}
+	#endif
+	
+	
 	// query the ability to post-exist
 	if(!IS_ATTY) {
 		#if defined(_WIN32) || defined(_WIN64)
@@ -237,7 +261,7 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 	}
 	
 	// make sure to start in the requested directory, if any
-	check_error(ARGS.start != NULL && _chdir(ARGS.start) == -1, "Error: Invalid start directory supplied.");
+	check_error((ARGS.start != NULL && _chdir(ARGS.start) == -1), _("LDATA_BAD_SD"));
 	
 	
 	// initiate global variables set up
@@ -252,18 +276,20 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 		load_parameters();
 	
 	// stdin
-	int status = 0;
 	if(ARGS.do_stdin == 1) {
-		status = start_protective_mode_file(0, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+		status = start_protective_mode_file(0,
+			(ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 		if(status != 0) {
-			fprintf(stderr, "LuaConsole had an error in stdin!\n!");
+			fprintf(stderr, _("LDATA_BAD_STDIN"));
 			goto exit;
 		}
 	}
 	
 	if(ARGS.restore_console == 1) {
 		#if defined(_WIN32) || defined(_WIN64)
-			HANDLE hand_stdin = CreateFile("CONIN$", (GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+			HANDLE hand_stdin = CreateFile("CONIN$",
+				(GENERIC_READ | GENERIC_WRITE), FILE_SHARE_READ,
+				0, OPEN_EXISTING, 0, 0);
 			int hand_stdin_final = _open_osfhandle((intptr_t)hand_stdin, _O_TEXT);
 			_dup2(hand_stdin_final, _fileno(stdin));
 			SetStdHandle(STD_INPUT_HANDLE, (HANDLE) _get_osfhandle(_fileno(stdin)));
@@ -277,7 +303,8 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 	
 	// run executable string before -l's
 	if(ARGS.run_str != 0 && ARGS.run_after_libs == 0)
-		start_protective_mode_string(ARGS.run_str, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+		start_protective_mode_string(ARGS.run_str,
+			(ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 	
 	
 	// do passed libraries/modules
@@ -289,7 +316,8 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 	
 	// run executable string after -l's
 	if(ARGS.run_str != 0 && ARGS.run_after_libs == 1)
-		start_protective_mode_string(ARGS.run_str, (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+		start_protective_mode_string(ARGS.run_str,
+			(ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 	
 	
 	
@@ -304,9 +332,10 @@ LC_LD_API int luacon_loaddll(LC_ARGS _ARGS)
 	// files
 	if(ARGS.no_file == 0) {
 		for(size_t i=0; i<ARGS.file_count; i++) {
-			status = start_protective_mode_file(ARGS.files_index[i], (ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
+			status = start_protective_mode_file(ARGS.files_index[i],
+				(ARGS.no_tuple_parameters == 1 ? 0 : ARGS.parameters));
 			if(status != 0) {
-				fprintf(stderr, "LuaConsole ended on file `%s`!\n", ARGS.files_index[i]);
+				fprintf(stderr, _("LDATA_END_FILE"), ARGS.files_index[i]);
 				goto exit;
 			}
 		}
