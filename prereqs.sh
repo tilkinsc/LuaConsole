@@ -54,6 +54,7 @@ function help_message() {
 	echo "		ZIP should be set to an unzipper that takes the .tar or .tar.gz. Defaults to 7zip."
 	echo "		GIT should be set to the git program. Defaults to git in path."
 	echo "\n"
+	exit 0
 }
 
 function failure() {
@@ -67,17 +68,14 @@ function failure() {
 
 if [ "$1" = "/?" ]; then
 	help_message
-	exit 0
 fi
 
 if [ "$1" = "-?" ]; then
 	help_message
-	exit 0
 fi
 
 if [ "$1" = "--help" ]; then
 	help_message
-	exit 0
 fi
 
 
