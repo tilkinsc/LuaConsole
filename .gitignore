@@ -1,4 +1,3 @@
-lua-all
 /.settings
 /.git
 /.vs
@@ -17,4 +16,6 @@ lua-all
 *.tar
 *.gz
 luajit-*/
+lua-all.tar
+lua-all.tar.gz
 lua-all/
