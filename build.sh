@@ -69,7 +69,7 @@ function failure() {
 
 # Basic help switches
 if [ -z "$1" ]; then
-	echo "No arguments specified.\n"
+	echo -i "No arguments specified.\n"
 	help_message
 	exit 1
 fi
@@ -124,7 +124,7 @@ if [ "$1" = "install" ]; then
 		failure
 	fi
 	
-	cp -r bin\Release\* $2
+	cp -r bin/Release/* $2
 	
 	echo "Done."
 	exit 0
@@ -176,7 +176,7 @@ fi
 # --------------------------------------------------------------------
 
 
-function build_luajit() {
+build_luajit () {
 	echo "Building luajit..."
 	
 	pushd luajit-2.0/src
@@ -201,7 +201,7 @@ function build_luajit() {
 }
 
 
-function build_lua() {
+build_lua () {
 	echo "Building $1..."
 	
 	pushd lua-all/$1
@@ -232,7 +232,7 @@ function build_lua() {
 	echo "Finished installing $1."
 }
 
-function build_install() {
+build_install () {
 	echo "Installing $1..."
 	mv *.o $objdir
 	if [ "$1" = "luajit" ]; then
@@ -245,7 +245,7 @@ function build_install() {
 	echo "Finished installing $1."
 }
 
-function build_package() {
+build_package () {
 	if [ "$1" = "luajit" ]; then
 		luaverdef="-DLUA_JIT_51"
 		luaverout="$dlldir/libluajit.so"
@@ -262,8 +262,8 @@ function build_package() {
 	echo "Finished building driver package $1."
 }
 
-function build_driver() {
-	echo "Compiling luaw driver $1..."
+build_driver () {
+	echo "Compiling luaw driver..."
 	$GCC $attrib $dirs -DDEFAULT_LUA=\"lc$1.so\" -c $srcdir/luadriver.c
 	
 	echo "Linking luaw driver $1..."
