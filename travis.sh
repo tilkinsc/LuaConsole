@@ -70,6 +70,34 @@ pushd bin/Debug
 	
 	echo "Test 5"
 	./luaw -w lua-5.1.5 -e "print('Everything went okay')"
+	
+	echo "Test 6"
+	./luaw "res/testing.lua" -Dtest=5 -n a b c
+	
+	echo "Test 7"
+	./luaw -c -o testing.luac "res/testing.lua"
+	./luaw testing.luac -Dtest=5 -n a b c
+	
+	echo "Test 8"
+	./luaw -w luajit -c -o testing.luac "res/testing.lua"
+	./luaw -w luajit -ltesting.luac -Dtest=5 -n a b c
+	echo "Test 8 end"
+	
+	echo "Test 9"
+	./luaw -w lua-5.3.5 -c -o testing.luac "res/testing.lua"
+	./luaw -w lua-5.3.5 -ltesting.luac -Dtest=5 -n a b c
+	echo "Test 9 end"
+	
+	echo "Test 10"
+	./luaw -w lua-5.2.4 -c -o testing.luac "res/testing.lua"
+	./luaw -w lua-5.2.4 -ltesting.luac -Dtest=5 -n a b c
+	echo "Test 10 end"
+	
+	echo "Test 11"
+	./luaw -w lua-5.1.5 -c -o testing.luac "res/testing.lua"
+	./luaw -w lua-5.1.5 -ltesting.luac -Dtest=5 -n a b c
+	echo "Test 11 end"
+	
 popd
 
 # Code coverage

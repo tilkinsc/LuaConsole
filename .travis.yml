@@ -14,8 +14,22 @@ braches:
   only:
     - master
 
-script:
-  - bash travis.sh
+build_cmd: &build_cmd
+  - ./travis.sh
+
+before_script:
+  - chmod +x travis.sh
+  - chmod +x build.sh
+  - chmod +x prereqs.sh
+
+jobs:
+  include:
+    - stage: build
+      script: *build_cmd
+      os: linux
+    - stage: build
+      script: *build_cmd
+      os: osx
 
 after_success:
   - echo "Build and tests successful"
