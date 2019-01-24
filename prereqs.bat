@@ -62,6 +62,33 @@ setlocal
 	)
 	
 	
+	REM - Basic Reseter ----------------------------------------------------
+	
+	
+	IF [reset] == [%1] (
+		echo Cleaning luajit...
+		del /F /S luajit-2.0\*.o
+		del /F /S luajit-2.0\*.dll
+		del /F /S luajit-2.0\*.lib
+		del /F /S luajit-2.0\*.exp
+		
+		echo Cleaning lua-all...
+		rmdir /S /Q lua-all
+		del lua-all.tar
+		
+		%ZIP% lua-all.tar.gz
+		%ZIP% lua-all.tar
+		
+		IF NOT EXIST "lua-all" (
+			echo Failed to unpack lua-all.
+			goto failure
+		)
+		
+		echo Done.
+		exit /b 0
+	)
+	
+	
 	REM - luajit Download --------------------------------------------------
 	
 	
@@ -132,8 +159,9 @@ REM Simplex help message
 :help
 	echo Usage:
 	echo.
-	echo		prereqs.bat                              Downloads and extracts the lua files
+	echo		prereqs.bat                              Downloads and extracts the dependencies
 	echo		prereqs.bat clean                        Cleans the environment of downloaded files
+	echo		prereqs.bat reset                        Removes and re-extracts the dependencies
 	echo		prereqs.bat -? /? --help                 Shows this help message
 	echo.
 	echo Notes:

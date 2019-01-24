@@ -37,16 +37,17 @@ if [ -z "$DLM" ]; then DLM="curl";	fi
 function help_message() {
 	echo "Usage:"
 	echo "\n"
-	echo "		prereqs.bat                              Downloads and extracts the lua files"
-	echo "		prereqs.bat clean                        Cleans the environment of downloaded files"
-	echo "		prereqs.bat -? /? --help                 Shows this help message"
+	echo "		prereqs.sh                              Downloads and extracts the dependencies"
+	echo "		prereqs.sh clean                        Cleans the environment of downloaded files"
+	echo "		prereqs.sh reset                        Removes and re-extracts the dependencies"
+	echo "		prereqs.sh -? /? --help                 Shows this help message"
 	echo "\n"
 	echo "Notes:"
 	echo "	Uses `7zip` found in Program Files    ( https://www.7-zip.org/download.html )"
 	echo "	Uses `bitsadmin` for downloading      ( core to most windows installations  )"
 	echo "	Uses `git` found in PATH              ( https://gitforwindows.org/          )"
 	echo "\n"
-	echo "Configure above notes with set:"
+	echo "Configure above notes with export:"
 	echo "		ZIP, GIT, and DLM"
 	echo "\n"
 	echo "		DLM should be set to bitsadmin or wget or curl. Defaults to bitsadmin."
@@ -90,6 +91,30 @@ if [ "$1" = "clean" ]; then
 	echo "Deleting lua-all..."
 	rm lua-all.tar.gz
 	rm -f -r -d lua-all
+	
+	echo "Done."
+	exit 0
+fi
+
+
+# - Basic Reseter ----------------------------------------------------
+
+
+if [ "%1" = "reset" ]; then
+	echo Cleaning luajit...
+	rm -f -r luajit-2.0/*.o
+	rm -f -r luajit-2.0/*.so
+	rm -f -r luajit-2.0/*.so.*
+	
+	echo Cleaning lua-all
+	rm -f -d lua-all
+	
+	$ZIP lua-all.tar.gz
+	
+	if [ ! -d "lua-all" ]; then
+		echo Failed to unpack lua-all.
+		failure
+	fi
 	
 	echo "Done."
 	exit 0
