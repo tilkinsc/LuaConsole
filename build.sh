@@ -306,7 +306,6 @@ if [ "$1" = "driver" ]; then
 		if [ ! -d "$root/jit" ]; then
 			mkdir -p $root/jit
 			cp -r luajit-2.0/src/jit/* $root/jit
-			ls $root/jit
 		fi
 	else
 		if [ ! -d "lua-all/$2" ]; then
@@ -351,7 +350,6 @@ if [ "$1" = "package" ]; then
 		if [ ! -d "$root/jit" ]; then
 			mkdir -p $root/jit
 			cp -r luajit-2.0/src/jit/* $root/jit
-			ls $root/jit
 		fi
 	else
 		if [ ! -d "lua-all/$2" ]; then

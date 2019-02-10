@@ -65,7 +65,7 @@
 
 
 const char HELP_MESSAGE[] =
-	"LuaConsole | Version: 1/22/2019\n\n"
+	"LuaConsole | Version: 2/10/2019\n\n"
 	#if LUA_VERSION_NUM <= 501
 		LUA_VERSION " | " LUA_COPYRIGHT "\n"
 	#else
@@ -105,7 +105,7 @@ const char HELP_MESSAGE[] =
 	"-  \t\tProcesses input from stdin\n"
 	"-- \t\tStops processing parameters\n"
 	#if defined(LUA_JIT_51)
-		"-j \t\t [LuaJIT] Performs a control command loads an extension module\n"
+		"-j \t\t [LuaJIT] Performs a control command/loads an extension module\n"
 		"-O \t\t [LuaJIT] Sets an optimization level/parameters\n"
 		"-b \t\t [LuaJIT] Saves or lists bytecode\n"
 	#endif

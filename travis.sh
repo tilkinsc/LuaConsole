@@ -59,6 +59,10 @@ pushd bin/Debug
 	echo "Test 1"
 	./luaw -e "print('Everything went okay')"
 	
+	# Code coverage
+	gcov *.gc*
+	bash <(curl -s https://codecov.io/bash)
+	
 	echo "Test 2"
 	./luaw -w luajit -e "print('Everything went okay')"
 	
@@ -73,10 +77,12 @@ pushd bin/Debug
 	
 	echo "Test 6"
 	./luaw res/testing.lua -Dtest=5 -n a b c
+	echo "Test 6 end"
 	
 	echo "Test 7"
 	./luaw -b res/testing.lua testing.luac
 	./luaw testing.luac -Dtest=5 -n a b c
+	echo "Test 7 end"
 	
 	echo "Test 8"
 	./luaw -w luajit -c -o testing.luac "res/testing.lua"
@@ -100,9 +106,6 @@ pushd bin/Debug
 	
 popd
 
-# Code coverage
-gcov *.gc*
-bash <(curl -s https://codecov.io/bash)
 
 # Update cache if needed
 cp -f -r -u lua-all $HOME/cistore
