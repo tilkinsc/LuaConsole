@@ -14,22 +14,34 @@ braches:
   only:
     - master
 
-build_cmd: &build_cmd
-  - ./travis.sh
+
 
 before_script:
-  - chmod +x travis.sh
-  - chmod +x build.sh
+  - chmod +x travis.linux.sh
+  - chmod +x travis.mac.sh
+  - chmod +x build.linux.sh
+  - chmod +x build.mac.sh
   - chmod +x prereqs.sh
+
+
+
+build_cmd_linux: &build_cmd_linux
+  - ./travis.linux.sh
+
+build_cmd_mac: &build_cmd_mac
+  - ./travis.mac.sh
 
 jobs:
   include:
     - stage: build
-      script: *build_cmd
+      script: *build_cmd_linux
       os: linux
     - stage: build
-      script: *build_cmd
+      script: *build_cmd_mac
+      osx_image: xcode10.2
       os: osx
+
+
 
 after_success:
   - echo "Build and tests successful"
