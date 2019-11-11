@@ -1,25 +1,17 @@
----
-name: REPORTING
-about: Short Title of Problem
-title: "[Bug Report]"
-labels: bug, not confirmed
-assignees: ''
 
----
 
-**Describe the bug**
+**Describe the bug**  
 What happened?
 
-**What platform and build date are you using?**
-OS: 
-Build: 
+**What version are you using?**  
+The version can be found with `/dump KiwiItemInfo._VERSION`
 
-**To Reproduce**
-Steps to reproduce the behavior:
+**To Reproduce**  
+Steps to reproduce the behavior:  
 1. 
 2. 
 3. 
 4. 
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**Is this a regression?**
+Did the problem exist in previous versions?
