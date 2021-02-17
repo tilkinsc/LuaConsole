@@ -36,28 +36,28 @@ if [ -z "$GCC_VER" ]; then			GCC_VER=gnu99;		fi
 # On help message request
 function help_message() {
 	echo "Usage:"
-	echo ""
+	echo
 	echo "		build.bat build lua-x.x.x              Builds the driver with a default package"
 	echo "		build.bat package lua-x.x.x            Creates packages for the driver"
 	echo "		build.bat clean                        Cleans the environment of built files"
 	echo "		build.bat install [directory]          Installs to a pre-created directory"
 	echo "		build.bat -? /? --help                 Shows this help message"
-	echo ""
+	echo
 	echo "Notes:"
 	echo "      After building, you may need to configure LD_LIBRARY_PATH to bin/* to run"
-	echo "		Uses `debug` for debug binaries"
-	echo "		Uses `debug_coverage` for coverage enabling"
-	echo "		Uses `GCC` for specifying GCC executable"
-	echo "		Uses `OBJCOPY` for modifying GCC objects"
-	echo "		Uses `AR` for specifying AR executable"
-	echo "		Uses `MAKE` for specifying MAKE executable"
-	echo "		Uses `GCC_VER` for specifying lua gcc version for building lua dlls"
-	echo ""
+	echo "		Uses 'debug' for debug binaries"
+	echo "		Uses 'debug_coverage' for coverage enabling"
+	echo "		Uses 'GCC' for specifying GCC executable"
+	echo "		Uses 'OBJCOPY' for modifying GCC objects"
+	echo "		Uses 'AR' for specifying AR executable"
+	echo "		Uses 'MAKE' for specifying MAKE executable"
+	echo "		Uses 'GCC_VER' for specifying lua gcc version for building lua dlls"
+	echo
 	echo "Configure above notes with set:"
 	echo "		debug, debug_coverage, GCC, OBJCOPY, AR, MAKE, GCC_VER"
-	echo ""
+	echo
 	echo "	Specify luajit if you want to use luajit"
-	echo ""
+	echo
 }
 
 # On failure found
@@ -176,7 +176,7 @@ fi
 # --------------------------------------------------------------------
 
 
-build_luajit () {
+build_luajit() {
 	echo "Building luajit..."
 	
 	pushd luajit-2.0/src
@@ -201,7 +201,7 @@ build_luajit () {
 }
 
 
-build_lua () {
+build_lua() {
 	echo "Building $1..."
 	
 	pushd lua-all/$1
@@ -232,7 +232,7 @@ build_lua () {
 	echo "Finished installing $1."
 }
 
-build_install () {
+build_install() {
 	echo "Installing $1..."
 	mv *.o $objdir
 	if [ "$1" = "luajit" ]; then
@@ -246,7 +246,7 @@ build_install () {
 	echo "Finished installing $1."
 }
 
-build_package () {
+build_package() {
 	if [ "$1" = "luajit" ]; then
 		luaverdef="-DLUA_JIT_51"
 		luaverout="$dlldir/libluajit.so"
@@ -263,7 +263,7 @@ build_package () {
 	echo "Finished building driver package $1."
 }
 
-build_driver () {
+build_driver() {
 	echo "Compiling luaw driver..."
 	$GCC $attrib $dirs -DDEFAULT_LUA=\"lc$1.so\" -c $srcdir/luadriver.c
 	

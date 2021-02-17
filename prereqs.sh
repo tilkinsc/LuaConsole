@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # MIT License
 # 
@@ -26,71 +26,92 @@
 # - Basic Variables --------------------------------------------------
 
 
-if [ -z "$ZIP" ]; then ZIP="tar xzf";	fi
-if [ -z "$GIT" ]; then GIT="git";		fi
-if [ -z "$DLM" ]; then DLM="curl";		fi
+[[ -z "${ZIP}" ]] && ZIP="tar"
+[[ -z "${GIT}" ]] && GIT="git"
+[[ -z "${DLM}" ]] && DLM="curl"
 
 
 # - Basic Functions --------------------------------------------------
 
 
+error() {
+	printf "\n\n$0 : ${2} : Error: ${1}\n" 1>&2
+	exit 1
+}
+
+# TODO: translate, 'cat prereqs.espanol.linux.help'
 help_message() {
-	echo "Usage:"
-	echo "\n"
-	echo "		prereqs.sh                              Downloads and extracts the dependencies"
-	echo "		prereqs.sh clean                        Cleans the environment of downloaded files"
-	echo "		prereqs.sh reset                        Removes and re-extracts the dependencies"
-	echo "		prereqs.sh -? /? --help                 Shows this help message"
-	echo "\n"
-	echo "Notes:"
-	echo "	Uses `7zip` found in Program Files    ( https://www.7-zip.org/download.html )"
-	echo "	Uses `bitsadmin` for downloading      ( core to most windows installations  )"
-	echo "	Uses `git` found in PATH              ( https://gitforwindows.org/          )"
-	echo "\n"
-	echo "Configure above notes with export:"
-	echo "		ZIP, GIT, and DLM"
-	echo "\n"
-	echo "		DLM should be set to bitsadmin or wget or curl. Defaults to bitsadmin."
-	echo "		ZIP should be set to an unzipper that takes the .tar or .tar.gz. Defaults to 7zip."
-	echo "		GIT should be set to the git program. Defaults to git in path."
-	echo "\n"
+	printf """
+Usage:
+    
+    prereqs.sh download         Downloads and extracts the dependencies
+    prereqs.sh clean            Cleans the environment of downloaded files
+    prereqs.sh reset            Removes and re-extracts the dependencies
+    prereqs.sh -? /? --help     Shows this help message
+    
+Notes:
+    Uses '7zip'	                ( apt-get install p7zip-full )
+    Uses 'git'                  ( apt-get install git        )
+
+Listens to these variables:
+    ZIP, GIT, and DLM
+    
+    ZIP should be set to tar or 7zip.       Defaults to tar.
+    GIT should be set to the git binary.    Defaults to git.
+    DLM should be set to wget or curl.      Defaults to curl.
+
+"""
 	exit 0
 }
 
-failure() {
-	echo "An error has occured!"
-	exit 1
-}
+
+
+# - Basic Dependencies Checking --------------------------------------
+
+
+if [[ "${ZIP}" == "7zip" ]]; then
+	[[ which "7z" ]] || error "\$ZIP - 7zip requested but not found in path" $LINENO
+fi
+if [[ "${ZIP}" == "tar" ]]; then
+	[[ which "tar" ]] || error "\$ZIP - tar requested but not found in path" $LINENO
+fi
+
+if [[ "${GIT}" == "git" ]]; then
+	[[ which "${GIT}" ]] || error "\$GIT - git requested but not found by '${GIT}'" $LINENO
+fi
+
+if [[ "${DLM}" == "curl" ]]; then
+	[[ which "curl" ]] || error "\$DLM - curl requested but not found in path" $LINENO
+fi
+if [[ "${DLM}" == "wget" ]]; then
+	[[ which "wget" ]] || error "\$DLM - wget requested but not found in path" $LINENO
+fi
 
 
 # - Basic Switches ---------------------------------------------------
 
 
-if [ "$1" = "/?" ]; then
-	help_message
-fi
+[[ -z "${1}" || "${1}" == "/?" || "${1}" == "-?" || "${1}" == "--help" ]] && help_message
 
-if [ "$1" = "-?" ]; then
-	help_message
-fi
 
-if [ "$1" = "--help" ]; then
-	help_message
-fi
+# - Basic Innerworking Variables -------------------------------------------
+
+
+CWD="$(pwd)"
 
 
 # - Basic Cleaner ----------------------------------------------------
 
 
-if [ "$1" = "clean" ]; then
-	echo "Deleting luajit..."
-	rm -f -r -d luajit-2.0
+if [[ "${1}" == "clean" ]]; then
+	printf "Deleting luajit (${CWD}/luajit-2.0)...\n"
+	rm -f -r -d -I "${CWD}/luajit-2.0"
 	
-	echo "Deleting lua-all..."
-	rm lua-all.tar.gz
-	rm -f -r -d lua-all
+	printf "Deleting lua-all (${CWD}/lua-all)...\n"
+	rm -i "${CWD}/lua-all.tar.gz"
+	rm -f -r -d -I "${CWD}/lua-all"
 	
-	echo "Done."
+	printf "Done.\n"
 	exit 0
 fi
 
@@ -98,85 +119,58 @@ fi
 # - Basic Reseter ----------------------------------------------------
 
 
-if [ "%1" = "reset" ]; then
-	echo Cleaning luajit...
-	rm -f -r luajit-2.0/*.o
-	rm -f -r luajit-2.0/*.so
-	rm -f -r luajit-2.0/*.so.*
+if [[ "${1}" == "reset" ]]; then
+	printf "Cleaning (${CWD}/luajit-2.0)...\n"
+	rm -f -r "${CWD}/luajit-2.0/*.o"
+	rm -f -r "${CWD}/luajit-2.0/*.so"
+	rm -f -r "${CWD}/luajit-2.0/*.so.*"
+	rm -f -r "${CWD}/luajit-2.0/*.dll"
+	rm -f -r "${CWD}/luajit-2.0/*.lib"
+	rm -f -r "${CWD}/luajit-2.0/*.exp"
 	
-	echo Cleaning lua-all
-	rm -f -d lua-all
+	printf "Cleaning (${CWD}/lua-all)...\n"
+	rm -f -r -d -I "${CWD}/lua-all"
 	
-	$ZIP lua-all.tar.gz
+	printf "Extracting (${CWD}/lua-all.tar.gz)..."
+	[[ "${ZIP}" == "tar" ]] && tar xzf "${CWD}/lua-all.tar.gz"
+	[[ "${ZIP}" == "7zip" ]] && 7z x "${CWD}/lua-all.tar.gz"
+	[[ -d "${CWD}/lua-all" ]] || error "failed to unpack '${CWD}/lua-all'" $LINENO
 	
-	if [ ! -d "lua-all" ]; then
-		echo Failed to unpack lua-all.
-		failure
-	fi
-	
-	echo "Done."
+	printf "Done.\n"
 	exit 0
 fi
 
 
-# - luajit Download --------------------------------------------------
+# - Lua Download -----------------------------------------------------
 
 
-echo "Checking for cached luajit folder ..."
-if [ ! -d "luajit-2.0" ]; then
-	echo "Not found. Downloading..."
-	$GIT clone http://luajit.org/git/luajit-2.0.git
-fi
-
-if [ ! -d "luajit-2.0" ]; then
-	echo "Failure to git download luajit."
-	failure
-fi
-
-echo "Cached."
-
-
-# - lua-all Download -------------------------------------------------
-
-
-# lua-all download
-echo "Checking for cached lua-all.tar.gz..."
-if [ ! -f "lua-all.tar.gz" ]; then
-	echo "Not found. Downloading..."
-	if [ "$DLM" = "curl" ]; then
-		curl "https://www.lua.org/ftp/lua-all.tar.gz" > lua-all.tar.gz
+if [[ "${1}" == "download" ]]; then
+	printf "Checking for cached (${CWD}/luajit-2.0) folder...\n"
+	if [[ ! -d "${CWD}/luajit-2.0" ]]; then
+		printf "Not found. Downloading...\n"
+		$GIT clone "http://luajit.org/git/luajit-2.0.git" || error "failed to clone luajit-2.0" $LINENO
 	fi
-	if [ "$DLM" = "wget" ]; then
-		echo "Not implemented!"
-		failure
+	printf "Cached.\n"
+
+	printf "Checking for cached (${CWD}/lua-all.tar.gz) file...\n"
+	if [[ ! -f "${CWD}/lua-all.tar.gz" ]]; then
+		printf "Not found. Downloading...\n"
+		[[ "${DLM}" == "curl" ]] && curl "https://www.lua.org/ftp/lua-all.tar.gz" > "${CWD}/lua-all.tar.gz"
+		[[ "${DLM}" == "wget" ]] && wget "https://www.lua.org/ftp/lua-all.tar.gz"
+		[[ -f "${CWD}/lua-all.tar.gz" ]] || error "failed to download lua-all" $LINENO
 	fi
-	if [ ! -f "lua-all.tar.gz" ]; then
-		echo "lua-all.tar.gz not downloaded."
-		failure
+	printf "Cached.\n"
+
+	printf "Checking for cached (${CWD}/lua-all) folder...\n"
+	if [[ ! -d "${CWD}/lua-all" ]]; then
+		printf "Not found. Unpacking...\n"
+		[[ "${ZIP}" == "tar" ]] && tar xzf "${CWD}/lua-all.tar.gz"
+		[[ "${ZIP}" == "7zip" ]] && 7z x "${CWD}/lua-all.tar.gz"
+		[[ -d "${CWD}/lua-all" ]] || error "failed to unpack lua-all" $LINENO
 	fi
+	printf "Cached.\n"
+
+	printf "Dependencies downloaded successfully.\n"
+	exit 0
 fi
-
-echo "Cached."
-
-
-# lua-all extract
-echo "Checking for cached lua-all folder..."
-if [ ! -d "lua-all" ]; then
-	echo "Not found. Unpacking lua-all.tar.gz"
-	
-	$ZIP lua-all.tar.gz
-	
-	if [ ! -d "lua-all" ]; then
-		echo "Failure to unpack lua-all."
-		failure
-	fi
-fi
-
-echo "Cached."
-
-
-# - Exit Gracefully --------------------------------------------------
-
-
-echo "Prerequisits downloaded and extracted!"
 
