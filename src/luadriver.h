@@ -72,7 +72,7 @@ typedef struct tag_LC_ARGS {
 	LC_LD_API int luacon_loaddll(LC_ARGS _ARGS, LangCache* _lang);
 	
 #else
-	
+#	define LC_LD_API
 	typedef int (*luacon_loaddll)(LC_ARGS, LangCache*);
 	
 #endif

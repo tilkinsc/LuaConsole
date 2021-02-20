@@ -175,7 +175,7 @@ static inline char* strnxt(const char* str1) {
 }
 
 // counts the number of 'char c' occurances in a string
-// WARNING: while(1){} if non-null-terminal'd data chunk
+// WARNING: while(1){} if non-null-terminated data chunk
 static inline size_t strcnt(const char* str1, char c) {
 	size_t count = 0;
 	while(*str1++ != '\0' && (*str1 == c ? ++count : 1));
