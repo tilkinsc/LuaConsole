@@ -1,6 +1,7 @@
 /.settings
 /.git
 /.vs
+/.vscode
 
 /build/*
 /obj/*
