@@ -1,6 +1,6 @@
 @REM MIT License
 @REM 
-@REM Copyright (c) 2017-2019 Cody Tilkins
+@REM Copyright (c) 2017-2021 Cody Tilkins
 @REM 
 @REM Permission is hereby granted, free of charge, to any person obtaining a copy
 @REM of this software and associated documentation files (the "Software"), to deal

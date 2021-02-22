@@ -1,6 +1,6 @@
 /* MIT License
  * 
- * Copyright (c) 2017-2019 Cody Tilkins
+ * Copyright (c) 2017-2021 Cody Tilkins
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,8 +50,8 @@
 #	include <dlfcn.h>
 #endif
 
-#include "darr.h"
 #include "luadriver.h"
+#include "darr.h"
 #include "lang.h"
 
 
@@ -265,7 +265,7 @@ int main(int argc, char** argv) {
 	if(req_pe == 1)
 		ARGS.post_exist = 1;
 	
-	luacon_loaddll _luacon_loaddll = 0;
+	luacon_loaddll _luacon_loaddll = (luacon_loaddll*) 0;
 	
 	char luastr[260];
 	if(ARGS.luaver != 0) {

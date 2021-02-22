@@ -2,8 +2,8 @@
 /.git
 /.vs
 
-/obj/*.o
-/obj/*.obj
+/build/*
+/obj/*
 /src/*.o
 /src/*.obj
 /bin/*
@@ -15,7 +15,7 @@
 *.gcno
 *.tar
 *.gz
-luajit-*/
+luajit-*/*
 lua-all.tar
 lua-all.tar.gz
-lua-all/
+lua-all/*

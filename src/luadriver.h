@@ -1,6 +1,6 @@
 /* MIT License
  * 
- * Copyright (c) 2017-2019 Cody Tilkins
+ * Copyright (c) 2017-2021 Cody Tilkins
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,9 @@
  * SOFTWARE.
  */
 
-#pragma once
 // This is a template for DLLs to be built off, using consolew.h and ldata.h
+
+#pragma once
 
 #include "lang.h"
 #include "darr.h"
