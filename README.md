@@ -20,7 +20,7 @@ For more information, visit [LuaConsole Github Website](https://tilkinsc.github.
 * Have low code-coverage to prevent redundancy being executed (0-30% pseudo-goal)
 * Support everything compatible with PUC-Lua and LuaJIT
 * Prevent messy, obfuscating code
-* Be CLI dependant and independant  
+* Be CLI dependent and independent  
 
 # Building
 [Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
@@ -76,7 +76,7 @@ dofile('res/testing.lua')
 REM Using type
 type res\testing.lua | luaw -Dtest=5 -n a b c -
 
-REM With Windows Registry enchancements found below
+REM With Windows Registry enhancements found below
 res\testing.lua | luaw -Dtest=5 -n a b c -
 res\testing | luaw -Dtest=5 -n a b c -
 ```

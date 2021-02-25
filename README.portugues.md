@@ -76,7 +76,7 @@ dofile('res/testing.lua')
 REM Usando type
 type res\testing.lua | luaw -Dtest=5 -n a b c -
 
-REM Com os aprimoramentos do Windows Registry encontrados abaixo
+REM Use os aprimoramentos do Registro do Windows encontrados abaixo
 res\testing.lua | luaw -Dtest=5 -n a b c -
 res\testing | luaw -Dtest=5 -n a b c -
 ```
