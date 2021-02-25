@@ -25,87 +25,95 @@
 set -e
 
 # Init
-echo "> PREREQS"
-if [ ! "$(ls -A $HOME/cistore/lua-all)" ]; then
-	echo "Not cached. Downloading..."
+printf "> PREREQS\n"
+if [[ ! "$(ls -A $HOME/cistore/lua-all)" ]]; then
+	printf "Not cached. Downloading...\n"
 	
-	./prereqs.sh
+	./prereqs.sh download
 	
 	cp -r lua-all $HOME/cistore
 	cp -r luajit-2.0 $HOME/cistore
 	
-	echo "Travis-CI cache created."
+	printf "Travis-CI cache created.\n"
 else
-	echo "Cached. Migrating..."
+	printf "Cached. Migrating...\n"
 	cp -r $HOME/cistore/lua-all lua-all
 	cp -r $HOME/cistore/luajit-2.0 luajit-2.0
 fi
 
 
 # Building
-echo "> BUILDING"
+printf "> BUILDING\n"
 export debug=1
 export debug_coverage=1
 ./build.mac.sh driver luajit
+./build.mac.sh package lua-5.4.2
 ./build.mac.sh package lua-5.3.5
 ./build.mac.sh package lua-5.2.4
 ./build.mac.sh package lua-5.1.5
 
 # Testing
-echo "> TESTING"
+printf "> TESTING\n"
 export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
-echo $LD_LIBRARY_PATH
+printf "LD_LIBRARY_PATH=$LD_LIBRARY_PATH\n"
 pushd bin/Debug
-	echo "Test 1"
+	printf "Test 1\n"
 	./luaw -e "print('Everything went okay')"
 	
 	# Code coverage
+	printf "CodeCoverage snapshot\n"
 	gcov *.gc*
 	bash <(curl -s https://codecov.io/bash)
 	
-	echo "Test 2"
+	printf "Test 2\n"
 	./luaw -w luajit -e "print('Everything went okay')"
 	
-	echo "Test 3"
+	printf "Test 3\n"
 	./luaw -w lua-5.3.5 -e "print('Everything went okay')"
 	
-	echo "Test 4"
+	printf "Test 4\n"
 	./luaw -w lua-5.2.4 -e "print('Everything went okay')"
 	
-	echo "Test 5"
+	printf "Test 5\n"
 	./luaw -w lua-5.1.5 -e "print('Everything went okay')"
 	
-	echo "Test 6"
+	printf "Test 6\n"
 	./luaw res/testing.lua -Dtest=5 -n a b c
-	echo "Test 6 end"
+	printf "Test 6 end\n"
 	
-	echo "Test 7"
-	./luaw -b res/testing.lua testing.luac
-	./luaw testing.luac -Dtest=5 -n a b c
-	echo "Test 7 end"
+	printf "Test 7\n"
+	./luaw -b res/testing.lua testing.luac1
+	./luaw testing.luac1 -Dtest=5 -n a b c
+	printf "Test 7 end\n"
 	
-	echo "Test 8"
-	./luaw -w luajit -c -o testing.luac "res/testing.lua"
-	./luaw -w luajit -ltesting.luac -Dtest=5 -n a b c
-	echo "Test 8 end"
+	printf "Test 8\n"
+	./luaw -w luajit -c -o testing.luac2 "res/testing.lua"
+	./luaw -w luajit -ltesting.luac2 -Dtest=5 -n a b c
+	printf "Test 8 end\n"
 	
-	echo "Test 9"
-	./luaw -w lua-5.3.5 -c -o testing.luac "res/testing.lua"
-	./luaw -w lua-5.3.5 -ltesting.luac -Dtest=5 -n a b c
-	echo "Test 9 end"
+	printf "Test 9\n"
+	./luaw -w lua-5.4.2 -c -o testing.luac3 "res/testing.lua"
+	./luaw -w lua-5.4.2 -ltesting.luac3 -Dtest=5 -n a b c
+	printf "Test 9 end\n"
 	
-	echo "Test 10"
-	./luaw -w lua-5.2.4 -c -o testing.luac "res/testing.lua"
-	./luaw -w lua-5.2.4 -ltesting.luac -Dtest=5 -n a b c
-	echo "Test 10 end"
+	printf "Test 10\n"
+	./luaw -w lua-5.3.5 -c -o testing.luac4 "res/testing.lua"
+	./luaw -w lua-5.3.5 -ltesting.luac4 -Dtest=5 -n a b c
+	printf "Test 10 end\n"
 	
-	echo "Test 11"
-	./luaw -w lua-5.1.5 -c -o testing.luac "res/testing.lua"
-	./luaw -w lua-5.1.5 -ltesting.luac -Dtest=5 -n a b c
-	echo "Test 11 end"
+	printf "Test 11\n"
+	./luaw -w lua-5.2.4 -c -o testing.luac5 "res/testing.lua"
+	./luaw -w lua-5.2.4 -ltesting.luac5 -Dtest=5 -n a b c
+	printf "Test 11 end\n"
+	
+	printf "Test 12\n"
+	./luaw -w lua-5.1.5 -c -o testing.luac6 "res/testing.lua"
+	./luaw -w lua-5.1.5 -ltesting.luac6 -Dtest=5 -n a b c
+	printf "Test 12 end\n"
 	
 popd
 
+printf "Testing complete.\n"
 
 # Update cache if needed
 cp -f -r -u lua-all $HOME/cistore
