@@ -1,11 +1,11 @@
 language: c
 os: linux
+dist: trusty
 
 cache:
   directories:
     - $HOME/cistore
 
-dist: trusty
 
 compiler:
   - gcc
@@ -36,6 +36,7 @@ jobs:
     - stage: build
       script: *build_cmd_linux
       os: linux
+      dist: trusty
     - stage: build
       script: *build_cmd_mac
       osx_image: xcode10.2
