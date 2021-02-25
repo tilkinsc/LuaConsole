@@ -15,7 +15,6 @@ branches:
     - master
 
 
-
 before_script:
   - chmod +x travis.linux.sh
   - chmod +x travis.mac.sh
@@ -24,26 +23,18 @@ before_script:
   - chmod +x prereqs.sh
 
 
-
-build_cmd_linux: &build_cmd_linux
-  - ./travis.linux.sh
-
-build_cmd_mac: &build_cmd_mac
-  - ./travis.mac.sh
-
 jobs:
   allow_failures:
   - os: osx
   include:
     - stage: build
-      script: *build_cmd_linux
+      script: ./travis.linux.sh
       os: linux
       dist: trusty
     - stage: build
-      script: *build_cmd_mac
+      script: ./travis.mac.sh
       osx_image: xcode10.2
       os: osx
-
 
 
 after_success:
