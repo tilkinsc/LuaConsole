@@ -1,16 +1,16 @@
 language: c
+os: linux
 
 cache:
   directories:
     - $HOME/cistore
 
 dist: trusty
-sudo: true
 
 compiler:
   - gcc
 
-braches:
+branches:
   only:
     - master
 
