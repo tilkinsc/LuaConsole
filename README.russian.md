@@ -26,12 +26,10 @@ https://github.com/tilkinsc/LuaConsole
 [Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
 
 # Использование с LuaRocks
-[Windows MinGW](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW)  
-[Linux GCC](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Linux-GCC)  
-[Mac GCC](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Mac-GCC)  
+https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support   
 
 # Использование с LuaDIST
-[Windows/Unix LuaDIST](https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS)
+https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS
 
 # тестирование
 ```bash

@@ -23,15 +23,13 @@ Para mais informações, visite o [Site do LuaConsole Github] (https://tilkinsc.
 * Seja CLI dependente e independente 
 
 # Construção
-[Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
+[Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions
 
 # Usando com o LuaRocks
-[Windows MinGW](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Windows-MinGW)  
-[Linux GCC](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Linux-GCC)  
-[Mac GCC](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support-Mac-GCC)  
+https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support  
 
 # Usando com o LuaDIST
-[Windows/Unix LuaDIST](https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS)
+https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS
 
 # Testando
 ```bash
