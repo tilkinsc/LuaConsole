@@ -70,7 +70,7 @@ setlocal
 	
 	
 	IF [clean] == [%1] (
-		echo Cleaning build directory (%CWD%)...
+		echo Cleaning build directory %CWD% ...
 		echo Remove %CWD%\include\*.h
 		del %CWD%\include\*.h
 		echo Remove %CWD%\dll\*.dll
@@ -99,7 +99,7 @@ setlocal
 			goto failure
 		)
 		
-		echo Installing to directory (%2)...
+		echo Installing to directory %2 ...
 		xcopy /Y %CWD%\bin\Release\* %2
 		
 		echo Done.
@@ -128,7 +128,7 @@ setlocal
 	set srcdir=%CWD%\src
 	set incdir=%CWD%\include
 	
-	set "dirs=-L%srcdir% -L%libdir% -L%dlldir% -I%srcdir% -I%incdir%""
+	set "dirs=-L%srcdir% -L%libdir% -L%dlldir% -I%srcdir% -I%incdir%"
 	
 	
 	REM - Basic Cache Checking ---------------------------------------------
@@ -149,7 +149,7 @@ setlocal
 	
 	
 	IF [%1] == [driver] (
-		echo Cleaning workspace (%CWD%)...
+		echo Cleaning workspace %CWD% ...
 		
 		REM Resets bin
 		IF EXIST "%root%" rmdir /S /Q %root%
@@ -158,8 +158,8 @@ setlocal
 		del %dlldir%\*.dll
 		
 		REM Create build structure
-		mkdir %resdir%
-		mkdir %dlldir%
+		mkdir %root%\res
+		mkdir %root%\dll
 		mkdir %root%\lang
 		
 		REM Build dependencies
@@ -241,51 +241,50 @@ setlocal
 	
 	:build_luajit
 	setlocal
-		echo Locally building luajit (%CWD%\luajit-2.0)...
+		echo Locally building luajit %CWD%\luajit-2.0 ...
 			
 		pushd %CWD%\luajit-2.0\src
-			IF NOT EXIST "lua51.dll" (
+			IF NOT EXIST "libluajit.dll" (
 				%MAKE% -j%NUMBER_OF_PROCESSORS%
 			) ELSE (
-				echo lua51.dll already cached.
+				echo libluajit.dll already cached.
 			)
 			
-			echo Locally installing luajit (%CWD%)...
-			xcopy /Y lua.h		%incdir%
-			xcopy /Y luaconf.h	%incdir%
-			xcopy /Y lualib.h	%incdir%
-			xcopy /Y lauxlib.h	%incdir%
-			xcopy /Y luajit.h	%incdir%
-			xcopy /Y lua51.dll	%dlldir%
+			echo Locally installing luajit %CWD% ...
+			xcopy /Y lua.h			%incdir%
+			xcopy /Y luaconf.h		%incdir%
+			xcopy /Y lualib.h		%incdir%
+			xcopy /Y lauxlib.h		%incdir%
+			xcopy /Y luajit.h		%incdir%
+			copy /B /Y lua51.dll	%dlldir%\libluajit.dll
 		popd
 		
-		echo Finished locally building & installing luajit.
+		echo Finished locally building / installing luajit.
 		goto :EOF
 	endlocal
 	
 	:build_lua
 	setlocal
-		echo Locally building lua (%CWD%\lua-all\%1)...
+		echo Locally building lua %CWD%\lua-all\%1 ...
 		
 		pushd %CWD%\lua-all\%1
-			REM TODO: this needs to be an explicit test
 			IF EXIST "lib%1.dll" (
 				echo lib%1.dll already cached.
 			) ELSE (
-				echo Compiling (%1)...
+				echo Compiling %1 ...
 				%GCC% -std=%GCC_VER% -g0 -O2 -Wall %luaverdef% -c *.c
 				
 				del lua.o
 				%OBJCOPY% --redefine-sym "main=luac_main" luac.o
 				
-				echo Linking (lib%1.dll)...
+				echo Linking lib%1.dll ...
 				%GCC% -std=%GCC_VER% -Wl,--require-defined,luac_main -g0 -O2 -Wall -shared -o lib%1.dll *.o
 				
-				echo Archiving (lib%1.a)...
+				echo Archiving lib%1.a ...
 				$AR rcs "lib%1.a" *.o
 			)
 			
-			echo Locally nstalling (%CWD%)...
+			echo Locally installing %CWD% ...
 			xcopy /Y lua.h		%incdir%
 			xcopy /Y luaconf.h	%incdir%
 			xcopy /Y lualib.h	%incdir%

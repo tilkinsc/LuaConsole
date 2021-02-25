@@ -34,50 +34,6 @@ setlocal
 	IF NOT DEFINED DLM	set "DLM=bitsadmin"
 	
 	
-	REM - Basic Dependencies Checking --------------------------------
-	
-	
-	IF [7zip] == [%ZIP%] (
-		where 7z.exe
-		IF [%errorlevel%] == [1] (
-			echo \%ZIP\% - 7zip requested but not found in path
-			goto error
-		)
-	)
-	
-	IF [git] == [%GIT%] (
-		where git.exe
-		IF [%errorlevel%] == [1] (
-			echo \%GIT\% - git requested but not found in path
-			goto error
-		)
-	)
-	
-	IF [bitsadmin] == [%DLM%] (
-		where bitsadmin.exe
-		IF [%errorlevel%] == [1] (
-			echo \%DLM\% - bitsadmin requested but not found in path
-			goto error
-		)
-	)
-	
-	IF [curl] == [%DLM%] (
-		where curl.exe
-		IF [%errorlevel%] == [1] (
-			echo \%DLM\% - curl requested but not found in path
-			goto error
-		)
-	)
-	
-	IF [wget] == [%DLM%] (
-		where wget.exe
-		IF [%errorlevel%] == [1] (
-			echo \%DLM\% - wget requested but not found in path
-			goto error
-		)
-	)
-	
-	
 	REM - Basic Switches ---------------------------------------------
 	
 	
@@ -95,20 +51,66 @@ setlocal
 	)
 	
 	
+	REM - Basic Dependencies Checking --------------------------------
+	
+	
+	setlocal EnableDelayedExpansion
+		IF [7zip] == [%ZIP%] (
+			where 7z.exe
+			IF [!errorlevel!] == [1] (
+				echo %%ZIP%% - 7zip requested but not found in path
+				goto failure
+			)
+		)
+		
+		IF [git] == [%GIT%] (
+			where git.exe
+			IF [!errorlevel!] == [1] (
+				echo %%GIT%% - git requested but not found in path
+				goto failure
+			)
+		)
+		
+		IF [bitsadmin] == [%DLM%] (
+			where bitsadmin.exe
+			IF [!errorlevel!] == [1] (
+				echo %%DLM%% - bitsadmin requested but not found in path
+				goto failure
+			)
+		)
+		
+		IF [curl] == [%DLM%] (
+			where curl.exe
+			IF [!errorlevel!] == [1] (
+				echo %%DLM%% - curl requested but not found in path
+				goto failure
+			)
+		)
+		
+		IF [wget] == [%DLM%] (
+			where wget.exe
+			IF [!errorlevel!] == [1] (
+				echo %%DLM%% - wget requested but not found in path
+				goto failure
+			)
+		)
+	endlocal
+	
+	
 	REM - Basic Innerworking Variables -------------------------------
 	
 	
-	CWD="%CD%"
+	set "CWD=%CD%"
 	
 	
 	REM - Basic Cleaner ----------------------------------------------
 	
 	
 	IF [clean] == [%1] (
-		echo Deleting luajit (%CWD%/luajit-2.0)...
+		echo Deleting luajit %CWD%\luajit-2.0 ...
 		rmdir /S %CWD%\luajit-2.0
 		
-		echo Deleting lua-all (%CWD%/lua-all)...
+		echo Deleting lua-all %CWD%\lua-all ...
 		del %CWD%\lua-all.tar
 		del %CWD%\lua-all.tar.gz
 		rmdir /S %CWD%\lua-all
@@ -122,7 +124,7 @@ setlocal
 	
 	
 	IF [reset] == [%1] (
-		echo Cleaning (%CWD%\luajit)...
+		echo Cleaning %CWD%\luajit ...
 		del /F /S %CWD%\luajit-2.0\*.o
 		del /F /S %CWD%\luajit-2.0\*.so
 		del /F /S %CWD%\luajit-2.0\*.so.*
@@ -130,10 +132,12 @@ setlocal
 		del /F /S %CWD%\luajit-2.0\*.lib
 		del /F /S %CWD%\luajit-2.0\*.exp
 		
-		echo Cleaning (%CWD%\lua-all)...
+		echo Cleaning  %CWD%\lua-all ...
 		rmdir /S /Q %CWD%\lua-all
+		del /F /S %CWD%\lua-all.tar
 		
-		IF [7zip] == [%ZIP%] 7z xzf %CWD%\lua-all.tar.gz
+		IF [7zip] == [%ZIP%] 7z x %CWD%\lua-all.tar.gz
+		IF EXIST "%CWD%\lua-all.tar" 7z x %CWD%\lua-all.tar
 		IF NOT EXIST "%CWD%/lua-all" (
 			echo failed to unpack '%CWD/lua-all'
 			goto error
@@ -148,7 +152,7 @@ setlocal
 	
 	
 	IF [download] == [%1] (
-		echo Checking for cached (%CWD%\luajit-2.0) folder...
+		echo Checking for cached %CWD%\luajit-2.0 folder ...
 		IF NOT EXIST "%CWD%\luajit-2.0" (
 			echo Not found. Downloading...
 			%GIT% clone "http://luajit.org/git/luajit-2.0.git"
@@ -159,7 +163,7 @@ setlocal
 		)
 		echo Cached.
 		
-		echo Checking for cached (%CWD%\lua-all.tar.gz) folder...
+		echo Checking for cached %CWD%\lua-all.tar.gz folder ...
 		IF NOT EXIST "%CWD%\lua-all.tar.gz" (
 			echo Not found. Downloading...
 			IF [bitsadmin] == [%DLM%] bitsadmin.exe /TRANSFER "lua-all.tar.gz" "https://www.lua.org/ftp/lua-all.tar.gz" %CWD%\lua-all.tar.gz
@@ -172,12 +176,12 @@ setlocal
 		)
 		echo Cached.
 		
-		echo Checking for cached (%CWD%\lua-all) folder...
+		echo Checking for cached %CWD%\lua-all folder...
 		IF NOT EXIST "lua-all" (
 			echo Not found. Unpacking...
 			IF [7zip] == [%ZIP%] (
-				7z xzf %CWD%\lua-all.tar.gz
-				IF EXIST "%CWD%\lua-all.tar" 7z xzf %CWD%\lua-all.tar
+				7z x %CWD%\lua-all.tar.gz
+				IF EXIST "%CWD%\lua-all.tar" 7z x %CWD%\lua-all.tar
 			)
 			IF NOT EXIST "%CWD%\lua-all" (
 				echo failed to unpack lua-all
@@ -221,6 +225,5 @@ REM TODO: translate, 'type prereqs.espanol.win32.help'
 REM General failure message
 :failure
 	echo An error has occured!
-	pause
 	exit /b 1
 
