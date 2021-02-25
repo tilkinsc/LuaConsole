@@ -32,6 +32,8 @@ build_cmd_mac: &build_cmd_mac
   - ./travis.mac.sh
 
 jobs:
+  allow_failures:
+  - os: osx
   include:
     - stage: build
       script: *build_cmd_linux
