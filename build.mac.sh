@@ -23,309 +23,296 @@
 # SOFTWARE.
 
 
-# Default env vars
-if [ -z "$debug" ]; then			debug=0;			fi
-if [ -z "$debug_coverage" ]; then	debug_coverage=0;	fi
-if [ -z "$GCC" ]; then				GCC="gcc";			fi
-if [ -z "$OBJCOPY" ]; then			OBJCOPY="objcopy";	fi
-if [ -z "$AR" ]; then				AR="ar";			fi
-if [ -z "$MAKE" ]; then				MAKE="make";		fi
-if [ -z "$GCC_VER" ]; then			GCC_VER=gnu99;		fi
+# - Basic Variables --------------------------------------------------
 
 
-# On help message request
-function help_message() {
-	echo "Usage:"
-	echo ""
-	echo "		build.bat build lua-x.x.x              Builds the driver with a default package"
-	echo "		build.bat package lua-x.x.x            Creates packages for the driver"
-	echo "		build.bat clean                        Cleans the environment of built files"
-	echo "		build.bat install [directory]          Installs to a pre-created directory"
-	echo "		build.bat -? /? --help                 Shows this help message"
-	echo ""
-	echo "Notes:"
-	echo "      After building, you may need to configure LD_LIBRARY_PATH to bin/* to run"
-	echo "		Uses `debug` for debug binaries"
-	echo "		Uses `debug_coverage` for coverage enabling"
-	echo "		Uses `GCC` for specifying GCC executable"
-	echo "		Uses `OBJCOPY` for modifying GCC objects"
-	echo "		Uses `AR` for specifying AR executable"
-	echo "		Uses `MAKE` for specifying MAKE executable"
-	echo "		Uses `GCC_VER` for specifying lua gcc version for building lua dlls"
-	echo ""
-	echo "Configure above notes with set:"
-	echo "		debug, debug_coverage, GCC, OBJCOPY, AR, MAKE, GCC_VER"
-	echo ""
-	echo "	Specify luajit if you want to use luajit"
-	echo ""
-}
+[[ -z "${debug}" ]] &&			debug="0"
+[[ -z "${debug_coverage}" ]] &&	debug_coverage="0"
+[[ -z "${GCC}" ]] &&			GCC="gcc"
+[[ -z "${OBJCOPY}" ]] &&		OBJCOPY="objcopy"
+[[ -z "${AR}" ]] &&				AR="ar"
+[[ -z "${MAKE}" ]] &&			MAKE="make"
+[[ -z "${GCC_VER}" ]] &&		GCC_VER="gnu99"
 
-# On failure found
-function failure() {
-	echo "An error has occured!"
+
+# - Basic Functions --------------------------------------------------
+
+
+error() {
+	printf "\n\n$0 : ${2} : Error: ${1}\n" 1>&2
 	exit 1
 }
 
+# TODO: translate, 'cat build.espanol.linux.help'
+help_message() {
+	printf """
+Usage:
 
-# Basic help switches
-if [ -z "$1" ]; then
-	echo -i "No arguments specified.\n"
-	help_message
-	exit 1
-fi
-
-if [ "$1" = "/?" ]; then
-	help_message
+    build build lua-x.x.x           Builds the driver with a default package
+    build package lua-x.x.x         Creates packages for the driver
+    build clean                     Cleans the environment of built files
+    build install {directory}       Installs to a pre-created directory
+    build -? /? --help              Shows this help message
+    
+build and package accepts:
+    luajit, lua-5.1, lua-5.1.5, lua-5.2.0, etc
+    
+Listens to these variables:
+    debug, debug_coverage, GCC, OBJCOPY, AR, MAKE, GCC_VER
+    
+    debug          - 0, 1               Default: 0
+    debug_coverage - 0, 1               Default: 0
+    GCC            - gcc binary         Default: gcc
+    OBJCOPY        - objcopy binary     Default: objcopy
+    AR             - ar binary          Default: ar
+    MAKE           - make binary        Default: make
+    GCC_VER        - stdlib version     Default: gnu99
+    
+Notes:
+    After building, you may need to configure LD_LIBRARY_PATH to bin/Release/* to test
+    
+"""
 	exit 0
-fi
-
-if [ "$1" = "-?" ]; then
-	help_message
-	exit 0
-fi
-
-if [ "$1" = "--help" ]; then
-	help_message
-	exit 0
-fi
+}
 
 
-# --------------------------------------------------------------------
+# - Basic Switches ---------------------------------------------------
 
 
-# Cleans the build directory
-if [ "$1" = "clean" ]; then
-	echo "Cleaning build directory..."
-	rm include/*.h
-	rm dll/*.so
-	rm dll/*.so.*
-	rm obj/*.o
-	rm lib/*.a
-	rm -r -d bin/*
+[[ -z "${1}" || "${1}" == "/?" || "${1}" == "-?" || "${1}" == "--help" ]] && help_message
+
+
+# - Basic Dependencies Checking --------------------------------------
+
+
+which "${GCC}" || error "GCC not found suggested: apt install gcc build-essential" $LINENO
+which "${OBJCOPY}" || error "OBJCOPY not found suggested: apt install gcc build-essential" $LINENO
+which "${AR}" || error "AR not found suggested: apt install gcc build-essential" $LINENO
+which "${MAKE}" || error "MAKE not found suggested: apt install gcc build-essential" $LINENO
+
+
+# - Basic Innerworking Variables -------------------------------------
+
+
+CWD="$(pwd)"
+
+
+# - Basic Cleaner ----------------------------------------------------
+
+
+if [[ "${1}" == "clean" ]]; then
+	printf "Cleaning build directory (${CWD})...\n"
+	printf "Remove ${CWD}/include/*.h\n"
+	rm -f -I ${CWD}/include/*.h
+	printf "Remove ${CWD}/dll/*.so\n"
+	rm -f -I ${CWD}/dll/*.so*
+	printf "Remove ${CWD}/obj/*.o\n"
+	rm -f -I ${CWD}/obj/*.o
+	printf "Remove ${CWD}/lib/*.a\n"
+	rm -f -I ${CWD}/lib/*.a
+	printf "Remove ${CWD}/bin\n"
+	rm -f -I -r -d ${CWD}/bin
 	
-	echo "Done."
+	printf "Done.\n"
 	exit 0
 fi
 
 
-# --------------------------------------------------------------------
+# - Basic Installer --------------------------------------------------
 
 
-# Installs to a directory
-if [ "$1" = "install" ]; then
-	if [ -z "$2" ]; then
-		echo "Please specify where to install to."
-		failure
-	fi
+if [[ "${1}" == "install" ]]; then
+	[[ -z "${2}" ]] && error "please specify where to install to" $LINENO
+	[[ -d "${2}" ]] || error "please create the destination folder first" $LINENO
 	
-	echo Installing to directory $2...
-	if [ ! -d "$2" ]; then
-		echo "Please create the destination folder first."
-		failure
-	fi
+	printf "Installing to directory (${2})...\n"
+	cp -r -i ${CWD}/bin/Release/* "${2}"
 	
-	cp -r bin/Release/* $2
-	
-	echo "Done."
+	printf "Done.\n"
 	exit 0
 fi
 
 
-# --------------------------------------------------------------------
+# - Basic GCC Setup --------------------------------------------------
 
 
-# GCC setup
-if [ "$debug" = "0" ]; then
+if [[ "${debug}" == "0" ]]; then
 	attrib="-std=gnu11 -Wall -O2"
-	root="bin/Release"
+	root="${CWD}/bin/Release"
 else
 	attrib="-std=gnu11 -Wall -g -O0"
-	root="bin/Debug"
-	if [ "$debug_coverage" = "1" ]; then
-		attrib="$attrib -coverage"
-	fi
+	root="${CWD}/bin/Debug"
+	[[ "${debug_coverage}" == "1" ]] && attrib="${attrib} -coverage"
 fi
 
+objdir="${CWD}/obj"
+libdir="${CWD}/lib"
+resdir="${CWD}/res"
+rootdir="${CWD}/root"
+dlldir="${CWD}/dll"
+srcdir="${CWD}/src"
+incdir="${CWD}/include"
+
+dirs="-L${srcdir} -L${libdir} -L${dlldir} -I${srcdir} -I${incdir}"
 
 
-objdir=obj
-libdir=lib
-resdir=res
-rootdir=root
-dlldir=dll
-srcdir=src
-incdir=include
+# - Basic Cache Checking ---------------------------------------------
 
-dirs="-L$srcdir -L$libdir -L$dlldir -I$srcdir -I$incdir"
+
+[[ -d "${CWD}/lua-all" ]] || error "please run 'prereqs.sh download' to get lua-all" $LINENO
+[[ -d "${CWD}/luajit-2.0" ]] || error "please run prereqs.sh downliad' to get luajit" $LINENO
 
 
 # --------------------------------------------------------------------
 
 
-if [ ! -d "lua-all" ]; then
-	echo "Please run prereqs.sh to get lua-all"
-	exit 1
-fi
-
-if [ ! -d "luajit-2.0" ]; then
-	echo "Please run prereqs.sh to get luajit"
-	exit 1
-fi
-
-
-# --------------------------------------------------------------------
-
-
-build_luajit () {
-	echo "Building luajit..."
+build_luajit() {
+	printf "Locally building luajit (${CWD}/luajit-2.0)...\n"
 	
-	pushd luajit-2.0/src
-		if [ ! -f "libluajit.so" ]; then
-			$MAKE -j5
+	pushd "${CWD}/luajit-2.0/src"
+		if [[ -f "libluajit.so" ]]; then
+			printf "libluajit.so already cached\n"
 		else
-			echo "libluajit.so already cached."
+			$MAKE "-j$(nproc)"
 		fi
 		
-		echo "Installing..."
-		cp lua.h ../../include
-		cp luaconf.h ../../include
-		cp lualib.h ../../include
-		cp lauxlib.h ../../include
-		cp luajit.h ../../include
+		printf "Locally installing luajit (${CWD})...\n"
+		cp lua.h "${incdir}"
+		cp luaconf.h "${incdir}"
+		cp lualib.h "${incdir}"
+		cp lauxlib.h "${incdir}"
+		cp luajit.h "${incdir}"
 		ln libluajit.so libluajit-5.1.so.2
-		cp libluajit.so ../../dll
-		cp libluajit-5.1.so.2 ../../dll
+		cp libluajit.so "${dlldir}"
+		cp libluajit-5.1.so.2 "${dlldir}"
 	popd
 	
-	echo "Finished installing luajit."
+	printf "Finished locally building & installing luajit.\n"
 }
 
 
-build_lua () {
-	echo "Building $1..."
+build_lua() {
+	printf "Locally building lua (${CWD}/lua-all/${1})...\n"
 	
-	pushd lua-all/$1
-		if [ ! -f "$1.so" ]; then
-			echo "Compiling $1..."
-			$GCC -std=$GCC_VER -g0 -O2 -Wall -fPIC $luaverdef -DLUA_USE_POSIX -c *.c
+	pushd "${CWD}/lua-all/${1}"
+		if [[ -f "lib${1}.so" ]]; then
+			printf "lib${1}.so already cached\n"
+		else
+			printf "Compiling (${1})...\n"
+			$GCC "-std=${GCC_VER}" -g0 -O2 -Wall -fPIC $luaverdef -DLUA_USE_POSIX -c *.c
 			
 			rm lua.o
-			$OBJCOPY --redefine-sym main=luac_main luac.o
+			$OBJCOPY --redefine-sym "main=luac_main" luac.o
 			
-			echo "Linking $1..."
-			$GCC -std=$GCC_VER -g0 -O2 -Wall -fPIC -shared -o $1.so *.o -lm -ldl
+			printf "Linking (lib${1}.so)...\n"
+			$GCC "-std=${GCC_VER}" -g0 -O2 -Wall -fPIC -Wl,--require-defined,luac_main -shared -Wl,-E -o "lib${1}.so" *.o -lm -ldl
 			
-			echo "Archiving $1..."
-			$AR rcu lib$1.a *.o
-		else
-			echo "$1.so already cached."
+			printf "Archiving (lib${1}.a)...\n"
+			$AR rcs "lib${1}.a" *.o
 		fi
 		
-		echo "Installing..."
-		cp lua.h ../../include
-		cp luaconf.h ../../include
-		cp lualib.h ../../include
-		cp lauxlib.h ../../include
-		cp $1.so ../../dll
+		printf "Locally installing (${CWD})...\n"
+		cp lua.h "${incdir}"
+		cp luaconf.h "${incdir}"
+		cp lualib.h "${incdir}"
+		cp lauxlib.h "${incdir}"
+		cp "lib${1}.so" "${dlldir}"
 	popd
 	
-	echo "Finished installing $1."
+	printf "Finished locally building & installing ${1}.\n"
 }
 
-build_install () {
-	echo "Installing $1..."
-	mv *.o $objdir
-	if [ "$1" = "luajit" ]; then
-		cp -r $dlldir/* $root
-		mkdir $root/jit
+# TODO: very misleading
+build_install() {
+	printf "Migrating ${1} to ${root}...\n"
+	
+	mv *.o "${objdir}"
+	if [[ "${1}" == "luajit" ]]; then
+		cp -r ${dlldir}/* "${root}"
 	else
-		cp $dlldir/$1.so $root/dll
+		cp "${dlldir}/lib${1}.so" "${root}"
 	fi
-	mv lc*.so $root
+	mv liblc*.so "${root}"
 
-	echo "Finished installing $1."
+	printf "Finished migrating ${1} to ${root}.\n"
 }
 
-build_package () {
-	if [ "$1" = "luajit" ]; then
+build_package() {
+	if [[ "${1}" == "luajit" ]]; then
 		luaverdef="-DLUA_JIT_51"
-		luaverout="$dlldir/libluajit.so"
+		luaverout="-lluajit"
 	else
-		luaverout="$dlldir/$1.so"
+		luaverout="-l${1}"
 	fi
 	
-	echo "Compiling luaw driver package $1..."
-	$GCC $attrib $dirs -fPIC -DLC_LD_DLL $luaverdef -c $srcdir/ldata.c $srcdir/jitsupport.c
+	printf "Compiling luaw driver package ${1}...\n"
+	$GCC $attrib $dirs -fPIC -DLC_LD_DLL $luaverdef -c "${srcdir}/ldata.c" "${srcdir}/jitsupport.c"
 	
-	echo "Linking luaw driver package $1..."
-	$GCC $attrib $dirs -fPIC -shared -o lc$1.so ldata.o jitsupport.o $luaverout
+	printf "Linking luaw driver package liblc${1}.so...\n"
+	$GCC $attrib $dirs -fPIC -shared -Wl,-E -o "liblc${1}.so" ldata.o jitsupport.o "${luaverout}"
 	
-	echo "Finished building driver package $1."
+	printf "Finished building driver package ${1}.\n"
 }
 
-build_driver () {
-	echo "Compiling luaw driver..."
-	$GCC $attrib $dirs -DDEFAULT_LUA=\"lc$1.so\" -c $srcdir/luadriver.c
+build_driver() {
+	printf "Compiling luaw driver...\n"
+	$GCC $attrib $dirs "-DDEFAULT_LUA=\"liblc${1}.so\"" -c "${srcdir}/luadriver.c"
 	
-	echo "Linking luaw driver $1..."
+	printf "Linking luaw driver ${1}...\n"
 	$GCC $attrib $dirs -o luaw luadriver.o -ldl
 	
-	build_package $1
+	printf "Building default lua package ${1}...\n"
+	build_package "${1}"
 	
-	if [ "$debug" = "0" ]; then
-		echo "Stripping..."
+	if [[ "${debug}" == "0" ]]; then
+		printf "Stripping driver...\n"
 		strip --strip-all luaw
 	fi
 
-	echo "Finished building driver $1."
+	printf "Finished building driver ${1}.\n"
 }
 
 
 # --------------------------------------------------------------------
 
 
-if [ "$1" = "driver" ]; then
-
-	echo "Cleaning workspace..."
+if [[ "$1" == "driver" ]]; then
+	printf "Cleaning workspace (${CWD})...\n"
+	
 	# Resets bin
-	if [ -d "$root" ]; then
-		rm -r --one-file-system -d $root
-	fi
+	[[ -d "${root}" ]] && rm -r --one-file-system -d "${root}"
 	
 	# Resets dll
-	rm -r $dlldir/*.so
+	rm -r ${dlldir}/*.so
 	
-	# Output build structure
-	mkdir -p $root/res
-	mkdir -p $root/dll
-	mkdir -p $root/lang
+	# Create build structure
+	mkdir -p "${resdir}"
+	mkdir -p "${dlldir}"
+	mkdir -p "${root}/lang"
 	
 	# Build dependencies
-	if [ "$2" = "luajit" ]; then
+	if [[ "${2}" == "luajit" ]]; then
 		build_luajit
-		if [ ! -d "$root/jit" ]; then
-			mkdir -p $root/jit
-			cp -r luajit-2.0/src/jit/* $root/jit
+		if [[ ! -d "${root}/jit" ]]; then
+			mkdir -p "${root}/jit"
+			cp -r $CWD/luajit-2.0/src/jit/* "${root}/jit"
 		fi
 	else
-		if [ ! -d "lua-all/$2" ]; then
-			echo Not a valid lua version!
-			failure
-		fi
-		build_lua $2
+		[[ -d "${CWD}/lua-all/${2}" ]] || error "supplied argument ${2} is not a valid lua version in lua-all" $LINENO
+		build_lua "${2}"
 	fi
 	
 	# Build driver
-	build_driver $2
+	build_driver "${2}"
 	chmod +x luaw
-
-	# Build install
-	mv luaw $root
-	cp -r $resdir/* $root/res
-	cp -r $rootdir/* $root 1>/dev/null 2>/dev/null
-	build_install $2
 	
-	echo "Finished."
+	# Build install
+	mv luaw "${root}"
+	cp -r ${resdir}/* "${root}/res"
+	cp -r ${rootdir}/* "${root}"
+	build_install "${2}"
+	
+	printf "Finished.\n"
 	exit 0
 fi
 
@@ -333,36 +320,34 @@ fi
 # --------------------------------------------------------------------
 
 
-if [ "$1" = "package" ]; then
+if [[ "$1" == "package" ]]; then
 	
 	# Force driver to be built
-	if [ ! -f "$root/luaw" ]; then
-		echo "Please build the driver first."
-		exit 1
-	fi
+	[[ -f "${root}/luaw" ]] || error "please run ${0} driver lua-5.x.x first" $LINENO
 	
-	echo "Cleaning workspace..."
+	printf "Cleaning workspace...\n"
+	
 	# Resets dll
-	rm -r $dlldir/*.so
+	rm -r ${dlldir}/*.so
 	
-	if [ "$2" = "luajit" ]; then
+	if [[ "${2}" == "luajit" ]]; then
 		build_luajit
-		if [ ! -d "$root/jit" ]; then
-			mkdir -p $root/jit
-			cp -r luajit-2.0/src/jit/* $root/jit
+		if [[ ! -d "${root}/jit" ]]; then
+			mkdir -p "${root}/jit"
+			cp -r $CWD/luajit-2.0/src/jit/* "${root}/jit"
 		fi
 	else
-		if [ ! -d "lua-all/$2" ]; then
-			echo Not a valid lua version!
-			failure
-		fi
-		build_lua $2
+		[[ -d "${CWD}/lua-all/${2}" ]] || error "supplied argument ${2} is not a valid lua version in lua-all" $LINENO
+		build_lua "${2}"
 	fi
 	
-	build_package $2
-	build_install $2
+	# Build package and install
+	build_package "${2}"
+	build_install "${2}"
 	
-	echo "Finished."
+	printf "Finished.\n"
 	exit 0
 fi
+
+error "This shouldn't be reached!\n" $LINENO
 

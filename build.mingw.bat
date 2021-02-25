@@ -24,7 +24,10 @@
 
 setlocal
 	
-	REM Default env vars
+	
+	REM - Basic Variables --------------------------------------------------
+	
+	
 	IF NOT DEFINED debug			set debug=0
 	IF NOT DEFINED debug_coverage	set debug_coverage=0
 	IF NOT DEFINED GCC				set GCC=gcc
@@ -34,10 +37,10 @@ setlocal
 	IF NOT DEFINED GCC_VER			set GCC_VER=gnu99
 	
 	
-	REM Basic help switches
+	REM - Basic Switches ---------------------------------------------------
+	
+	
 	IF [] == [%1] (
-		echo No arguments specified.
-		echo.
 		goto help
 	)
 	IF [/?] == [%1] (
@@ -51,107 +54,124 @@ setlocal
 	)
 	
 	
-	REM --------------------------------------------------------------------
+	REM - Basic Dependencies Checking --------------------------------------
 	
 	
-	REM Cleans the build directory
+	REM -- TODO: add in executable checking
+	
+	
+	REM - Basic Innerworking Variables -------------------------------------
+	
+	
+	set "CWD=%cd%"
+	
+	
+	REM - Basic Cleaner ----------------------------------------------------
+	
+	
 	IF [clean] == [%1] (
-		echo Cleaning build directory...
-		del include\*.h
-		del dll\*.dll
-		del obj\*.o
-		rmdir /S /Q bin\Release
-		rmdir /S /Q bin\Debug
+		echo Cleaning build directory (%CWD%)...
+		echo Remove %CWD%\include\*.h
+		del %CWD%\include\*.h
+		echo Remove %CWD%\dll\*.dll
+		del %CWD%\dll\*.dll
+		echo Remove %CWD%\obj\*.o
+		del %CWD%\obj\*.o
+		echo Remove %CWD%\lib\*.a
+		del %CWD%\lib\*.a
+		rmdir /S /Q %CWD%\bin
 		
 		echo Done.
 		exit /b 0
 	)
 	
 	
-	REM --------------------------------------------------------------------
+	REM - Basic Installer --------------------------------------------------
 	
 	
-	REM Installs to a directory
 	IF [install] == [%1] (
 		IF [] == [%2] (
-			echo Please specify where to install to.
+			echo please specify where to install to
 			goto failure
 		)
-		
-		echo Installing to directory %2...
 		IF NOT EXIST "%2" (
-			echo Please create the destination folder first.
+			echo please create the destination folder first
 			goto failure
 		)
 		
-		xcopy /Y bin\Release\* %2
+		echo Installing to directory (%2)...
+		xcopy /Y %CWD%\bin\Release\* %2
 		
 		echo Done.
 		exit /b 0
 	)
 	
 	
-	REM --------------------------------------------------------------------
-	
-	
-	IF NOT EXIST "lua-all" (
-		echo Please run prereqs.bat to get lua-all
-		goto failure
-	)
-	
-	IF NOT EXIST "luajit-2.0" (
-		echo Please run prereqs.bat to get luajit
-		goto failure
-	)
-	
-	
-	REM --------------------------------------------------------------------
+	REM - Basic GCC Setup --------------------------------------------------
 	
 	
 	REM GCC setup
-	IF [%debug%] EQU [0] (
+	IF [0] EQU [%debug%] (
 		set attrib=-std=gnu11 -Wall -O2
-		set root=bin\Release
+		set root=%CWD%\bin\Release
 	) ELSE (
 		set attrib=-std=gnu11 -Wall -g -O0
-		set root=bin\Debug
-		IF %debug_coverage% EQU 1	set attrib=%attrib% -coverage
+		set root=%CWD%\bin\Debug
+		IF [1] EQU [%debug_coverage%]	set "attrib=%attrib% -coverage"
 	)
 	
-	set objdir=obj
-	set libdir=lib
-	set resdir=res
-	set rootdir=root
-	set dlldir=dll
-	set srcdir=src
-	set incdir=include
+	set objdir=%CWD%\obj
+	set libdir=%CWD%\lib
+	set resdir=%CWD%\res
+	set rootdir=%CWD%\root
+	set dlldir=%CWD%\dll
+	set srcdir=%CWD%\src
+	set incdir=%CWD%\include
 	
-	set dirs=-L%srcdir% -L%libdir% -L%dlldir% -I%srcdir% -I%incdir%
+	set "dirs=-L%srcdir% -L%libdir% -L%dlldir% -I%srcdir% -I%incdir%""
+	
+	
+	REM - Basic Cache Checking ---------------------------------------------
+	
+	
+	IF NOT EXIST "%CWD%\lua-all" (
+		echo please run prereqs.bat download to get lua-all
+		goto failure
+	)
+	
+	IF NOT EXIST "%CWD%\luajit-2.0" (
+		echo please run prereqs.bat download to get luajit
+		goto failure
+	)
 	
 	
 	REM --------------------------------------------------------------------
 	
 	
 	IF [%1] == [driver] (
-		echo Cleaning workspace...
+		echo Cleaning workspace (%CWD%)...
+		
 		REM Resets bin
 		IF EXIST "%root%" rmdir /S /Q %root%
 		
 		REM Resets dll
 		del %dlldir%\*.dll
 		
-		REM Output build structure
-		mkdir %root%\res
+		REM Create build structure
+		mkdir %resdir%
+		mkdir %dlldir%
 		mkdir %root%\lang
 		
 		REM Build dependencies
 		IF [%2] == [luajit] (
 			call :build_luajit
-			mkdir %root%\jit
-			xcopy /E /Y luajit-2.0\src\jit\* %root%\jit
+			IF NOT EXIST "%root%\jit" (
+				mkdir %root%\jit
+				xcopy /E /Y luajit-2.0\src\jit\* %root%\jit
+			)
 		) ELSE (
-			IF NOT EXIST "lua-all\%2" (
-				echo Not a valid lua version!
+			IF NOT EXIST "%CWD%\lua-all\%2" (
+				echo supplied argument %2 is not a valid lua version in lua-all
 				goto failure
 			)
 			call :build_lua %2
@@ -177,22 +197,25 @@ setlocal
 	IF [%1] == [package] (
 		
 		REM Force driver to be built
-		IF NOT EXIST %root%\luaw.exe (
-			echo Please build the driver first.
+		IF NOT EXIST "%root%\luaw.exe" (
+			echo please run build.mingw.bat driver lua-5.x.x first
 			goto failure
 		)
 		
 		echo Cleaning workspace...
+		
 		REM Resets dll
 		del %dlldir%\*.dll
 		
 		IF [%2] == [luajit] (
 			call :build_luajit
-			mkdir %root%\jit
-			xcopy /E /Y luajit-2.0\src\jit\* %root%\jit
+			IF NOT EXIST "%root%\jit" (
+				mkdir %root%\jit
+				xcopy /E /Y %CWD%\luajit-2.0\src\jit\* %root%\jit
+			)
 		) ELSE (
-			IF NOT EXIST "lua-all\%2" (
-				echo Not a valid lua version!
+			IF NOT EXIST "%CWD%\lua-all\%2" (
+				echo supplied argument %2 is not a valid lua version in lua-all
 				goto failure
 			)
 			call :build_lua %2
@@ -218,52 +241,56 @@ setlocal
 	
 	:build_luajit
 	setlocal
-		echo Building luajit...
+		echo Locally building luajit (%CWD%\luajit-2.0)...
 			
-		pushd luajit-2.0\src
+		pushd %CWD%\luajit-2.0\src
 			IF NOT EXIST "lua51.dll" (
 				%MAKE% -j%NUMBER_OF_PROCESSORS%
 			) ELSE (
-				echo luajit already cached.
+				echo lua51.dll already cached.
 			)
 			
-			echo Installing...
-			xcopy /Y lua.h		..\..\include
-			xcopy /Y luaconf.h	..\..\include
-			xcopy /Y lualib.h	..\..\include
-			xcopy /Y lauxlib.h	..\..\include
-			xcopy /Y luajit.h	..\..\include
-			xcopy /Y lua51.dll	..\..\dll
+			echo Locally installing luajit (%CWD%)...
+			xcopy /Y lua.h		%incdir%
+			xcopy /Y luaconf.h	%incdir%
+			xcopy /Y lualib.h	%incdir%
+			xcopy /Y lauxlib.h	%incdir%
+			xcopy /Y luajit.h	%incdir%
+			xcopy /Y lua51.dll	%dlldir%
 		popd
 		
-		echo Finished installing luajit.
+		echo Finished locally building & installing luajit.
 		goto :EOF
 	endlocal
 	
 	:build_lua
 	setlocal
-		echo "Building %1..."
+		echo Locally building lua (%CWD%\lua-all\%1)...
 		
-		pushd lua-all\%1
-			IF NOT EXIST "*.dll" (
-				echo Compiling %1...
+		pushd %CWD%\lua-all\%1
+			REM TODO: this needs to be an explicit test
+			IF EXIST "lib%1.dll" (
+				echo lib%1.dll already cached.
+			) ELSE (
+				echo Compiling (%1)...
 				%GCC% -std=%GCC_VER% -g0 -O2 -Wall %luaverdef% -c *.c
 				
 				del lua.o
-				%OBJCOPY% --redefine-sym main=luac_main luac.o
+				%OBJCOPY% --redefine-sym "main=luac_main" luac.o
 				
-				echo Linking %1...
-				%GCC% -std=%GCC_VER% -Wl,--require-defined,luac_main -g0 -O2 -Wall -shared -o %1.dll *.o
-			) ELSE (
-				echo %1 already cached.
+				echo Linking (lib%1.dll)...
+				%GCC% -std=%GCC_VER% -Wl,--require-defined,luac_main -g0 -O2 -Wall -shared -o lib%1.dll *.o
+				
+				echo Archiving (lib%1.a)...
+				$AR rcs "lib%1.a" *.o
 			)
 			
-			echo Installing...
-			xcopy /Y lua.h		..\..\include
-			xcopy /Y luaconf.h	..\..\include
-			xcopy /Y lualib.h	..\..\include
-			xcopy /Y lauxlib.h	..\..\include
-			xcopy /Y %1.dll		..\..\dll
+			echo Locally nstalling (%CWD%)...
+			xcopy /Y lua.h		%incdir%
+			xcopy /Y luaconf.h	%incdir%
+			xcopy /Y lualib.h	%incdir%
+			xcopy /Y lauxlib.h	%incdir%
+			xcopy /Y lib%1.dll	%dlldir%
 		popd
 		
 		echo Finished installing %1.
@@ -272,16 +299,17 @@ setlocal
 	
 	:build_install
 	setlocal
+		echo Migrating %1 to %root%...
+		
 		move /Y *.o %objdir%
-		IF [%1] == [luajit] (
+		IF [luajit] == [%1] (
 			copy /Y %dlldir%\lua51.dll %root%
 		) ELSE (
-			copy /Y %dlldir%\%1.dll %root%
+			copy /Y %dlldir%\lib%1.dll %root%
 		)
-		copy lc%1.dll %root%
-		move lc%1.dll %dlldir%
+		move liblc%1.dll %root%
 		
-		echo Finished installing %1.
+		echo Finished migrating %1 to %root%.
 		goto :EOF
 	endlocal
 	
@@ -289,16 +317,16 @@ setlocal
 	setlocal
 		IF [%1] == [luajit] (
 			set luaverdef=-DLUA_JIT_51
-			set luaverout=%dlldir%\lua51.dll
+			set luaverout=-lluajit
 		) ELSE (
-			set luaverout=%dlldir%\%1.dll
+			set luaverout=-l%1
 		)
 		
 		echo Compiling luaw driver package %1...
 		%gcc% %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -c %srcdir%\ldata.c %srcdir%\jitsupport.c
 		
-		echo Linking luaw driver package %1...
-		%GCC% %attrib% %dirs% -shared -o lc%1.dll ldata.o jitsupport.o %luaverout%
+		echo Linking luaw driver package liblc%1.dll...
+		%GCC% %attrib% %dirs% -shared -o liblc%1.dll ldata.o jitsupport.o %luaverout%
 		
 		echo Finished building driver package %1.
 		goto :EOF
@@ -307,15 +335,16 @@ setlocal
 	:build_driver
 	setlocal
 		echo Compiling luaw driver...
-		%GCC% %attrib% %dirs% -D__USE_MINGW_ANSI_STDIO=1 -DDEFAULT_LUA=\"lc%1.dll\" -c %srcdir%\luadriver.c
+		%GCC% %attrib% %dirs% -D__USE_MINGW_ANSI_STDIO=1 -DDEFAULT_LUA=\"liblc%1.dll\" -c %srcdir%\luadriver.c
 		
 		echo Linking luaw driver...
 		%GCC% %attrib% %dirs% -o luaw.exe luadriver.o
 		
+		echo Building default lua package %1...
 		call :build_package %1
 		
-		IF %debug% EQU 0 (
-			echo Stripping...
+		IF [0] EQU [%debug%] (
+			echo Stripping driver...
 			strip --strip-all luaw.exe
 		)
 		
@@ -330,25 +359,25 @@ REM Simplex help message
 :help
 	echo Usage:
 	echo.
-	echo		build.bat build lua-x.x.x              Builds the driver with a default package
-	echo		build.bat package lua-x.x.x            Creates packages for the driver
-	echo		build.bat clean                        Cleans the environment of built files
-	echo		build.bat install [directory]          Installs to a pre-created directory
-	echo		build.bat -? /? --help                 Shows this help message
+	echo     build build lua-x.x.x           Builds the driver with a default package
+	echo     build package lua-x.x.x         Creates packages for the driver
+	echo     build clean                     Cleans the environment of built files
+	echo     build install [directory]       Installs to a pre-created directory
+	echo     build -? /? --help              Shows this help message
 	echo.
-	echo Notes:
-	echo		Uses `debug` for debug binaries
-	echo		Uses `debug_coverage` for coverage enabling
-	echo		Uses `GCC` for specifying GCC executable
-	echo		Uses `OBJCOPY` for modifying GCC objects
-	echo		Uses `AR` for specifying AR executable
-	echo		Uses `MAKE` for specifying MAKE executable
-	echo		Uses `GCC_VER` for specifying lua gcc version for building lua dlls
+	echo build and package accepts:
+	echo    luajit, lua-5.1, lua-5.1.5, lua-5.2.0, etc
 	echo.
-	echo Configure above notes with set:
-	echo		debug, debug_coverage, GCC, AR, MAKE, GCC_VER
+	echo Listens to these variables:
+	echo    debug, debug_coverage, GCC, OBJCOPY, AR, MAKE, GCC_VER
 	echo.
-	echo 	Specify luajit if you want to use luajit
+	echo    debug          - 0, 1               Default: 0
+	echo    debug_coverage - 0, 1               Default: 0
+	echo    GCC            - gcc binary         Default: gcc
+	echo    OBJCOPY        - objcopy binary     Default: objcopy
+	echo    AR             - ar binary          Default: ar
+	echo    MAKE           - make binary        Default: make
+	echo    GCC_VER        - stdlib version     Default: gnu99
 	echo.
 	exit /b 0
 

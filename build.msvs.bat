@@ -31,8 +31,6 @@ setlocal
 	
 	REM Basic help switches
 	IF [] == [%1] (
-		echo No arguments specified.
-		echo.
 		goto help
 	)
 	IF [/?] == [%1] (
