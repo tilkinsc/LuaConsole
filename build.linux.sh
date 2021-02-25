@@ -205,7 +205,7 @@ build_lua() {
 			$OBJCOPY --redefine-sym "main=luac_main" luac.o
 			
 			printf "Linking (lib${1}.so)...\n"
-			$GCC "-std=${GCC_VER}" -g0 -O2 -Wall -fPIC -Wl,--require-defined,luac_main -shared -Wl,-E -o "lib${1}.so" *.o -lm -ldl
+			$GCC "-std=${GCC_VER}" -g0 -O2 -Wall -fPIC -shared -Wl,-E -o "lib${1}.so" *.o -lm -ldl
 			
 			printf "Archiving (lib${1}.a)...\n"
 			$AR rcs "lib${1}.a" *.o
@@ -308,7 +308,7 @@ if [[ "$1" == "driver" ]]; then
 	
 	# Build install
 	mv luaw "${root}"
-	cp -r ${resdir}/* "${root}/res"
+	cp -r ${resdir} "${root}/res"
 	cp -r ${rootdir}/* "${root}"
 	build_install "${2}"
 	

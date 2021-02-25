@@ -1,19 +1,19 @@
+
 language: c
+os: linux
+dist: trusty
 
 cache:
   directories:
     - $HOME/cistore
 
-dist: trusty
-sudo: true
 
 compiler:
   - gcc
 
-braches:
+branches:
   only:
     - master
-
 
 
 before_script:
@@ -24,27 +24,22 @@ before_script:
   - chmod +x prereqs.sh
 
 
-
-build_cmd_linux: &build_cmd_linux
-  - ./travis.linux.sh
-
-build_cmd_mac: &build_cmd_mac
-  - ./travis.mac.sh
-
 jobs:
+  allow_failures:
+  - os: osx
   include:
     - stage: build
-      script: *build_cmd_linux
+      script: ./travis.linux.sh
       os: linux
+      dist: trusty
     - stage: build
-      script: *build_cmd_mac
+      script: ./travis.mac.sh
       osx_image: xcode10.2
       os: osx
 
 
-
 after_success:
-  - echo "Build and tests successful"
+  - echo "Build and tests successful."
 
 after_failure:
   - echo "Build and tests failed."
