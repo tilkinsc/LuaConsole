@@ -78,36 +78,36 @@ pushd bin/Debug
 	./luaw -w lua-5.1.5 -e "print('Everything went okay')"
 	
 	printf "Test 6\n"
-	./luaw res/testing.lua -Dtest=5 -n a b c
+	./luaw ./res/testing.lua -Dtest=5 -n a b c
 	printf "Test 6 end\n"
 	
 	printf "Test 7\n"
-	./luaw -b res/testing.lua testing.luac1
-	./luaw testing.luac1 -Dtest=5 -n a b c
+	./luaw -b ./res/testing.lua ./testing.luac1
+	./luaw ./testing.luac1 -Dtest=5 -n a b c
 	printf "Test 7 end\n"
 	
 	printf "Test 8\n"
-	./luaw -w luajit -c -o testing.luac2 "res/testing.lua"
+	./luaw -w luajit -c -o ./testing.luac2 ./res/testing.lua
 	./luaw -w luajit -ltesting.luac2 -Dtest=5 -n a b c
 	printf "Test 8 end\n"
 	
 	printf "Test 9\n"
-	./luaw -w lua-5.4.2 -c -o testing.luac3 "res/testing.lua"
+	./luaw -w lua-5.4.2 -c -o ./testing.luac3 ./res/testing.lua
 	./luaw -w lua-5.4.2 -ltesting.luac3 -Dtest=5 -n a b c
 	printf "Test 9 end\n"
 	
 	printf "Test 10\n"
-	./luaw -w lua-5.3.5 -c -o testing.luac4 "res/testing.lua"
+	./luaw -w lua-5.3.5 -c -o ./testing.luac4 ./res/testing.lua
 	./luaw -w lua-5.3.5 -ltesting.luac4 -Dtest=5 -n a b c
 	printf "Test 10 end\n"
 	
 	printf "Test 11\n"
-	./luaw -w lua-5.2.4 -c -o testing.luac5 "res/testing.lua"
+	./luaw -w lua-5.2.4 -c -o ./testing.luac5 ./res/testing.lua
 	./luaw -w lua-5.2.4 -ltesting.luac5 -Dtest=5 -n a b c
 	printf "Test 11 end\n"
 	
 	printf "Test 12\n"
-	./luaw -w lua-5.1.5 -c -o testing.luac6 "res/testing.lua"
+	./luaw -w lua-5.1.5 -c -o ./testing.luac6 ./res/testing.lua
 	./luaw -w lua-5.1.5 -ltesting.luac6 -Dtest=5 -n a b c
 	printf "Test 12 end\n"
 	
