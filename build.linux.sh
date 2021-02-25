@@ -308,7 +308,7 @@ if [[ "$1" == "driver" ]]; then
 	
 	# Build install
 	mv luaw "${root}"
-	cp -r ${resdir}/* "${root}/res"
+	cp -r ${resdir} "${root}/res"
 	cp -r ${rootdir}/* "${root}"
 	build_install "${2}"
 	
