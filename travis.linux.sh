@@ -78,6 +78,9 @@ pushd bin/Debug
 	./luaw -w lua-5.1.5 -e "print('Everything went okay')"
 	
 	printf "Test 6\n"
+	ls
+	echo "-----"
+	ls res
 	./luaw ./res/testing.lua -Dtest=5 -n a b c
 	printf "Test 6 end\n"
 	
