@@ -198,10 +198,10 @@ REM TODO: translate, 'type prereqs.espanol.win32.help'
 :help
 	echo Usage:
 	echo.
-	echo     prereqs.bat download         Downloads and extracts the dependencies
-	echo     prereqs.bat clean            Cleans the environment of downloaded files
-	echo     prereqs.bat reset            Removes and re-extracts the dependencies
-	echo     prereqs.bat -? /? --help     Shows this help message
+	echo     prereqs download         Downloads and extracts the dependencies
+	echo     prereqs clean            Cleans the environment of downloaded files
+	echo     prereqs reset            Removes and re-extracts the dependencies
+	echo     prereqs -? /? --help     Shows this help message
 	echo.
 	echo Notes:
 	echo     Uses '7zip'                  ( https://www.7-zip.org/download.html )
