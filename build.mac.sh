@@ -29,7 +29,7 @@
 [[ -z "${debug}" ]] &&			debug="0"
 [[ -z "${debug_coverage}" ]] &&	debug_coverage="0"
 [[ -z "${GCC}" ]] &&			GCC="gcc"
-[[ -z "${OBJCOPY}" ]] &&		OBJCOPY="gobjcopy"
+[[ -z "${OBJCOPY}" ]] &&		OBJCOPY="llvm-objcopy"
 [[ -z "${AR}" ]] &&				AR="ar"
 [[ -z "${MAKE}" ]] &&			MAKE="make"
 [[ -z "${GCC_VER}" ]] &&		GCC_VER="gnu99"
@@ -60,13 +60,13 @@ build and package accepts:
 Listens to these variables:
     debug, debug_coverage, GCC, OBJCOPY, AR, MAKE, GCC_VER
     
-    debug          - 0, 1               Default: 0
-    debug_coverage - 0, 1               Default: 0
-    GCC            - gcc binary         Default: gcc
-    OBJCOPY        - gobjcopy binary    Default: gobjcopy
-    AR             - ar binary          Default: ar
-    MAKE           - make binary        Default: make
-    GCC_VER        - stdlib version     Default: gnu99
+    debug          - 0, 1                   Default: 0
+    debug_coverage - 0, 1                   Default: 0
+    GCC            - gcc binary             Default: gcc
+    OBJCOPY        - llvm-objcopy binary    Default: llvm-objcopy
+    AR             - ar binary              Default: ar
+    MAKE           - make binary            Default: make
+    GCC_VER        - stdlib version         Default: gnu99
     
 Notes:
     After building, you may need to configure LD_LIBRARY_PATH to bin/Release/* to test
