@@ -1,3 +1,4 @@
+
 language: c
 os: linux
 dist: trusty
@@ -38,7 +39,7 @@ jobs:
 
 
 after_success:
-  - echo "Build and tests successful"
+  - echo "Build and tests successful."
 
 after_failure:
   - echo "Build and tests failed."
