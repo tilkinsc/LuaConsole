@@ -29,7 +29,7 @@
 [[ -z "${debug}" ]] &&			debug="0"
 [[ -z "${debug_coverage}" ]] &&	debug_coverage="0"
 [[ -z "${GCC}" ]] &&			GCC="gcc"
-[[ -z "${OBJCOPY}" ]] &&		OBJCOPY="objcopy"
+[[ -z "${OBJCOPY}" ]] &&		OBJCOPY="gobjcopy"
 [[ -z "${AR}" ]] &&				AR="ar"
 [[ -z "${MAKE}" ]] &&			MAKE="make"
 [[ -z "${GCC_VER}" ]] &&		GCC_VER="gnu99"
@@ -63,7 +63,7 @@ Listens to these variables:
     debug          - 0, 1               Default: 0
     debug_coverage - 0, 1               Default: 0
     GCC            - gcc binary         Default: gcc
-    OBJCOPY        - objcopy binary     Default: objcopy
+    OBJCOPY        - gobjcopy binary    Default: gobjcopy
     AR             - ar binary          Default: ar
     MAKE           - make binary        Default: make
     GCC_VER        - stdlib version     Default: gnu99
@@ -308,7 +308,7 @@ if [[ "$1" == "driver" ]]; then
 	
 	# Build install
 	mv luaw "${root}"
-	cp -r ${resdir}/* "${root}/res"
+	cp -r ${resdir} "${root}/res"
 	cp -r ${rootdir}/* "${root}"
 	build_install "${2}"
 	
