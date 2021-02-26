@@ -14,9 +14,9 @@
 [![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=RCR8HT8GDC5XC&item_name=Free+Software&currency_code=USD)
 
 https://github.com/tilkinsc/LuaConsole  
-A next-gen, Cross-Platform [Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x]-supporting CLI made to supersede PUC-Lua and LuaJIT CLI  
+Eine plattformübergreifende CLI der nächsten Generation [Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x], die PUC-Lua und LuaJIT CLI ersetzt
 
-For more information, visit [LuaConsole Github Website](https://tilkinsc.github.io/LuaConsole) and the [wiki](https://github.com/tilkinsc/LuaConsole/wiki)!  
+Weitere Informationen finden Sie auf der [LuaConsole Github-Website](https://tilkinsc.github.io/LuaConsole) und im [Wiki](https://github.com/tilkinsc/LuaConsole/wiki)!  
 
 # Tore
 * Seien Sie eine bessere CLI-Anwendung als PUC-Lua/LuaJIT
