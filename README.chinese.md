@@ -24,35 +24,35 @@ https://github.com/tilkinsc/LuaConsole
 * 取决于 CLI 并且是独立的
 
 # 建造
-[Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
+[Windows/Linux Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
 
 # 与 LuaRocks一起使用
-https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support  
+[LuaRocks Support](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support)  
 
 # 与 LuaDIST一起使用
-https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS
+[LuaDist Support Windows, Linux, MacOS](https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS)  
 
-# 测试
+### Linux
 ```bash
-# 帮助命令
+# Help command
 luaw --help /? -?
 
-# REPL 模式
+# REPL Mode
 luaw
 luaw -p
 
-# 从命令
+# From the command
 luaw res/testing.lua -Dtest=5 -n a b c
 luaw -lres/testing.lua -Dtest=5 -n a b c
 luaw -Dtest=5 -n a b c - < res/testing.lua
 
-# 在下面找到 Shebang 增强功能
-res/testing.lua | luaw -Dtest=5 -n a b c -
+# With Shebang enhancements found below
+res/testing.lua -Dtest=5 -n a b c
 
-# 使用 cat
+# Using cat
 cat res/testing.lua | luaw -Dtest=5 -n a b c -
 
-# 从 Lua 里面
+# From inside Lua
 luaw -e "dofile('res/testing.lua')" -Dtest=5 -n a b c
 luaw -e "dofile('testing.lua')" -s res -Dtest=5 -n a b c
 
@@ -61,27 +61,41 @@ luaw -
 dofile('res/testing.lua')
 <Ctrl + d>
 <Enter>
-
-# 但是, 请使用以下代码: (可以忽略隐含的 -p)
-luaw -p
 ```
 
-Windows 特定:
+### Windows
 ```batch
+REM Help command
+luaw --help /? -?
+
+REM REPL Mode
+luaw
+luaw -p
+
+REM From the command
+luaw res/testing.lua -Dtest=5 -n a b c
+luaw -lres/testing.lua -Dtest=5 -n a b c
+luaw -Dtest=5 -n a b c - < res/testing.lua
+
+REM With Windows Registry enhancements found below
+res\testing.lua -Dtest=5 -n a b c
+res\testing -Dtest=5 -n a b c
+
+REM Using type
+type res\testing.lua | luaw -Dtest=5 -n a b c -
+
+REM From inside Lua
+luaw -e "dofile('res/testing.lua')" -Dtest=5 -n a b c
+luaw -e "dofile('testing.lua')" -s res -Dtest=5 -n a b c
+
 REM stdin
 luaw -
 dofile('res/testing.lua')
 <Ctrl + z>
 <Enter>
-
-REM 使用 type
-type res\testing.lua | luaw -Dtest=5 -n a b c -
-
-REM 使用下面的 Windows Registry 增强功能
-res\testing.lua | luaw -Dtest=5 -n a b c -
-res\testing | luaw -Dtest=5 -n a b c -
 ```
 
 # 奖金
-* [Windows Bonus Flashy Icons and Ease of Open](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus---Flashy-Icons-and-Ease-of-Open)  
-* Linux Bonus Shebangs -- WIP, not yet made
+* [Windows Bonus - Flashy Icons & Registry Enhancements](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus----Flashy-Icons-&-Registry-Enhancements)  
+* [Linux Bonus - Shebangs & Desktop Files](https://github.com/tilkinsc/LuaConsole/wiki/Linux-Bonus---Shebangs-&-Desktop-Files)
+
