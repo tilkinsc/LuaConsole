@@ -167,7 +167,7 @@ setlocal
 			call :build_luajit
 			IF NOT EXIST "%root%\jit" (
 				mkdir %root%\jit
-				xcopy /E /Y luajit-2.0\src\jit\* %root%\jit
+				xcopy /E /Y %CWD%\luajit-2.0\src\jit\* %root%\jit
 			)
 		) ELSE (
 			IF NOT EXIST "%CWD%\lua-all\%2" (
