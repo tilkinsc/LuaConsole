@@ -12,47 +12,47 @@
 [![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=RCR8HT8GDC5XC&item_name=Free+Software&currency_code=USD)
 
 https://github.com/tilkinsc/LuaConsole  
-Кроссплатформенная следующего поколения \[Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua5.3.x \] поддерживающая CLI, заменяющая интерпретаторы PUC-Lua и LuaJIT  
+Кросс-платформенный интерфейс следующего поколения [Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x], поддерживающий CLI, призванный заменить PUC-Lua и LuaJIT CLI
 
-Для получения дополнительной информации посетите [веб-сайт LuaConsole Github] (https://tilkinsc.github.io/LuaConsole) и [wiki] (https://github.com/tilkinsc/LuaConsole/wiki)!  
+Для получения дополнительной информации посетите [Веб-сайт LuaConsole Github](https://tilkinsc.github.io/LuaConsole) и [wiki](https://github.com/tilkinsc/LuaConsole/wiki)!
 
-# цели
+# Цели
 * Будьте лучшим приложением CLI, чем PUC-Lua/LuaJIT
-* Низкое покрытие кода для предотвращения выполнения избыточности (псевдо-цель 0-30%)
-* Поддержка всего совместимого с PUC-Lua и LuaJIT
-* Предотвратить грязный, запутывающий код
-* Быть зависимым от CLI и независимым 
+* Поддержка всего, что совместимо с PUC-Lua и LuaJIT
+* Предотвратить беспорядочный, запутывающий код
+* Будьте зависимы от интерфейса командной строки и независимы
+* Мультиплатформенность - Linux, Windows, Mac (неофициально) 
 
-# Строительство
+# Сборка
 [Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
 
 # Использование с LuaRocks
-https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support   
+[LuaRocks Support](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support)  
 
 # Использование с LuaDIST
-https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS
+[LuaDist Support Windows, Linux, MacOS](https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS)  
 
-# тестирование
+### Linux
 ```bash
-# Справочная команда
+# Help command
 luaw --help /? -?
 
-# Режим REPL
+# REPL Mode
 luaw
 luaw -p
 
-# Из команды
+# From the command
 luaw res/testing.lua -Dtest=5 -n a b c
 luaw -lres/testing.lua -Dtest=5 -n a b c
 luaw -Dtest=5 -n a b c - < res/testing.lua
 
-# С улучшениями Shebang, найденными ниже
-res/testing.lua | luaw -Dtest=5 -n a b c -
+# With Shebang enhancements found below
+res/testing.lua -Dtest=5 -n a b c
 
-# Изнутри cat
+# Using cat
 cat res/testing.lua | luaw -Dtest=5 -n a b c -
 
-# Изнутри Lua
+# From inside Lua
 luaw -e "dofile('res/testing.lua')" -Dtest=5 -n a b c
 luaw -e "dofile('testing.lua')" -s res -Dtest=5 -n a b c
 
@@ -61,27 +61,41 @@ luaw -
 dofile('res/testing.lua')
 <Ctrl + d>
 <Enter>
-
-# Однако вместо двух вышеперечисленных используйте: (может пренебречь подразумеваемым -p)
-luaw -p
 ```
 
-Специфичный для Windows:
+### Windows
 ```batch
+REM Help command
+luaw --help /? -?
+
+REM REPL Mode
+luaw
+luaw -p
+
+REM From the command
+luaw res/testing.lua -Dtest=5 -n a b c
+luaw -lres/testing.lua -Dtest=5 -n a b c
+luaw -Dtest=5 -n a b c - < res/testing.lua
+
+REM With Windows Registry enhancements found below
+res\testing.lua -Dtest=5 -n a b c
+res\testing -Dtest=5 -n a b c
+
+REM Using type
+type res\testing.lua | luaw -Dtest=5 -n a b c -
+
+REM From inside Lua
+luaw -e "dofile('res/testing.lua')" -Dtest=5 -n a b c
+luaw -e "dofile('testing.lua')" -s res -Dtest=5 -n a b c
+
 REM stdin
 luaw -
 dofile('res/testing.lua')
 <Ctrl + z>
 <Enter>
-
-REM Изнутри type
-type res\testing.lua | luaw -Dtest=5 -n a b c -
-
-REM Используйте улучшения реестра, найденные ниже:
-res\testing.lua | luaw -Dtest=5 -n a b c -
-res\testing | luaw -Dtest=5 -n a b c -
 ```
 
-# бонус
-* [Windows Bonus Flashy Icons and Ease of Open](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus---Flashy-Icons-and-Ease-of-Open)  
-* Linux Bonus Shebangs -- WIP, not yet made
+# Дополнительный
+* [Windows Bonus - Flashy Icons & Registry Enhancements](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus----Flashy-Icons-&-Registry-Enhancements)  
+* [Linux Bonus - Shebangs & Desktop Files](https://github.com/tilkinsc/LuaConsole/wiki/Linux-Bonus---Shebangs-&-Desktop-Files)
+
