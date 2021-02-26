@@ -1,5 +1,5 @@
 # LuaConsole
-| Licença | Codecov.io | Gitter.im | Travis-CI | Appveyor |
+| Autorização | Codecov.io | Gitter.im | Travis-CI | Appveyor |
 | ------- | ---------- | --------- | --------- | -------- |
 | [![License](https://img.shields.io/github/license/tilkinsc/LuaConsole.svg)](https://github.com/tilkinsc/LuaConsole/blob/master/LICENSE) | [![Codecov](https://codecov.io/gh/tilkinsc/LuaConsole/coverage.svg?branch=master)](https://codecov.io/gh/tilkinsc/LuaConsole) | [![Gitter.im](https://badges.gitter.im/tilkinsc/LuaConsole.png)](https://gitter.im/LuaConsole) | [![travis-ci](https://travis-ci.org/tilkinsc/LuaConsole.svg?branch=master)](https://travis-ci.org/tilkinsc/LuaConsole) | ![appveyor](https://ci.appveyor.com/api/projects/status/github/tilkinsc/LuaConsole?svg=true) OFF |  
 
@@ -12,47 +12,49 @@
 [![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=RCR8HT8GDC5XC&item_name=Free+Software&currency_code=USD)
 
 https://github.com/tilkinsc/LuaConsole  
-Uma próxima geração, Plataforma Cruzada \[Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua5.3.x \] - suportando a CLI feita para substituir o interpretador PUC-Lua e LuaJIT  
+Uma próxima geração, Cross-Platform [Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x] de suporte CLI feita para substituir PUC-Lua e LuaJIT CLI 
 
-Para mais informações, visite o [Site do LuaConsole Github] (https://tilkinsc.github.io/LuaConsole) e o [wiki] (https://github.com/tilkinsc/LuaConsole/wiki)!  
+Para obter mais informações, visite [LuaConsole Github Website] (https://tilkinsc.github.io/LuaConsole) e o [wiki] (https://github.com/tilkinsc/LuaConsole/wiki)! 
 
-# Objetivos
-* Seja um aplicativo CLI melhor que o PUC-Lua/LuaJIT
-* Ter baixa cobertura de código para evitar que a redundância seja executada (0-30% de pseudo-objetivo)
+# Metas
+* Ser um aplicativo CLI melhor do que PUC-Lua/LuaJIT
 * Suporta tudo compatível com PUC-Lua e LuaJIT
-* Evite código confuso e ofuscante
-* Seja CLI dependente e independente 
+* Evite códigos confusos e ofuscantes
+* Seja dependente e independente da CLI
+* Multiplataforma - Linux, Windows, Mac (não oficial) 
 
-# Construção
+# Construir
 [Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions
 
-# Usando com o LuaRocks
-https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support  
+# Usando com LuaRocks
+[LuaRocks Support](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support)  
 
-# Usando com o LuaDIST
-https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS
+# Usando com LuaDIST
+[LuaDist Support Windows, Linux, MacOS](https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS)  
 
-# Testando
+# Testar
+
+## Linux
 ```bash
 # Help command
 luaw --help /? -?
 
-# Modo REPL
+# REPL Mode
 luaw
 luaw -p
 
-# Do comando
+# From the command
 luaw res/testing.lua -Dtest=5 -n a b c
 luaw -lres/testing.lua -Dtest=5 -n a b c
 luaw -Dtest=5 -n a b c - < res/testing.lua
 
-# Com os aprimoramentos do Shebang encontrados abaixo
-res/testing.lua | luaw -Dtest=5 -n a b c -
+# With Shebang enhancements found below
+res/testing.lua -Dtest=5 -n a b c
 
-# Usando cat
+# Using cat
 cat res/testing.lua | luaw -Dtest=5 -n a b c -
 
-# De dentro da Lua
+# From inside Lua
 luaw -e "dofile('res/testing.lua')" -Dtest=5 -n a b c
 luaw -e "dofile('testing.lua')" -s res -Dtest=5 -n a b c
 
@@ -61,27 +63,39 @@ luaw -
 dofile('res/testing.lua')
 <Ctrl + d>
 <Enter>
-
-# No entanto, em vez dos dois acima, use: (pode negligenciar o implícito -p)
-luaw -p
 ```
 
-Específico do Windows:
+## Windows
 ```batch
+REM Help command
+luaw --help /? -?
+
+REM REPL Mode
+luaw
+luaw -p
+
+REM From the command
+luaw res/testing.lua -Dtest=5 -n a b c
+luaw -lres/testing.lua -Dtest=5 -n a b c
+luaw -Dtest=5 -n a b c - < res/testing.lua
+
+REM With Windows Registry enhancements found below
+res\testing.lua -Dtest=5 -n a b c
+res\testing -Dtest=5 -n a b c
+
+REM Using type
+type res\testing.lua | luaw -Dtest=5 -n a b c -
+
+REM From inside Lua
+luaw -e "dofile('res/testing.lua')" -Dtest=5 -n a b c
+luaw -e "dofile('testing.lua')" -s res -Dtest=5 -n a b c
+
 REM stdin
 luaw -
 dofile('res/testing.lua')
 <Ctrl + z>
 <Enter>
-
-REM Usando type
-type res\testing.lua | luaw -Dtest=5 -n a b c -
-
-REM Use os aprimoramentos do Registro do Windows encontrados abaixo
-res\testing.lua | luaw -Dtest=5 -n a b c -
-res\testing | luaw -Dtest=5 -n a b c -
 ```
-
-# Bônus
-* [Windows Bonus Flashy Icons and Ease of Open](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus---Flashy-Icons-and-Ease-of-Open)  
-* Linux Bonus Shebangs -- WIP, not yet made
+# Extra
+* [Windows Bonus - Flashy Icons & Registry Enhancements](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus----Flashy-Icons-&-Registry-Enhancements)  
+* [Linux Bonus - Shebangs & Desktop Files](https://github.com/tilkinsc/LuaConsole/wiki/Linux-Bonus---Shebangs-&-Desktop-Files)
