@@ -33,7 +33,7 @@ For more information, visit [LuaConsole Github Website](https://tilkinsc.github.
 [LuaRocks Support](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support)  
 
 # Using with LuaDIST
-[LuaDist Support Windows, Linux, MacOS](https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS)
+[LuaDist Support Windows, Linux, MacOS](https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS)  
 
 # Testing
 
