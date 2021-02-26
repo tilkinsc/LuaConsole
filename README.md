@@ -32,6 +32,8 @@ https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support
 https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS
 
 # Testing
+
+### Linux
 ```bash
 # Help command
 luaw --help /? -?
@@ -46,7 +48,7 @@ luaw -lres/testing.lua -Dtest=5 -n a b c
 luaw -Dtest=5 -n a b c - < res/testing.lua
 
 # With Shebang enhancements found below
-res/testing.lua | luaw -Dtest=5 -n a b c -
+res/testing.lua -Dtest=5 -n a b c
 
 # Using cat
 cat res/testing.lua | luaw -Dtest=5 -n a b c -
@@ -60,25 +62,38 @@ luaw -
 dofile('res/testing.lua')
 <Ctrl + d>
 <Enter>
-
-# However, instead of the above two, use: (can neglect the implied -p)
-luaw -p
 ```
 
-Windows Specific:
+### Windows
 ```batch
+REM Help command
+luaw --help /? -?
+
+REM REPL Mode
+luaw
+luaw -p
+
+REM From the command
+luaw res/testing.lua -Dtest=5 -n a b c
+luaw -lres/testing.lua -Dtest=5 -n a b c
+luaw -Dtest=5 -n a b c - < res/testing.lua
+
+REM With Windows Registry enhancements found below
+res\testing.lua -Dtest=5 -n a b c
+res\testing -Dtest=5 -n a b c
+
+REM Using type
+type res\testing.lua | luaw -Dtest=5 -n a b c -
+
+REM From inside Lua
+luaw -e "dofile('res/testing.lua')" -Dtest=5 -n a b c
+luaw -e "dofile('testing.lua')" -s res -Dtest=5 -n a b c
+
 REM stdin
 luaw -
 dofile('res/testing.lua')
 <Ctrl + z>
 <Enter>
-
-REM Using type
-type res\testing.lua | luaw -Dtest=5 -n a b c -
-
-REM With Windows Registry enhancements found below
-res\testing.lua | luaw -Dtest=5 -n a b c -
-res\testing | luaw -Dtest=5 -n a b c -
 ```
 
 # Bonus
