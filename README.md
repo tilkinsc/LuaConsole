@@ -17,7 +17,6 @@ For more information, visit [LuaConsole Github Website](https://tilkinsc.github.
 
 # Goals
 * Be a better CLI application than PUC-Lua/LuaJIT
-* Have low code-coverage to prevent redundancy being executed (0-30% pseudo-goal)
 * Support everything compatible with PUC-Lua and LuaJIT
 * Prevent messy, obfuscating code
 * Be CLI dependent and independent  
@@ -97,5 +96,5 @@ dofile('res/testing.lua')
 ```
 
 # Bonus
-* [Windows Bonus Flashy Icons and Ease of Open](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus---Flashy-Icons-and-Ease-of-Open)  
-* Linux Bonus Shebangs -- WIP, not yet made
+* [Windows Bonus - Flashy Icons & Registry Enhancements](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus----Flashy-Icons-&-Registry-Enhancements)  
+* [Linux Bonus - Shebangs & Desktop Files](https://github.com/tilkinsc/LuaConsole/wiki/Linux-Bonus---Shebangs-&-Desktop-Files)
