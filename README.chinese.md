@@ -12,9 +12,9 @@
 [![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=RCR8HT8GDC5XC&item_name=Free+Software&currency_code=USD)
 
 https://github.com/tilkinsc/LuaConsole  
-下一代，跨平台 \[Lua-5.1.x，LuaJIT-2.0，Lua-5.2.x，Lua5.3.x \] 支持 CLI 取代 PUC-Lua 和 LuaJIT 解释器  
+下一代，跨平台 \[Lua-5.1.x，LuaJIT-2.0，Lua-5.2.x，Lua5.3.x, lua-5.4.x \] 支持 CLI 取代 PUC-Lua 和 LuaJIT 解释器  
 
-有关更多信息, 请访问[LuaConsole Github网站]（https://tilkinsc.github.io/LuaConsole）和[wiki]（https://github.com/tilkinsc/LuaConsole/wiki）！  
+有关更多信息, 请访问[LuaConsole Github网站](https://tilkinsc.github.io/LuaConsole) 和[wiki](https://github.com/tilkinsc/LuaConsole/wiki)！  
 
 # 目标
 * 比 PUC-Lua/LuaJIT 更好的 CLI 应用程序
