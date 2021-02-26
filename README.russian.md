@@ -9,6 +9,7 @@
 [![Russian](https://i.imgur.com/cuby3uW.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.russian.md)
 [![Chinese](https://i.imgur.com/pDy0fs3.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.chinese.md)
 
+[![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=RCR8HT8GDC5XC&item_name=Free+Software&currency_code=USD)
 
 https://github.com/tilkinsc/LuaConsole  
 Кроссплатформенная следующего поколения \[Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua5.3.x \] поддерживающая CLI, заменяющая интерпретаторы PUC-Lua и LuaJIT  
