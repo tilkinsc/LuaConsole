@@ -20,9 +20,10 @@ For more information, visit [LuaConsole Github Website](https://tilkinsc.github.
 * Support everything compatible with PUC-Lua and LuaJIT
 * Prevent messy, obfuscating code
 * Be CLI dependent and independent  
+* Multiplatform - Linux, Windows, Mac (unofficial)
 
 # Building
-[Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
+[Windows/Linux Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
 
 # Using with LuaRocks
 [LuaRocks Support](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support)  
