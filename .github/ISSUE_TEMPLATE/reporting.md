@@ -4,7 +4,7 @@
 What happened?
 
 **What version are you using?**  
-The version can be found with `/dump KiwiItemInfo._VERSION`
+Which did you download? Did you build yourself?
 
 **To Reproduce**  
 Steps to reproduce the behavior:  
