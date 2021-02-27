@@ -1,37 +1,36 @@
 # Welcome to LuaConsole Website
 
+[![License](https://img.shields.io/github/license/tilkinsc/LuaConsole.svg)](https://github.com/tilkinsc/LuaConsole/blob/master/LICENSE) [![Codecov](https://codecov.io/gh/tilkinsc/LuaConsole/coverage.svg?branch=master)](https://codecov.io/gh/tilkinsc/LuaConsole) [![Gitter.im](https://badges.gitter.im/tilkinsc/LuaConsole.png)](https://gitter.im/LuaConsole) [![travis-ci](https://travis-ci.org/tilkinsc/LuaConsole.svg?branch=master)](https://travis-ci.org/tilkinsc/LuaConsole) ![appveyor](https://ci.appveyor.com/api/projects/status/github/tilkinsc/LuaConsole?svg=true) 
 
-| License | Codecov.io | Gitter.im | Travis-cl | Appveyor |
-| ------- | ---------- | --------- | --------- | -------- |
-| [![License](https://img.shields.io/github/license/tilkinsc/LuaConsole.svg)](https://github.com/tilkinsc/LuaConsole/blob/master/LICENSE) | [![Codecov](https://codecov.io/gh/tilkinsc/LuaConsole/coverage.svg?branch=master)](https://codecov.io/gh/tilkinsc/LuaConsole) | [![Gitter.im](https://badges.gitter.im/tilkinsc/LuaConsole.png)](https://gitter.im/LuaConsole) | [![travis-ci](https://travis-ci.org/tilkinsc/LuaConsole.svg?branch=master)](https://travis-ci.org/tilkinsc/LuaConsole) | ![appveyor](https://ci.appveyor.com/api/projects/status/github/tilkinsc/LuaConsole?svg=true) OFF |  
+[![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=RCR8HT8GDC5XC&item_name=Free+Software&currency_code=USD)
+
+Copyright information: [LuaConsole License](https://tilkinsc.github.io/LuaConsole/LICENSE) - [Lua License](https://tilkinsc.github.io/LuaConsole/Lua%20LICENSE) - [LuaJIT License](https://tilkinsc.github.io/LuaConsole/LuaJIT%20LICENSE)
 
 ### About
 
 The project came to life when I realized how bad the PUC-Lua and LuaJIT's REPL interpreters were.
 I took action and started development on a brand new REPL interpreter around May 1, 2017.
+The project came out a massive success!
 
-Copyright information: [LuaConsole License](https://tilkinsc.github.io/LuaConsole/LICENSE) - [Lua License](https://tilkinsc.github.io/LuaConsole/Lua%20LICENSE) - [LuaJIT License](https://tilkinsc.github.io/LuaConsole/LuaJIT%20LICENSE)
+LuaConsole is a Cross-Platform CLI application designed to support Lua-5.1.x, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x, and LuaJIT-2.0 while not breaking compatibility, but also adding some very QOL features. The at-birth goal for LuaConsole was to be better than PUC-Lua in terms of pretty code, more operation, and less 'bugs'. Soon after, I took a look at LuaJIT and reworked it... after exporting some functions to learn (and fix) them aka `jitsupport.c`. One other step was `luaadd.dll` which added a few debug things such as `stack_dump()` and mainly just current directory and terminal clearing, but was later scrapped because it made the repo too complex. It is in a perfect place to support Lua-5.0 and earlier.
 
-LuaConsole is a Cross-Platform CLI application designed to support Lua-5.1.x, Lua-5.2.x, Lua-5.3.x, and LuaJIT-2.0 while not breaking compatibility, but also adding some very QOL features. The at-birth goal for LuaConsole was to be better than PUC-Lua in terms of pretty code, more operation, and less 'bugs'. Soon after, I took a look at LuaJIT and reworked it... after exporting some functions to learn (and fix) them aka `jitsupport.c`. One other step was `luaadd.dll` which adds a few debug things such as stack_dump() and mainly just current directory and terminal clearing, but was later scrapped because it made the repo too complex. It is in a perfect place to support Lua-5.0 and earlier.
-
-### Collaborators (1)
+### Collaborators (2)
 
 * [tilkinsc](https://github.com/tilkinsc)
+* [DarkWiiPlayer](https://github.com/DarkWiiPlayer)
 
 ### Getting Started
-
-First, download and build Lua then LuaConsole [HERE](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions).
-
+[Simply run prereqs followed by your build script!](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions).
 
 _____
 
-**Things wrong with PUC-Lua REPL interpreter (1/13/2019):**
+**Things wrong with PUC-Lua REPL interpreter (2/26/2021):**
 * Poor formatted command line help message
 * Mashed up, not spaced properly, weird tabs, string-line cutting aka column 80, etc
 * Code was horrifying to look at and hard to follow through, very complex names, functions not ordered
 * It was a maintainers nightmare
 * Redundant code, you don't need to pass args to pmain, even luajit doesn't do that
-* Full help/usage not layed out. `[options]` means a lot for ordering, doesn't it...
+* Full help/usage not layed out. `[options]` means a lot for ordering, which had unexpected behaviour...
 * Lack of support for different versions of switches (-, /) aka windows vs linux switches
 * Parameters couldn't be combined, thanks `[options]` (can't `lua -e "print(arg[1], arg[2])" arg1 arg2`)
 * Readline library is actually only useful for those who knew what they were doing, use stdin instead
@@ -39,7 +38,7 @@ _____
 * There was too much pushing to the stack for no reason when you could just preprocess the information or something
 * PUC-Lua hasn't updated their console much [since 2003 lua5.0](https://www.lua.org/versions.html)
 * No features are likely in development
-* luajit only conforms with changes to PUC-Lua 5.1 REPL
+* luajit only conforms with changes to PUC-Lua 5.1 REPL with minimal upstream support
 * PUC-Lua easily deprecated in favor for LuaJIT variation: fast, the addition of -j, -O, and -b
 * I found it hard to use stdout when parsing things with lua because the copyright
 * No support for -Dglobal=value variables (i.e. dynamic environments)
@@ -71,7 +70,7 @@ _____
 * Forces you to install rather than migrate binaries
 * Weird binary names
 
-**Improvements made (1/13/2019):**
+**Improvements made (2/26/2021):**
 * Attempts at a really good help message
 * Supports all types of switches -,/ but only --help for --
 * 100% fresh, maintainable code with proper names and ordering for forkers
@@ -96,5 +95,5 @@ _____
 * Determine how you handle parameters with -t
 * Installation doesn't have to be in a specific directory, so AIO workspaces are enabled
 * Ability to switch lua version with executable call `luaw -w lua-5.3.5 -e 'print(":)")'`
-
+* Basic translations are being added
 
