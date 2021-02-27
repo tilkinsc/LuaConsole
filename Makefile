@@ -72,7 +72,7 @@ default: none
 
 prereqs:
 	$(warning Make is a joke)
-	$(PRE_$(PLAT))prereqs$(FE_$(PLAT))
+	$(PRE_$(PLAT))prereqs$(FE_$(PLAT)) download
 
 driver:
 	$(warning Make is a joke)
