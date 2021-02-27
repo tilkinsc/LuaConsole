@@ -20,7 +20,7 @@ LuaConsole is a Cross-Platform CLI application designed to support Lua-5.1.x, Lu
 * [DarkWiiPlayer](https://github.com/DarkWiiPlayer)
 
 ### Getting Started
-[Simply run prereqs followed by your build script!](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions).
+[Simply run prereqs followed by your build script!](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)
 
 _____
 
