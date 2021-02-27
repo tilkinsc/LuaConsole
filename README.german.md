@@ -16,14 +16,14 @@ Eine plattformübergreifende CLI der nächsten Generation [Lua-5.1.x, LuaJIT-2.0
 
 Weitere Informationen finden Sie auf der [LuaConsole Github-Website](https://tilkinsc.github.io/LuaConsole) und im [Wiki](https://github.com/tilkinsc/LuaConsole/wiki)!  
 
-# Tore
+# Ziele
 * Seien Sie eine bessere CLI-Anwendung als PUC-Lua/LuaJIT
 * Unterstützen Sie alles, was mit PUC-Lua und LuaJIT kompatibel ist
 * Verhindern Sie unordentlichen, verschleierten Code
 * Seien Sie CLI-abhängig und unabhängig  
 * Multiplattform - Linux, Windows, Mac (inoffiziell)
 
-# Erstellen
+# Build
 [Windows/Linux Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
 
 # Verwendung mit LuaRocks
