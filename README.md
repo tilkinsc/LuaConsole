@@ -4,11 +4,12 @@
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![License](https://img.shields.io/github/license/tilkinsc/LuaConsole.svg)](https://github.com/tilkinsc/LuaConsole/blob/master/LICENSE) [![Codecov](https://codecov.io/gh/tilkinsc/LuaConsole/coverage.svg?branch=master)](https://codecov.io/gh/tilkinsc/LuaConsole) [![Gitter.im](https://badges.gitter.im/tilkinsc/LuaConsole.png)](https://gitter.im/LuaConsole) [![travis-ci](https://travis-ci.org/tilkinsc/LuaConsole.svg?branch=master)](https://travis-ci.org/tilkinsc/LuaConsole) ![appveyor](https://ci.appveyor.com/api/projects/status/github/tilkinsc/LuaConsole?svg=true) 
 
-[![English](https://i.imgur.com/koEsWJi.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.md)
-[![Spanish](https://i.imgur.com/6eQwrN2.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.espanol.md)
-[![Portuguese](https://i.imgur.com/MQ1ArnU.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.portugues.md)
-[![Russian](https://i.imgur.com/cuby3uW.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.russian.md)
-[![Chinese](https://i.imgur.com/pDy0fs3.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.chinese.md)
+[![English](https://user-images.githubusercontent.com/7494772/109406669-0a75d500-7949-11eb-87fa-b56ee60e2afd.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.md)
+[![Spanish](https://user-images.githubusercontent.com/7494772/109406678-24171c80-7949-11eb-94d7-83afe3befae0.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.espanol.md)
+[![German](https://user-images.githubusercontent.com/7494772/109406691-3002de80-7949-11eb-83ee-95967d986e99.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.espanol.md)
+[![Portuguese](https://user-images.githubusercontent.com/7494772/109406785-e49d0000-7949-11eb-8b36-793272d7821e.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.portugues.md)
+[![Russian](https://user-images.githubusercontent.com/7494772/109406798-f5e60c80-7949-11eb-9467-947936c47188.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.russian.md)
+[![Chinese](https://user-images.githubusercontent.com/7494772/109406811-0c8c6380-794a-11eb-82dc-c06a322448ff.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.chinese.md)
 
 [![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=RCR8HT8GDC5XC&item_name=Free+Software&currency_code=USD)
 
