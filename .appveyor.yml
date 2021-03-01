@@ -10,16 +10,8 @@ branches:
   only:
   - master
 
-
 build_script:
-
-- cmd: >-
-    prereqs.bat download
-    
-    build.msvs.bat driver luajit
-    
-    build.msvs.bat package lua-5.3.5
-    
+- cmd: appveyor.msvs.bat
 
 test: off
 deploy: off
