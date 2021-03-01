@@ -1,0 +1,20 @@
+version: '{build}'
+
+image: Visual Studio 2019
+platform: x64
+
+build_script:
+- cmd: call build.msvs.bat
+
+test: off
+deploy: off
+
+on_success:
+- cmd: echo Build successful!
+
+on_failure:
+- cmd: echo Build failed!
+
+on_finish:
+- cmd: echo Building finished.
+
