@@ -26,17 +26,17 @@ setlocal
 	
 	call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 	
-	prereqs.bat download
+	call prereqs.bat download
 	
-	build.msvs.bat driver luajit
+	call build.msvs.bat driver luajit
 	
-	build.msvs.bat package lua-5.4.2
+	call build.msvs.bat package lua-5.4.2
 	
-	build.msvs.bat package lua-5.3.6
+	call build.msvs.bat package lua-5.3.6
 	
-	build.msvs.bat package lua-5.2.4
+	call build.msvs.bat package lua-5.2.4
 	
-	build.msvs.bat package lua-5.1.5
+	call build.msvs.bat package lua-5.1.5
 	
 endlocal
 
