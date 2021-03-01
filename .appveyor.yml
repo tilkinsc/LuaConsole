@@ -12,7 +12,11 @@ branches:
 
 
 build_script:
-- cmd: call build.msvs.bat
+
+- cmd: >-
+    call prereqs.bat download
+    call build.msvs.bat driver luajit
+    call build.msvs.bat package lua-5.3.5
 
 test: off
 deploy: off
