@@ -255,12 +255,9 @@ setlocal
 			xcopy /Y lualib.h		%incdir%
 			xcopy /Y lauxlib.h		%incdir%
 			xcopy /Y luajit.h		%incdir%
-			xcopy /Y msvs_lua51.dll	%dlldir%
-			move %dlldir%\msvs_lua51.dll %dlldir%\libluajit.dll
-			xcopy /Y msvs_lua51.lib	%dlldir%\libluajit.lib
-			move %dlldir%\msvs_lua51.lib %dlldir%\libluajit.lib
-			xcopy /Y msvs_lua51.exp	%dlldir%\libluajit.exp
-			move %dlldir%\msvs_lua51.exp %dlldir%\libluajit.exp
+			copy /Y msvs_lua51.dll	%dlldir%\libluajit.dll
+			copy /Y msvs_lua51.lib	%dlldir%\libluajit.lib
+			copy /Y msvs_lua51.exp	%dlldir%\libluajit.exp
 		popd
 		
 		echo Finished locally building / installing luajit.
@@ -292,12 +289,9 @@ setlocal
 			xcopy /Y luaconf.h		%incdir%
 			xcopy /Y lualib.h		%incdir%
 			xcopy /Y lauxlib.h		%incdir%
-			xcopy /Y msvs_lib%1.dll	%dlldir%
-			move %dlldir%\msvs_lib%1.dll %dlldir%\lib%1.dll
-			xcopy /Y msvs_lib%1.lib	%dlldir%\lib%1.lib
-			move %dlldir%\msvs_lib%1.lib %dlldir%\lib%1.lib
-			xcopy /Y msvs_lib%1.exp	%dlldir%\lib%1.exp
-			move %dlldir%\msvs_lib%1.exp %dlldir%\lib%1.exp
+			copy /Y msvs_lib%1.dll	%dlldir%\lib%1.dll
+			copy /Y msvs_lib%1.lib	%dlldir%\lib%1.lib
+			copy /Y msvs_lib%1.exp	%dlldir%\lib%1.exp
 		popd
 		
 		echo Finished installing %1.
