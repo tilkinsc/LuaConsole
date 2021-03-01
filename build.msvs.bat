@@ -108,7 +108,7 @@ setlocal
 	REM - Basic MSVS Setup -------------------------------------------------
 	
 	
-	IF [%debug%] EQU [0] (
+	IF [0] EQU [%debug%] (
 		set attrib=/O2
 		set root=%CWD%\bin\Release
 	) ELSE (
