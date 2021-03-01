@@ -6,6 +6,17 @@
   "commit": false,
   "contributors": [
     {
+      "login": "tilkinsc",
+      "name": "tilkinsc",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7494772?v=4",
+      "profile": "http://tilkinsc.github.io",
+      "contributions": [
+        "code",
+        "content",
+        "doc"
+      ]
+    },
+    {
       "login": "DarkWiiPlayer",
       "name": "DarkWiiPlayer",
       "avatar_url": "https://avatars.githubusercontent.com/u/1252859?v=4",
