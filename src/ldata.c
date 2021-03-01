@@ -76,7 +76,7 @@ const char HELP_MESSAGE[] =
 	#if defined(LUA_JIT_51)
 		LUAJIT_VERSION " " LUAJIT_COPYRIGHT " " LUAJIT_URL "\n"
 	#endif
-	"\nSupports Lua5.3, Lua5.2, Lua5.1, LuaJIT5.1\n"
+	"\nSupports Lua5.4, Lua5.3, Lua5.2, Lua5.1, LuaJIT5.1\n"
 	"\n"
 	"Usage: luaw" LUA_BIN_EXT_NAME " [-c] [FILES] [-w] [-v] [-q] [-r] [-R] [-s PATH] [-p] [-Dvar=val]\n"
 	"\t[-Dtb.var=val] [-Lfile.lua] [-Llualib" LUA_DLL_SO_NAME "] [-t{a,b}] [-e \"string\"]\n"
