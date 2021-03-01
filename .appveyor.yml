@@ -1,7 +1,15 @@
-version: '{build}'
+version: '{build}-{branch}'
+
+clone_folder: C:\git\LuaConsole
+skip_tags: true
+max_jobs: 2
 
 image: Visual Studio 2019
 platform: x64
+branches:
+  only:
+  - master
+
 
 build_script:
 - cmd: call build.msvs.bat
