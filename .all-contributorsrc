@@ -1,6 +1,11 @@
 {
   "files": [
-    "README.md"
+    "README.md",
+    "README.espanol.md",
+    "README.german.md",
+    "README.chinese.md",
+    "README.portugues.md",
+    "README.russian.md"
   ],
   "imageSize": 100,
   "commit": false,
