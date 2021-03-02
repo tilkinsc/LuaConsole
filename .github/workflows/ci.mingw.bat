@@ -42,56 +42,59 @@ setlocal
 	
 	REM Testing
 	echo ^> TESTING
-	echo Test 1
-	luaw -e "print('Everything went okay')"
+	pushd bin\Debug
+		echo Test 1
+		luaw -e "print('Everything went okay')"
+		
+		echo Test 2
+		luaw -w luajit -e "print('Everything went okay')"
+		
+		echo Test 3
+		luaw -w lua-5.3.6 -e "print('Everything went okay')"
+		
+		echo Test 4
+		luaw -w lua-5.2.4 -e "print('Everything went okay')"
+		
+		echo Test 5
+		luaw -w lua-5.1.5 -e "print('Everything went okay')"
+		
+		echo Test 6
+		luaw res\testing.lua -Dtest=5 -n a b c
+		echo Test 6 end
+		
+		echo Test 7
+		luaw -b res\testing.lua testing.luac
+		luaw testing.luac -Dtest=5 -n a b c
+		echo Test 7 end
+		
+		echo Test 8
+		luaw -w luajit -c -o testing.luac "res\testing.lua"
+		luaw -w luajit -ltesting.luac -Dtest=5 -n a b c
+		echo Test 8 end
+		
+		echo Test 9
+		luaw -w lua-5.4.2 -c -o testing.luac "res\testing.lua"
+		luaw -w lua-5.4.2 -ltesting.luac -Dtest=5 -n a b c
+		echo Test 9 end
+		
+		echo Test 10
+		luaw -w lua-5.3.6 -c -o testing.luac "res\testing.lua"
+		luaw -w lua-5.3.6 -ltesting.luac -Dtest=5 -n a b c
+		echo Test 10 end
+		
+		echo Test 11
+		luaw -w lua-5.2.4 -c -o testing.luac "res\testing.lua"
+		luaw -w lua-5.2.4 -ltesting.luac -Dtest=5 -n a b c
+		echo Test 11 end
+		
+		echo Test 12
+		luaw -w lua-5.1.5 -c -o testing.luac "res\testing.lua"
+		luaw -w lua-5.1.5 -ltesting.luac -Dtest=5 -n a b c
+		echo Test 12 end
+		
+		echo Testing complete.
+	popd
 	
-	echo Test 2
-	luaw -w luajit -e "print('Everything went okay')"
-	
-	echo Test 3
-	luaw -w lua-5.3.6 -e "print('Everything went okay')"
-	
-	echo Test 4
-	luaw -w lua-5.2.4 -e "print('Everything went okay')"
-	
-	echo Test 5
-	luaw -w lua-5.1.5 -e "print('Everything went okay')"
-	
-	echo Test 6
-	luaw res\testing.lua -Dtest=5 -n a b c
-	echo Test 6 end
-	
-	echo Test 7
-	luaw -b res\testing.lua testing.luac
-	luaw testing.luac -Dtest=5 -n a b c
-	echo Test 7 end
-	
-	echo Test 8
-	luaw -w luajit -c -o testing.luac "res\testing.lua"
-	luaw -w luajit -ltesting.luac -Dtest=5 -n a b c
-	echo Test 8 end
-	
-	echo Test 9
-	luaw -w lua-5.4.2 -c -o testing.luac "res\testing.lua"
-	luaw -w lua-5.4.2 -ltesting.luac -Dtest=5 -n a b c
-	echo Test 9 end
-	
-	echo Test 10
-	luaw -w lua-5.3.6 -c -o testing.luac "res\testing.lua"
-	luaw -w lua-5.3.6 -ltesting.luac -Dtest=5 -n a b c
-	echo Test 10 end
-	
-	echo Test 11
-	luaw -w lua-5.2.4 -c -o testing.luac "res\testing.lua"
-	luaw -w lua-5.2.4 -ltesting.luac -Dtest=5 -n a b c
-	echo Test 11 end
-	
-	echo Test 12
-	luaw -w lua-5.1.5 -c -o testing.luac "res\testing.lua"
-	luaw -w lua-5.1.5 -ltesting.luac -Dtest=5 -n a b c
-	echo Test 12 end
-	
-	echo Testing complete.
 endlocal
 
 
