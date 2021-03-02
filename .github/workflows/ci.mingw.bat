@@ -33,8 +33,8 @@ setlocal
 	REM Building
 	echo ^> BUILDING
 	set debug=1
-	call build.mingw.bat driver luajit
-	call build.mingw.bat package lua-5.4.2
+	call build.mingw.bat driver lua-5.4.2
+	call build.mingw.bat package luajit
 	call build.mingw.bat package lua-5.3.6
 	call build.mingw.bat package lua-5.2.4
 	call build.mingw.bat package lua-5.1.5
