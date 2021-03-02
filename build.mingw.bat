@@ -244,19 +244,20 @@ setlocal
 		echo Locally building luajit %CWD%\luajit-2.0 ...
 			
 		pushd %CWD%\luajit-2.0\src
-			IF NOT EXIST "libluajit.dll" (
+			IF NOT EXIST "mingw_libluajit.dll" (
 				%MAKE% -j%NUMBER_OF_PROCESSORS%
 			) ELSE (
 				echo libluajit.dll already cached.
 			)
 			
 			echo Locally installing luajit %CWD% ...
+			move lua51.dll	mingw_libluajit.dll
 			xcopy /Y lua.h			%incdir%
 			xcopy /Y luaconf.h		%incdir%
 			xcopy /Y lualib.h		%incdir%
 			xcopy /Y lauxlib.h		%incdir%
 			xcopy /Y luajit.h		%incdir%
-			copy /B /Y lua51.dll	%dlldir%\libluajit.dll
+			copy /B /Y mingw_libluajit.dll	%dlldir%\libluajit.dll
 		popd
 		
 		echo Finished locally building / installing luajit.
@@ -268,7 +269,7 @@ setlocal
 		echo Locally building lua %CWD%\lua-all\%1 ...
 		
 		pushd %CWD%\lua-all\%1
-			IF EXIST "lib%1.dll" (
+			IF EXIST "mingw_lib%1.dll" (
 				echo lib%1.dll already cached.
 			) ELSE (
 				echo Compiling %1 ...
@@ -281,15 +282,16 @@ setlocal
 				%GCC% -std=%GCC_VER% -Wl,--require-defined,luac_main -g0 -O2 -Wall -shared -o lib%1.dll *.o
 				
 				echo Archiving lib%1.a ...
-				$AR rcs "lib%1.a" *.o
+				%AR% rcs "lib%1.a" *.o
 			)
 			
 			echo Locally installing %CWD% ...
+			move lib%1.dll	mingw_lib%1.dll
 			xcopy /Y lua.h		%incdir%
 			xcopy /Y luaconf.h	%incdir%
 			xcopy /Y lualib.h	%incdir%
 			xcopy /Y lauxlib.h	%incdir%
-			xcopy /Y lib%1.dll	%dlldir%
+			copy /B /Y mingw_lib%1.dll	%dlldir%\lib%1.dll
 		popd
 		
 		echo Finished installing %1.

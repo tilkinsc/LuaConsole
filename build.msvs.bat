@@ -282,9 +282,9 @@ setlocal
 			)
 			
 			echo Locally installing %CWD% ...
-			move lib%1.dll msvs_lib%1.dll
-			move lib%1.lib msvs_lib%1.lib
-			move lib%1.exp msvs_lib%1.exp
+			move lib%1.dll	msvs_lib%1.dll
+			move lib%1.lib	msvs_lib%1.lib
+			move lib%1.exp	msvs_lib%1.exp
 			xcopy /Y lua.h			%incdir%
 			xcopy /Y luaconf.h		%incdir%
 			xcopy /Y lualib.h		%incdir%
