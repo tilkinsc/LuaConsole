@@ -1,4 +1,4 @@
-name: Linux LuaConsole CI
+name: Github CI
 
 on:
   push:
@@ -15,18 +15,24 @@ jobs:
     - uses: actions/checkout@v2
     - name: ./prereqs.sh download
       run: ./prereqs.sh download
+      shell: bash
     - name: ./build.linux.sh driver luajit
       run: ./build.linux.sh driver luajit
+      shell: bash
     - name: ./build.linux.sh package lua-5.4.2
       run: ./build.linux.sh package lua-5.4.2
+      shell: bash
   build_mingw:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
     - name: prereqs.bat download
       run: prereqs.bat download
+      shell: cmd
     - name: build.mingw.bat driver luajit
       run: build.mingw.bat driver luajit
+      shell: cmd
     - name: build.mingw.bat package lua-5.4.2
       run: build.mingw.bat package lua-5.4.2
+      shell: cmd
 
