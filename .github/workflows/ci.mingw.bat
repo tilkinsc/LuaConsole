@@ -26,41 +26,17 @@ setlocal
 	
 	REM Init
 	echo ^> PREREQS
-	IF NOT EXIST "lua-all" (
-		echo Not cached. Downloading...
-		
-		prereqs.bat download
-		
-		echo Github cache created.
-	)
-	IF NOT EXIST "luajit-2.0" (
-		echo Not cached. Downloading...
-		
-		prereqs.bat download
-		
-		echo Github cache created.
-	)
-	IF EXIST "lua-all" (
-		IF EXIST "luajit-2.0" (
-			echo Cached.
-		) else (
-			echo Error: Problem in caching system.
-			exit /b 1
-		)
-	) else (
-		echo Error: Problem in caching system.
-		exit /b 1
-	)
+	call prereqs.bat download
 	
 	
 	REM Building
 	echo ^> BUILDING
 	set debug=1
-	build.mingw.bat driver luajit
-	build.mingw.bat package lua-5.4.2
-	build.mingw.bat package lua-5.3.6
-	build.mingw.bat package lua-5.2.4
-	build.mingw.bat package lua-5.1.5
+	call build.mingw.bat driver luajit
+	call build.mingw.bat package lua-5.4.2
+	call build.mingw.bat package lua-5.3.6
+	call build.mingw.bat package lua-5.2.4
+	call build.mingw.bat package lua-5.1.5
 	echo Building complete.
 	
 	

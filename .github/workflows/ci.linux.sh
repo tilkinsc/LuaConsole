@@ -27,15 +27,7 @@ set -e
 
 # Init
 printf "> PREREQS\n"
-if [[ ! -d "lua-all" || ! -d "luajit-2.0" ]]; then
-	printf "Not cached. Downloading...\n"
-	
-	./prereqs.sh download
-	
-	printf "Github cache created.\n"
-else
-	printf "Cached.\n"
-fi
+./prereqs.sh download
 
 
 # Building
@@ -58,7 +50,7 @@ pushd bin/Debug
 	printf "Test 1\n"
 	./luaw -e "print('Everything went okay')"
 	
-	# Code coverage
+	# Code Coverage
 	printf "CodeCoverage snapshot\n"
 	gcov *.gc*
 	bash <(curl -s https://codecov.io/bash)

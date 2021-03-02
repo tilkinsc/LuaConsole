@@ -28,14 +28,14 @@ set -e
 # Init
 printf "> PREREQS\n"
 if [[ ! -d "${HOME}/cistore/lua-all" || ! -d "${HOME}/cistore/luajit-2.0" ]]; then
-	printf "Not cached. Downloading...\n"
+	printf "No travis cache. Downloading...\n"
 	
 	./prereqs.sh download
 	
 	cp -r lua-all $HOME/cistore
 	cp -r luajit-2.0 $HOME/cistore
 	
-	printf "Github cache created.\n"
+	printf "Travis cache created.\n"
 else
 	printf "Cached. Migrating...\n"
 	cp -r $HOME/cistore/lua-all lua-all
