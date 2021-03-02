@@ -19,4 +19,14 @@ jobs:
       run: ./build.linux.sh driver luajit
     - name: ./build.linux.sh package lua-5.4.2
       run: ./build.linux.sh package lua-5.4.2
+  build_mingw:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: prereqs.bat download
+      run: prereqs.bat download
+    - name: build.mingw.bat driver luajit
+      run: build.mingw.bat driver luajit
+    - name: build.mingw.bat package lua-5.4.2
+      run: build.mingw.bat package lua-5.4.2
 
