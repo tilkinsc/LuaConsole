@@ -1,5 +1,5 @@
 
-printf(_VERSION)
+print(_VERSION)
 print(package)
 
 if(arg)then
