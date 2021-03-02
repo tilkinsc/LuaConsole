@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Linux LuaConsole CI
 
 on:
   push:
@@ -17,4 +17,6 @@ jobs:
       run: ./prereqs.sh download
     - name: ./build.linux.sh driver luajit
       run: ./build.linux.sh driver luajit
+    - name: ./build.linux.sh package lua-5.4.2
+      run: ./build.linux.sh package lua-5.4.2
 
