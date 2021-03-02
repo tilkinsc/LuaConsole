@@ -26,6 +26,7 @@ setlocal
 	
 	REM Init
 	echo ^> PREREQS
+	set DLM=curl
 	call prereqs.bat download
 	
 	
@@ -38,6 +39,8 @@ setlocal
 	call build.mingw.bat package lua-5.2.4
 	call build.mingw.bat package lua-5.1.5
 	echo Building complete.
+	
+	dir bin\Debug
 	
 	
 	REM Testing
