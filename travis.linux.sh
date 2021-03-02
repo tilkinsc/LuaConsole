@@ -52,6 +52,7 @@ export debug_coverage=1
 ./build.linux.sh package lua-5.3.6
 ./build.linux.sh package lua-5.2.4
 ./build.linux.sh package lua-5.1.5
+printf "Building complete.\n"
 
 
 # Testing
@@ -71,7 +72,7 @@ pushd bin/Debug
 	./luaw -w luajit -e "print('Everything went okay')"
 	
 	printf "Test 3\n"
-	./luaw -w lua-5.3.5 -e "print('Everything went okay')"
+	./luaw -w lua-5.3.6 -e "print('Everything went okay')"
 	
 	printf "Test 4\n"
 	./luaw -w lua-5.2.4 -e "print('Everything went okay')"

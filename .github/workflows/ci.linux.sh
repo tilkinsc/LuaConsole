@@ -47,6 +47,7 @@ export debug_coverage=1
 ./build.linux.sh package lua-5.3.6
 ./build.linux.sh package lua-5.2.4
 ./build.linux.sh package lua-5.1.5
+printf "Building complete.\n"
 
 
 # Testing
@@ -56,9 +57,61 @@ printf "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}\n"
 pushd bin/Debug
 	printf "Test 1\n"
 	./luaw -e "print('Everything went okay')"
+	
+	# Code coverage
+	printf "CodeCoverage snapshot\n"
+	gcov *.gc*
+	bash <(curl -s https://codecov.io/bash)
+	
+	printf "Test 2\n"
+	./luaw -w luajit -e "print('Everything went okay')"
+	
+	printf "Test 3\n"
+	./luaw -w lua-5.3.6 -e "print('Everything went okay')"
+	
+	printf "Test 4\n"
+	./luaw -w lua-5.2.4 -e "print('Everything went okay')"
+	
+	printf "Test 5\n"
+	./luaw -w lua-5.1.5 -e "print('Everything went okay')"
+	
+	printf "Test 6\n"
+	./luaw res/testing.lua -Dtest=5 -n a b c
+	printf "Test 6 end\n"
+	
+	printf "Test 7\n"
+	./luaw -b res/testing.lua testing.luac
+	./luaw testing.luac -Dtest=5 -n a b c
+	printf "Test 7 end\n"
+	
+	printf "Test 8\n"
+	./luaw -w luajit -c -o testing.luac "res/testing.lua"
+	./luaw -w luajit -ltesting.luac -Dtest=5 -n a b c
+	printf "Test 8 end\n"
+	
+	printf "Test 9\n"
+	./luaw -w lua-5.4.2 -c -o testing.luac "res/testing.lua"
+	./luaw -w lua-5.4.2 -ltesting.luac -Dtest=5 -n a b c
+	printf "Test 9 end\n"
+	
+	printf "Test 10\n"
+	./luaw -w lua-5.3.6 -c -o testing.luac "res/testing.lua"
+	./luaw -w lua-5.3.6 -ltesting.luac -Dtest=5 -n a b c
+	printf "Test 10 end\n"
+	
+	printf "Test 11\n"
+	./luaw -w lua-5.2.4 -c -o testing.luac "res/testing.lua"
+	./luaw -w lua-5.2.4 -ltesting.luac -Dtest=5 -n a b c
+	printf "Test 11 end\n"
+	
+	printf "Test 12\n"
+	./luaw -w lua-5.1.5 -c -o testing.luac "res/testing.lua"
+	./luaw -w lua-5.1.5 -ltesting.luac -Dtest=5 -n a b c
+	printf "Test 12 end\n"
+	
+	printf "Testing complete.\n"
 popd
 
 
-printf "Testing complete.\n"
 exit 0
 
