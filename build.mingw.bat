@@ -246,12 +246,12 @@ setlocal
 		pushd %CWD%\luajit-2.0\src
 			IF NOT EXIST "mingw_libluajit.dll" (
 				%MAKE% -j%NUMBER_OF_PROCESSORS%
+				move lua51.dll	mingw_libluajit.dll
 			) ELSE (
 				echo libluajit.dll already cached.
 			)
 			
 			echo Locally installing luajit %CWD% ...
-			move lua51.dll	mingw_libluajit.dll
 			xcopy /Y lua.h			%incdir%
 			xcopy /Y luaconf.h		%incdir%
 			xcopy /Y lualib.h		%incdir%
@@ -283,10 +283,11 @@ setlocal
 				
 				echo Archiving lib%1.a ...
 				%AR% rcs "lib%1.a" *.o
+				
+				move lib%1.dll	mingw_lib%1.dll
 			)
 			
 			echo Locally installing %CWD% ...
-			move lib%1.dll	mingw_lib%1.dll
 			xcopy /Y lua.h		%incdir%
 			xcopy /Y luaconf.h	%incdir%
 			xcopy /Y lualib.h	%incdir%

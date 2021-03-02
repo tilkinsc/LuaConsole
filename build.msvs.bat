@@ -242,14 +242,14 @@ setlocal
 		pushd %CWD%\luajit-2.0\src
 			IF NOT EXIST "msvs_lua51.lib" (
 				call msvcbuild.bat
+				move lua51.lib msvs_lua51.lib
+				move lua51.dll msvs_lua51.dll
+				move lua51.exp msvs_lua51.exp
 			) ELSE (
 				echo msvs_lua51.lib already cached.
 			)
 			
 			echo Locally installing luajit %CWD% ...
-			move lua51.lib msvs_lua51.lib
-			move lua51.dll msvs_lua51.dll
-			move lua51.exp msvs_lua51.exp
 			xcopy /Y lua.h			%incdir%
 			xcopy /Y luaconf.h		%incdir%
 			xcopy /Y lualib.h		%incdir%
@@ -279,12 +279,13 @@ setlocal
 				
 				REM TODO: I don't know if LUA_BUILD_AS_DLL is necessary
 				cl.exe /O2 /D_USRDLL /D_WINDLL /DLUA_BUILD_AS_DLL *.c /link /DLL /EXPORT:luac_main=main /OUT:lib%1.dll
+				
+				move lib%1.dll	msvs_lib%1.dll
+				move lib%1.lib	msvs_lib%1.lib
+				move lib%1.exp	msvs_lib%1.exp
 			)
 			
 			echo Locally installing %CWD% ...
-			move lib%1.dll	msvs_lib%1.dll
-			move lib%1.lib	msvs_lib%1.lib
-			move lib%1.exp	msvs_lib%1.exp
 			xcopy /Y lua.h			%incdir%
 			xcopy /Y luaconf.h		%incdir%
 			xcopy /Y lualib.h		%incdir%
