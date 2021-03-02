@@ -1,4 +1,5 @@
 
+printf(_VERSION)
 print(package)
 
 if(arg)then

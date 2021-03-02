@@ -42,7 +42,7 @@ jobs:
         key: ${{ runner.os }}-cacher
         restore-keys: |
           ${{ runner.os }}-cacher
-    - name: Build & Test Linux
+    - name: Build & Test Windows
       run: call .github\workflows\ci.mingw.bat
       shell: cmd
 
