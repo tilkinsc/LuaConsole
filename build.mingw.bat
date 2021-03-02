@@ -305,7 +305,7 @@ setlocal
 		
 		move /Y *.o %objdir%
 		IF [luajit] == [%1] (
-			copy /Y %dlldir%\lua51.dll %root%
+			copy /Y %dlldir%\libluajit.dll %root%
 		) ELSE (
 			copy /Y %dlldir%\lib%1.dll %root%
 		)
