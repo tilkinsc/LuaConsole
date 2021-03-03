@@ -257,7 +257,7 @@ setlocal
 			copy /Y lualib.h		%incdir%\lualib.h
 			copy /Y lauxlib.h		%incdir%\lauxlib.h
 			copy /Y luajit.h		%incdir%\luajit.h
-			copy /B /Y mingw_libluajit.dll	%dlldir%\libluajit.dll
+			copy /Y mingw_libluajit.dll	%dlldir%\libluajit.dll
 		popd
 		
 		echo Finished locally building / installing luajit.
@@ -289,7 +289,7 @@ setlocal
 			copy /Y luaconf.h	%incdir%\luaconf.h
 			copy /Y lualib.h	%incdir%\lualib.h
 			copy /Y lauxlib.h	%incdir%\lauxlib.h
-			copy /B /Y mingw_lib%1.dll	%dlldir%\lib%1.dll
+			copy /Y mingw_lib%1.dll	%dlldir%\lib%1.dll
 		popd
 		
 		echo Finished installing %1.
@@ -302,9 +302,9 @@ setlocal
 		
 		move /Y *.o %objdir%
 		IF [luajit] == [%1] (
-			copy /B /Y %dlldir%\libluajit.dll %root%\libluajit.dll
+			copy /Y %dlldir%\libluajit.dll %root%\libluajit.dll
 		) ELSE (
-			copy /B /Y %dlldir%\lib%1.dll %root%\lib%1.dll
+			copy /Y %dlldir%\lib%1.dll %root%\lib%1.dll
 		)
 		move liblc%1.dll %root%
 		
