@@ -316,9 +316,9 @@ setlocal
 	setlocal
 		IF [%1] == [luajit] (
 			set luaverdef=-DLUA_JIT_51
-			set luaverout=-lluajit
+			set luaverout=%dlldir%\libluajit.dll
 		) ELSE (
-			set luaverout=-llua%1
+			set luaverout=%dlldir%\liblua%1.dll
 		)
 		
 		echo Compiling luaw driver package %1...
