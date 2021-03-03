@@ -244,19 +244,19 @@ setlocal
 		echo Locally building luajit %CWD%\luajit-2.0 ...
 			
 		pushd %CWD%\luajit-2.0\src
-			IF NOT EXIST "mingw_libluajit.dll" (
+			IF EXIST "mingw_libluajit.dll" (
+				echo libluajit.dll already cached.
+			) ELSE (
 				%MAKE% -j%NUMBER_OF_PROCESSORS%
 				move lua51.dll	mingw_libluajit.dll
-			) ELSE (
-				echo libluajit.dll already cached.
 			)
 			
 			echo Locally installing luajit %CWD% ...
-			xcopy /Y lua.h			%incdir%
-			xcopy /Y luaconf.h		%incdir%
-			xcopy /Y lualib.h		%incdir%
-			xcopy /Y lauxlib.h		%incdir%
-			xcopy /Y luajit.h		%incdir%
+			copy /Y lua.h			%incdir%\lua.h
+			copy /Y luaconf.h		%incdir%\luaconf.h
+			copy /Y lualib.h		%incdir%\lualib.h
+			copy /Y lauxlib.h		%incdir%\lauxlib.h
+			copy /Y luajit.h		%incdir%\luajit.h
 			copy /B /Y mingw_libluajit.dll	%dlldir%\libluajit.dll
 		popd
 		
@@ -273,25 +273,22 @@ setlocal
 				echo lib%1.dll already cached.
 			) ELSE (
 				echo Compiling %1 ...
-				%GCC% -std=%GCC_VER% -g0 -O2 -Wall %luaverdef% -c *.c
+				%GCC% -std=%GCC_VER% -I. -g0 -O2 -Wall -c *.c
 				
 				del lua.o
 				%OBJCOPY% --redefine-sym "main=luac_main" luac.o
 				
 				echo Linking lib%1.dll ...
-				%GCC% -std=%GCC_VER% -Wl,--require-defined,luac_main -g0 -O2 -Wall -shared -o lib%1.dll *.o
-				
-				echo Archiving lib%1.a ...
-				%AR% rcs "lib%1.a" *.o
+				%GCC% -std=%GCC_VER% -L. -Wl,--require-defined,luac_main -g0 -O2 -Wall -shared -o lib%1.dll *.o
 				
 				move lib%1.dll	mingw_lib%1.dll
 			)
 			
 			echo Locally installing %CWD% ...
-			xcopy /Y lua.h		%incdir%
-			xcopy /Y luaconf.h	%incdir%
-			xcopy /Y lualib.h	%incdir%
-			xcopy /Y lauxlib.h	%incdir%
+			copy /Y lua.h		%incdir%\lua.h
+			copy /Y luaconf.h	%incdir%\luaconf.h
+			copy /Y lualib.h	%incdir%\lualib.h
+			copy /Y lauxlib.h	%incdir%\lauxlib.h
 			copy /B /Y mingw_lib%1.dll	%dlldir%\lib%1.dll
 		popd
 		
@@ -305,9 +302,9 @@ setlocal
 		
 		move /Y *.o %objdir%
 		IF [luajit] == [%1] (
-			copy /Y %dlldir%\libluajit.dll %root%
+			copy /B /Y %dlldir%\libluajit.dll %root%\libluajit.dll
 		) ELSE (
-			copy /Y %dlldir%\lib%1.dll %root%
+			copy /B /Y %dlldir%\lib%1.dll %root%\lib%1.dll
 		)
 		move liblc%1.dll %root%
 		
@@ -319,9 +316,9 @@ setlocal
 	setlocal
 		IF [%1] == [luajit] (
 			set luaverdef=-DLUA_JIT_51
-			set luaverout=%dlldir%\libluajit.dll
+			set luaverout=-lluajit
 		) ELSE (
-			set luaverout=%dlldir%\lib%1.dll
+			set luaverout=-llua%1
 		)
 		
 		echo Compiling luaw driver package %1...
