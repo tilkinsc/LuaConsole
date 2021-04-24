@@ -1,9 +1,9 @@
 # LuaConsole
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![License](https://img.shields.io/github/license/tilkinsc/LuaConsole.svg)](https://github.com/tilkinsc/LuaConsole/blob/master/LICENSE) [![Codecov](https://codecov.io/gh/tilkinsc/LuaConsole/coverage.svg?branch=master)](https://codecov.io/gh/tilkinsc/LuaConsole) [![Gitter.im](https://badges.gitter.im/tilkinsc/LuaConsole.png)](https://gitter.im/LuaConsole) [![travis-ci](https://travis-ci.org/tilkinsc/LuaConsole.svg?branch=master)](https://travis-ci.org/tilkinsc/LuaConsole) [![Build status](https://ci.appveyor.com/api/projects/status/3rqh0vn8a0lm8itg?svg=true)](https://ci.appveyor.com/project/Hydroque/luaconsole)
-
 
 [![English](https://user-images.githubusercontent.com/7494772/109406669-0a75d500-7949-11eb-87fa-b56ee60e2afd.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.md)
 [![Spanish](https://user-images.githubusercontent.com/7494772/109406678-24171c80-7949-11eb-94d7-83afe3befae0.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.espanol.md)
@@ -14,30 +14,34 @@
 
 [![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=RCR8HT8GDC5XC&item_name=Free+Software&currency_code=USD)
 
-https://github.com/tilkinsc/LuaConsole  
-Кросс-платформенный интерфейс следующего поколения [Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x], поддерживающий CLI, призванный заменить PUC-Lua и LuaJIT CLI
+[LuaConsole](https://github.com/tilkinsc/LuaConsole) - это кросс-платформенный интерфейс следующего поколения [Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x], поддерживающий CLI, призванный заменить PUC-Lua и LuaJIT CLI
 
 Для получения дополнительной информации посетите [Веб-сайт LuaConsole Github](https://tilkinsc.github.io/LuaConsole) и [wiki](https://github.com/tilkinsc/LuaConsole/wiki)!
 
-# Цели
+## Цели
+
 * Будьте лучшим приложением CLI, чем PUC-Lua/LuaJIT
 * Поддержка всего, что совместимо с PUC-Lua и LuaJIT
 * Предотвратить беспорядочный, запутывающий код
 * Будьте зависимы от интерфейса командной строки и независимы
-* Мультиплатформенность - Linux, Windows, Mac (неофициально) 
+* Мультиплатформенность - Linux, Windows, Mac (неофициально)
 
-# Сборка
+## Сборка
+
 [Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions)  
 
-# Использование с LuaRocks
+## Использование с LuaRocks
+
 [LuaRocks Support](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support)  
 
-# Использование с LuaDIST
+## Использование с LuaDIST
+
 [LuaDist Support Windows, Linux, MacOS](https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS)  
 
-# Testing
+## Testing
 
 ### Linux
+
 ```bash
 # Help command
 luaw --help /? -?
@@ -69,6 +73,7 @@ dofile('res/testing.lua')
 ```
 
 ### Windows
+
 ```batch
 REM Help command
 luaw --help /? -?
@@ -100,7 +105,8 @@ dofile('res/testing.lua')
 <Enter>
 ```
 
-# Дополнительный
+## Дополнительный
+
 * [Windows Bonus - Flashy Icons & Registry Enhancements](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus----Flashy-Icons-&-Registry-Enhancements)  
 * [Linux Bonus - Shebangs & Desktop Files](https://github.com/tilkinsc/LuaConsole/wiki/Linux-Bonus---Shebangs-&-Desktop-Files)
 
