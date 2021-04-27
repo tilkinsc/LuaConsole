@@ -1,7 +1,8 @@
 # LuaConsole
-
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![License](https://img.shields.io/github/license/tilkinsc/LuaConsole.svg)](https://github.com/tilkinsc/LuaConsole/blob/master/LICENSE) [![Codecov](https://codecov.io/gh/tilkinsc/LuaConsole/coverage.svg?branch=master)](https://codecov.io/gh/tilkinsc/LuaConsole) [![Gitter.im](https://badges.gitter.im/tilkinsc/LuaConsole.png)](https://gitter.im/LuaConsole) [![travis-ci](https://travis-ci.org/tilkinsc/LuaConsole.svg?branch=master)](https://travis-ci.org/tilkinsc/LuaConsole) [![Build status](https://ci.appveyor.com/api/projects/status/3rqh0vn8a0lm8itg?svg=true)](https://ci.appveyor.com/project/Hydroque/luaconsole)
-
 
 [![English](https://user-images.githubusercontent.com/7494772/109406669-0a75d500-7949-11eb-87fa-b56ee60e2afd.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.md)
 [![Spanish](https://user-images.githubusercontent.com/7494772/109406678-24171c80-7949-11eb-94d7-83afe3befae0.png)](https://github.com/tilkinsc/LuaConsole/blob/master/README.espanol.md)
@@ -12,30 +13,34 @@
 
 [![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=RCR8HT8GDC5XC&item_name=Free+Software&currency_code=USD)
 
-https://github.com/tilkinsc/LuaConsole  
-Uma próxima geração, Cross-Platform [Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x] de suporte CLI feita para substituir PUC-Lua e LuaJIT CLI 
+[LuaConsole](https://github.com/tilkinsc/LuaConsole) é uma próxima geração, cross-platform [Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x] de suporte CLI feita para substituir PUC-Lua e LuaJIT CLI
 
-Para obter mais informações, visite [LuaConsole Github Website] (https://tilkinsc.github.io/LuaConsole) e o [wiki] (https://github.com/tilkinsc/LuaConsole/wiki)! 
+Para obter mais informações, visite [LuaConsole Github Website](https://tilkinsc.github.io/LuaConsole) e o [LuaConsole Github Wiki](https://github.com/tilkinsc/LuaConsole/wiki)!
 
-# Metas
+## Metas
+
 * Ser um aplicativo CLI melhor do que PUC-Lua/LuaJIT
 * Suporta tudo compatível com PUC-Lua e LuaJIT
 * Evite códigos confusos e ofuscantes
 * Seja dependente e independente da CLI
-* Multiplataforma - Linux, Windows, Mac (não oficial) 
+* Multiplataforma - Linux, Windows, Mac (não oficial)
 
-# Construir
+## Construir
+
 [Windows/Unix Build Instructions](https://github.com/tilkinsc/LuaConsole/wiki/Build-Instructions
 
-# Usando com LuaRocks
+## Usando com LuaRocks
+
 [LuaRocks Support](https://github.com/tilkinsc/LuaConsole/wiki/LuaRocks-Support)  
 
-# Usando com LuaDIST
+## Usando com LuaDIST
+
 [LuaDist Support Windows, Linux, MacOS](https://github.com/tilkinsc/LuaConsole/wiki/LuaDist-Support-Windows,-Linux,-MacOS)  
 
-# Testar
+## Testar
 
-## Linux
+### Linux
+
 ```bash
 # Help command
 luaw --help /? -?
@@ -66,7 +71,8 @@ dofile('res/testing.lua')
 <Enter>
 ```
 
-## Windows
+### Windows
+
 ```batch
 REM Help command
 luaw --help /? -?
@@ -97,6 +103,28 @@ dofile('res/testing.lua')
 <Ctrl + z>
 <Enter>
 ```
-# Extra
+
+## Extra
+
 * [Windows Bonus - Flashy Icons & Registry Enhancements](https://github.com/tilkinsc/LuaConsole/wiki/Windows-Bonus----Flashy-Icons-&-Registry-Enhancements)  
 * [Linux Bonus - Shebangs & Desktop Files](https://github.com/tilkinsc/LuaConsole/wiki/Linux-Bonus---Shebangs-&-Desktop-Files)
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="http://darkwiiplayer.com"><img src="https://avatars.githubusercontent.com/u/1252859?v=4?s=100" width="100px;" alt=""/><br /><sub><b>DarkWiiPlayer</b></sub></a><br /><a href="https://github.com/tilkinsc/LuaConsole/commits?author=DarkWiiPlayer" title="Code">рџ’»</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!

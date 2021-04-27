@@ -15,7 +15,7 @@
 
 [LuaConsole](https://github.com/tilkinsc/LuaConsole) is a next-gen, Cross-Platform [Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x]-supporting CLI made to supersede PUC-Lua and LuaJIT CLI
 
-For more information, visit [LuaConsole Github Website](https://tilkinsc.github.io/LuaConsole) and the [wiki](https://github.com/tilkinsc/LuaConsole/wiki)!
+For more information, visit [LuaConsole Github Website](https://tilkinsc.github.io/LuaConsole) and the [LuaConsole Github Wiki](https://github.com/tilkinsc/LuaConsole/wiki)!
 
 ## Goals
 
