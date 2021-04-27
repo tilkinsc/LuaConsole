@@ -13,7 +13,7 @@
 
 [![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate?business=RCR8HT8GDC5XC&item_name=Free+Software&currency_code=USD)
 
-[LuaConsole](https://github.com/tilkinsc/LuaConsole) - это кросс-платформенный интерфейс командной строки следующего поколения [Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x], призванный заменить PUC-Lua и LuaJIT CLI
+[LuaConsole](https://github.com/tilkinsc/LuaConsole) - это [Lua-5.1.x, LuaJIT-2.0, Lua-5.2.x, Lua-5.3.x, Lua-5.4.x] совместимый кросс-платформенный интерфейс командной строки следующего поколения, призванный заменить PUC-Lua и LuaJIT CLI
 
 Для получения дополнительной информации посетите [Веб-сайт LuaConsole Github](https://tilkinsc.github.io/LuaConsole) и [Вики LuaConsole Github](https://github.com/tilkinsc/LuaConsole/wiki)!
 
