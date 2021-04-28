@@ -1,6 +1,6 @@
 # LuaConsole
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![License](https://img.shields.io/github/license/tilkinsc/LuaConsole.svg)](https://github.com/tilkinsc/LuaConsole/blob/master/LICENSE) [![Codecov](https://codecov.io/gh/tilkinsc/LuaConsole/coverage.svg?branch=master)](https://codecov.io/gh/tilkinsc/LuaConsole) [![Gitter.im](https://badges.gitter.im/tilkinsc/LuaConsole.png)](https://gitter.im/LuaConsole) [![travis-ci](https://travis-ci.org/tilkinsc/LuaConsole.svg?branch=master)](https://travis-ci.org/tilkinsc/LuaConsole) [![Build status](https://ci.appveyor.com/api/projects/status/3rqh0vn8a0lm8itg?svg=true)](https://ci.appveyor.com/project/Hydroque/luaconsole)
 
@@ -118,7 +118,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
+    <td align="center"><a href="http://tilkinsc.github.io"><img src="https://avatars.githubusercontent.com/u/7494772?v=4?s=100" width="100px;" alt=""/><br /><sub><b>tilkinsc</b></sub></a><br /><a href="https://github.com/tilkinsc/LuaConsole/commits?author=tilkinsc" title="Code">💻</a> <a href="#content-tilkinsc" title="Content">🖋</a> <a href="https://github.com/tilkinsc/LuaConsole/commits?author=tilkinsc" title="Documentation">📖</a></td>
     <td align="center"><a href="http://darkwiiplayer.com"><img src="https://avatars.githubusercontent.com/u/1252859?v=4?s=100" width="100px;" alt=""/><br /><sub><b>DarkWiiPlayer</b></sub></a><br /><a href="https://github.com/tilkinsc/LuaConsole/commits?author=DarkWiiPlayer" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/acidicMercury8"><img src="https://avatars.githubusercontent.com/u/24611394?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Felix Lewandowski</b></sub></a><br /><a href="#translation-acidicMercury8" title="Translation">🌍</a></td>
   </tr>
 </table>
 
