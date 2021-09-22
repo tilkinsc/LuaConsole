@@ -1,0 +1,43 @@
+65001
+Error: Out of memory! %s\
+Error: Out of memory! %d\
+LuaJIT Warning: malformed argument `-j` has no parameter!\
+LuaJIT Warning: malformed argument `-O` has no parameter!\
+LuaJIT Warning: malformed argument `-b` has no parameter!\
+Error: Argument `%s` not recognized!\
+Could not find the LuaConsole library!
+Could not find the LuaConsole function `luacon_loaddll`!
+--------------- Stack Dump ----------------\
+%d:(String):`%s`\
+%d:(Boolean):`%s`\
+%d:(Number):`%g`\
+%d:(Function):`@0x%p`\
+%d:(Table):`@0x%p`\
+%d:(Userdata):`@0x%p`\
+%d:(LUserdata):`0x@%p`\
+%d:(Thread):`0x%p`\
+%d:(None)\
+%d:(Object):%s:`0x@%p`\
+----------- Stack Dump Finished -----------\
+ (Runtime) | Stack Top: %zu | %s%s\
+ (Internal)
+ (Syntax)
+ (Runtime)
+Input line is too long!\
+ | Stack Top: %zu | %s%s\
+Interrupted!\
+Error: Incorrect -D specified. Use format 'name=value'.
+Error: Incorrect -D specified. Use format 'subtab.name=value'.
+%s%s%s\
+Error: 
+ could not be required because no `require()`.
+Error: Invalid start directory supplied.
+LuaConsole had an error in stdin!\
+LuaConsole ended on file `%s`!\
+(error object is not a string)
+LuaJIT Error: %s\
+LuaJIT Error: unknown luaJIT command or jit.* modules not installed\
+JIT: ON
+JIT: OFF
+LuaJIT Warning: Failed to execute control command or load extension module!\
+LuaJIT Warning: Failed to set with -O!\
