@@ -32,6 +32,10 @@ jobs:
       script: ./travis.linux.sh
       os: linux
       dist: trusty
+      addons:
+        apt:
+          packages:
+            - libssl
     - stage: build
       script: ./travis.mac.sh
       osx_image: xcode12.2
