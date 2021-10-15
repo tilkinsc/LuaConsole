@@ -358,7 +358,7 @@ REM Simplex help message
 :help
 	echo Usage:
 	echo.
-	echo     build build lua-x.x.x           Builds the driver with a default package
+	echo     build driver lua-x.x.x          Builds the driver with a default package
 	echo     build package lua-x.x.x         Creates packages for the driver
 	echo     build clean                     Cleans the environment of built files
 	echo     build install [directory]       Installs to a pre-created directory
