@@ -17,6 +17,7 @@ branches:
 
 before_install:
   - apt update
+  - apt install libgnutls-openssl27 libgnutls30
 
 before_script:
   - chmod +x travis.linux.sh
@@ -34,11 +35,6 @@ jobs:
       script: ./travis.linux.sh
       os: linux
       dist: trusty
-      addons:
-        apt:
-          packages:
-            - libgnutls-openssl27
-            - libgnutls30
     - stage: build
       script: ./travis.mac.sh
       osx_image: xcode12.2
