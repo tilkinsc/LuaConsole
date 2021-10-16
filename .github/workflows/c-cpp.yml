@@ -21,9 +21,9 @@ jobs:
           lua-all
           lua-all.tar.gz
           luajit-2.0
-        key: ${{ runner.os }}-cacher-1
+        key: ${{ runner.os }}-cacher-2
         restore-keys: |
-          ${{ runner.os }}-cacher-1
+          ${{ runner.os }}-cacher-2
     - name: Build & Test Linux
       run: ./.github/workflows/ci.linux.sh
       shell: bash
@@ -39,9 +39,9 @@ jobs:
           lua-all
           lua-all.tar.gz
           luajit-2.0
-        key: ${{ runner.os }}-cacher-1
+        key: ${{ runner.os }}-cacher-2
         restore-keys: |
-          ${{ runner.os }}-cacher-1
+          ${{ runner.os }}-cacher-2
     - name: Build & Test Windows
       run: call .github\workflows\ci.mingw.bat
       shell: cmd
