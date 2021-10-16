@@ -15,9 +15,6 @@ branches:
   only:
     - master
 
-before_install:
-  - sudo apt update
-  - sudo apt install libgnutls-openssl27 libgnutls30
 
 before_script:
   - chmod +x travis.linux.sh
