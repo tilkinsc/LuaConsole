@@ -110,7 +110,6 @@ setlocal
 	REM - Basic GCC Setup --------------------------------------------------
 	
 	
-	REM GCC setup
 	IF [0] EQU [%debug%] (
 		set attrib=-std=gnu11 -Wall -O2
 		set root=%CWD%\bin\Release
@@ -316,9 +315,9 @@ setlocal
 	setlocal
 		IF [%1] == [luajit] (
 			set luaverdef=-DLUA_JIT_51
-			set luaverout=%dlldir%\libluajit.dll
+			set luaverout=-lluajit
 		) ELSE (
-			set luaverout=%dlldir%\lib%1.dll
+			set luaverout=-l%1
 		)
 		
 		echo Compiling luaw driver package %1...
