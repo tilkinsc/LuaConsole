@@ -9,6 +9,9 @@ orbs:
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   build:
+    machine:
+      image: windows-default
+    resource_class: windows.medium
     steps:
       - checkout
       - run:
