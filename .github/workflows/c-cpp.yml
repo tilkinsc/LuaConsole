@@ -25,7 +25,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cacher-2
     - name: Build & Test Linux
-      run: ./ci/ci.linux.sh
+      run:
+        - chmod +x ./ci/ci.linux.sh
+        - ./ci/ci.linux.sh
       shell: bash
   build_mingw:
     runs-on: windows-latest
