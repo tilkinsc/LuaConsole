@@ -25,7 +25,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cacher-2
     - name: Build & Test Linux
-      run: ./.github/workflows/ci.linux.sh
+      run: ./ci/ci.linux.sh
       shell: bash
   build_mingw:
     runs-on: windows-latest
@@ -43,6 +43,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cacher-2
     - name: Build & Test Windows
-      run: call .github\workflows\ci.mingw.bat
+      run: ci\ci.mingw.bat
       shell: cmd
 

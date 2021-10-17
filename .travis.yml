@@ -17,11 +17,11 @@ branches:
 
 
 before_script:
-  - chmod +x travis.linux.sh
-  - chmod +x travis.mac.sh
-  - chmod +x build.linux.sh
-  - chmod +x build.mac.sh
-  - chmod +x prereqs.sh
+  - chmod +x ./ci/travis.linux.sh
+  - chmod +x ./ci/travis.mac.sh
+  - chmod +x ./build.linux.sh
+  - chmod +x ./build.mac.sh
+  - chmod +x ./prereqs.sh
 
 
 jobs:
@@ -29,11 +29,11 @@ jobs:
   - os: osx
   include:
     - stage: build
-      script: ./travis.linux.sh
+      script: ./ci/travis.linux.sh
       os: linux
       dist: trusty
     - stage: build
-      script: ./travis.mac.sh
+      script: ./ci/travis.mac.sh
       osx_image: xcode12.2
       os: osx
 
