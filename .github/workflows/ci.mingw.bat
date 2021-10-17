@@ -26,7 +26,6 @@ setlocal
 	
 	REM Init
 	echo ^> PREREQS
-	set DLM=curl
 	prereqs.bat download
 	
 	
