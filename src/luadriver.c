@@ -280,6 +280,7 @@ int main(int argc, char** argv) {
 	}
 	
 	#if defined(_WIN32) || defined(_WIN64)
+		printf("Loading %s\n", ARGS.luaver == 0 ? DEFAULT_LUA : luastr);
 		HMODULE luacxt;
 		luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr);
 		check_error(luacxt == 0, _("LC_DLL_MIA"));
