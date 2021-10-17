@@ -1,0 +1,26 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+jobs:
+  build:
+    machine:
+      image: windows-default
+    resource_class: windows.medium
+    steps:
+      - checkout
+      - run:
+          name: build
+          shell: cmd.exe
+          command: ci\ci.mingw.bat
+    
+
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+workflows:
+  mingw:
+    jobs:
+      - build
+  
