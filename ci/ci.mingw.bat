@@ -24,7 +24,7 @@
 
 setlocal
 	
-	github.mingw.bat
+	ci\github.mingw.bat
 	
 endlocal
 
