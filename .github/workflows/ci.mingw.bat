@@ -46,19 +46,19 @@ setlocal
 	echo ^> TESTING
 	pushd bin\Debug
 		echo Test 1
-		luaw -e "print('Everything went okay')"
+		luaw -e "print('Everything went okay') 1"
 		
 		echo Test 2
-		luaw -w luajit -e "print('Everything went okay')"
+		luaw -w luajit -e "print('Everything went okay') 2"
 		
 		echo Test 3
-		luaw -w lua-5.3.6 -e "print('Everything went okay')"
+		luaw -w lua-5.3.6 -e "print('Everything went okay') 3"
 		
 		echo Test 4
-		luaw -w lua-5.2.4 -e "print('Everything went okay')"
+		luaw -w lua-5.2.4 -e "print('Everything went okay') 4"
 		
 		echo Test 5
-		luaw -w lua-5.1.5 -e "print('Everything went okay')"
+		luaw -w lua-5.1.5 -e "print('Everything went okay') 5"
 		
 		echo Test 6
 		luaw res\testing.lua -Dtest=5 -n a b c
