@@ -28,16 +28,16 @@ setlocal
 	
 	REM Init
 	echo ^> PREREQS
-	prereqs.bat download
+	call prereqs.bat download
 	
 	REM Building
 	echo ^> BUILDING
 	set debug=1
-	build.msvs.bat driver luajit
-	build.msvs.bat package lua-5.4.2
-	build.msvs.bat package lua-5.3.6
-	build.msvs.bat package lua-5.2.4
-	build.msvs.bat package lua-5.1.5
+	call build.msvs.bat driver luajit
+	call build.msvs.bat package lua-5.4.2
+	call build.msvs.bat package lua-5.3.6
+	call build.msvs.bat package lua-5.2.4
+	call build.msvs.bat package lua-5.1.5
 	echo Building complete.
 	
 	dir bin\Debug
