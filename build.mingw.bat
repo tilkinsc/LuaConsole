@@ -148,6 +148,7 @@ setlocal
 	
 	
 	IF [%1] == [driver] (
+		echo " running driver " 
 		echo Cleaning workspace %CWD% ...
 		
 		REM Resets bin
@@ -194,6 +195,7 @@ setlocal
 	
 	
 	IF [%1] == [package] (
+		echo "running package ..."
 		
 		REM Force driver to be built
 		IF NOT EXIST "%root%\luaw.exe" (
