@@ -164,6 +164,7 @@ setlocal
 		
 		REM Build dependencies
 		IF [%2] == [luajit] (
+			echo "running call :build_luajit"
 			call :build_luajit
 			IF NOT EXIST "%root%\jit" (
 				mkdir %root%\jit
