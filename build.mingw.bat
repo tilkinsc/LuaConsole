@@ -248,6 +248,7 @@ setlocal
 			IF EXIST "mingw_libluajit.dll" (
 				echo libluajit.dll already cached.
 			) ELSE (
+				echo "make command is the issue"
 				%MAKE% -j%NUMBER_OF_PROCESSORS%
 				move lua51.dll	mingw_libluajit.dll
 			)
