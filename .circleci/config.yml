@@ -18,10 +18,10 @@ jobs:
           name: build
           shell: cmd.exe
           command: ci\ci.mingw.bat
-      - run:
-          name: system_info 
-          shell: cmd.exe          
-          command: systeminfo
+#       - run:
+#           name: system_info 
+#           shell: cmd.exe          
+#           command: systeminfo
     
 
 # Invoke jobs via workflows
