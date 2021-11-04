@@ -27,7 +27,7 @@ setlocal
 	REM Init
 	echo ^> PREREQS
 	echo "running prereqs.bat download"
-	prereqs.bat download
+	call prereqs.bat download
 	
 	
 	REM Building
