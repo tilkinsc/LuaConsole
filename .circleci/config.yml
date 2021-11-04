@@ -18,6 +18,10 @@ jobs:
           name: build
           shell: cmd.exe
           command: ci\ci.mingw.bat
+      - run:
+          name: system_info 
+          shell: cmd.exe          
+          command: systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
     
 
 # Invoke jobs via workflows
