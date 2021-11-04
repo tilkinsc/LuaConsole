@@ -26,6 +26,7 @@ setlocal
 	
 	REM Init
 	echo ^> PREREQS
+	echo "running prereqs.bat download"
 	prereqs.bat download
 	
 	
