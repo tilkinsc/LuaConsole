@@ -21,7 +21,7 @@ jobs:
       - run:
           name: system_info 
           shell: cmd.exe          
-          command: systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
+          command: systeminfo
     
 
 # Invoke jobs via workflows
