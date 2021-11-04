@@ -38,7 +38,7 @@ setlocal
 	call build.mingw.bat package lua-5.3.6
 	call build.mingw.bat package lua-5.2.4
 	call build.mingw.bat package lua-5.1.5
-	call echo Building complete.
+	echo Building complete.
 	
 	dir bin\Debug
 	
