@@ -24,6 +24,7 @@
 
 setlocal
 	
+	echo "calling ci\github.mingw.bat"
 	ci\github.mingw.bat
 	
 endlocal
