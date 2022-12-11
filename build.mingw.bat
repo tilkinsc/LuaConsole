@@ -80,6 +80,9 @@ setlocal
 		echo Remove %CWD%\lib\*.a
 		del %CWD%\lib\*.a
 		rmdir /S /Q %CWD%\bin
+		pushd %CWD%\luajit-2.0\src
+			%MAKE% clean LUAJIT_A=libmingw_luajit.dll.a
+		popd
 		
 		echo Done.
 		exit /b 0
@@ -231,8 +234,7 @@ setlocal
 	REM --------------------------------------------------------------------
 	
 	
-	echo This shouldn't be reached!
-	goto failure
+	goto help
 	
 	
 	REM --------------------------------------------------------------------
@@ -243,11 +245,10 @@ setlocal
 		echo Locally building luajit %CWD%\luajit-2.0 ...
 			
 		pushd %CWD%\luajit-2.0\src
-			IF EXIST "mingw_libluajit.dll" (
+			IF EXIST "mingw_libluajit.dll.a" (
 				echo libluajit.dll already cached.
 			) ELSE (
-				%MAKE% -j%NUMBER_OF_PROCESSORS%
-				move lua51.dll	mingw_libluajit.dll
+				%MAKE% -j%NUMBER_OF_PROCESSORS% TARGET_DLLNAME=libluajit.dll TARGET_DLLDOTANAME=libmingw_luajit.dll.a
 			)
 			
 			echo Locally installing luajit %CWD% ...
@@ -256,7 +257,8 @@ setlocal
 			copy /Y lualib.h		%incdir%\lualib.h
 			copy /Y lauxlib.h		%incdir%\lauxlib.h
 			copy /Y luajit.h		%incdir%\luajit.h
-			copy /Y mingw_libluajit.dll	%dlldir%\libluajit.dll
+			copy /Y libluajit.dll	%dlldir%\libluajit.dll
+			copy /Y libmingw_luajit.dll.a ..\..\lib\libmingw_luajit.dll.a
 		popd
 		
 		echo Finished locally building / installing luajit.
@@ -315,7 +317,7 @@ setlocal
 	setlocal
 		IF [%1] == [luajit] (
 			set luaverdef=-DLUA_JIT_51
-			set luaverout=-lluajit
+			set luaverout=-lmingw_luajit.dll
 		) ELSE (
 			set luaverout=-l%1
 		)

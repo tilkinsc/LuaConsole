@@ -77,10 +77,29 @@ static inline void check_error(int cond, const char* str) {
 	}
 }
 
+static inline size_t strip_filename(char* buffer, char delim)
+{
+	char* iter = buffer;
+	char* last_slash = 0;
+	while (*iter++ != 0)
+	{
+		if (*iter == delim)
+			last_slash = iter;
+	}
+	iter = last_slash;
+	while (*iter != 0)
+	{
+		*iter = 0;
+		iter++;
+	}
+	return strlen(buffer);
+}
+
 
 int main(int argc, char** argv) {
 	
 	const char* language = 0;
+	char langbuf[260];
 	#if defined(_WIN32) || defined(_WIN64)
 		const char english[] = "lang/english.txt";
 		const char chinese[] = "lang/chinese.txt";
@@ -90,37 +109,40 @@ int main(int argc, char** argv) {
 		
 		setlocale(LC_ALL, "");
 		
+		DWORD length = GetModuleFileName(NULL, langbuf, 260);
+		length = strip_filename(langbuf, '\\');
 		switch(GetUserDefaultUILanguage() | 0xFF) { // first byte is lang id
 		case 0x09: // english
-			language = "lang/english.txt";
+			language = "/lang/english.txt";
 			break;
 		case 0x04: // chinese
-			language = "lang/chinese.txt";
+			language = "/lang/chinese.txt";
 			break;
 		case 0x11: // japanese
-			language = "lang/japanese.txt";
+			language = "/lang/japanese.txt";
 			break;
 		case 0x19: // russian
-			language = "lang/russian.txt";
+			language = "/lang/russian.txt";
 			break;
 		case 0x16: // portuguese
-			language = "lang/portuguese.txt";
+			language = "/lang/portuguese.txt";
 			break;
 		case 0x0A: // spanish
-			language = "lang/spanish.txt";
+			language = "/lang/spanish.txt";
 			break;
 		default: // needs translation >:(
-			language = "lang/english.txt";
+			language = "/lang/english.txt";
 			break;
 		}
+		strcat(langbuf, language);
 	#else
-		language = "lang/english.txt";
+		language = "/lang/english.txt";
 	#endif
 	
-	language = "lang/english.txt";
+	language = "/lang/english.txt";
 	
 	// load language file
-	lang = langfile_load(language);
+	lang = langfile_load(langbuf);
 	if(lang == 0) {
 		puts("Failed to load lang file!");
 		return EXIT_FAILURE;
@@ -280,7 +302,6 @@ int main(int argc, char** argv) {
 	}
 	
 	#if defined(_WIN32) || defined(_WIN64)
-		printf("Loading %s\n", ARGS.luaver == 0 ? DEFAULT_LUA : luastr);
 		HMODULE luacxt;
 		luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr);
 		check_error(luacxt == 0, _("LC_DLL_MIA"));
