@@ -22,7 +22,7 @@
 
 debug=0
 debug_coverage=0
-GCC=gcc
+CC=gcc
 OBJCOPY=objcopy
 AR=ar
 MAKE=make
@@ -39,7 +39,6 @@ PLATS=Windows MSVS Unix MacOS Linux
 
 FE_Windows=.bat
 FE_MSVS=.msvs.bat
-FE_MSVC=.msvs.bat
 FE_Unix=.sh
 FE_Linux=.sh
 FE_MacOS=.sh
@@ -50,10 +49,8 @@ PRE_Unix=./
 PRE_Linux=./
 PRE_MacOS=./
 
-
 # No need to modify below
 none:
-	$(warning Make is a joke)
 	@echo "Please do 'make PLAT=plat' where `plat` is one of these:"
 	@echo "    $(PLATS)"
 	@echo "Use these targets: clean-prereqs prereqs clean-build build"
@@ -71,37 +68,26 @@ default: none
 
 
 prereqs:
-	$(warning Make is a joke)
 	$(PRE_$(PLAT))prereqs$(FE_$(PLAT)) download
 
 driver:
-	$(warning Make is a joke)
 	$(PRE_$(PLAT))build$(FE_$(PLAT)) driver $(LUA_VER)
 
 package:
-	$(warning Make is a joke)
 	$(PRE_$(PLAT))build$(FE_$(PLAT)) package $(LUA_VER)
 
-
 clean-build:
-	$(warning Make is a joke)
 	$(PRE_$(PLAT))build$(FE_$(PLAT)) clean
 
 clean-prereqs:
-	$(warning Make is a joke)
 	$(PRE_$(PLAT))prereqs$(FE_$(PLAT)) clean
 
-
 reset-prereqs:
-	$(warning Make is a joke)
 	$(PRE_$(PLAT))prereqs$(FE_$(PLAT)) reset
 
+install:
+	$(PRE_$(PLAT))build$(FE_$(PLAT)) install $(PREFIX)
 
 uninstall:
-	$(warning Make is a joke)
-	$(error This program deletes by manual removal. Please delete it yourself.)
-
-install:
-	$(warning Make is a joke)
-	$($PRE_$(PLAT))build$(FE_$(PLAT)) install $(PREFIX)
+	$(PRE_$(PLAT))build$(FE_$(PLAT)) uninstall $(PREFIX)
 

@@ -48,10 +48,11 @@ help_message() {
 	printf """
 Usage:
 
-    build build lua-x.x.x           Builds the driver with a default package
+    build driver lua-x.x.x          Builds the driver with a default package
     build package lua-x.x.x         Creates packages for the driver
     build clean                     Cleans the environment of built files
-    build install {directory}       Installs to a pre-created directory
+    build install {directory}       Installs to a directory
+    build uninstall {directory}     Uninstalls an installation
     build -? /? --help              Shows this help message
     
 build and package accepts:
@@ -69,8 +70,9 @@ Listens to these variables:
     GCC_VER        - stdlib version     Default: gnu99
     
 Notes:
-    After building, you may need to configure LD_LIBRARY_PATH to bin/Release/* to test
-    
+    After building, you may need to configure LD_LIBRARY_PATH=. or bin/Release/* to test
+    Uninstall will delete the directory you give it and the installed libraries
+	When uninstalling it's helpful to pipe yes in
 """
 	exit 0
 }
@@ -117,22 +119,6 @@ if [[ "${1}" == "clean" ]]; then
 	exit 0
 fi
 
-
-# - Basic Installer --------------------------------------------------
-
-
-if [[ "${1}" == "install" ]]; then
-	[[ -z "${2}" ]] && error "please specify where to install to" $LINENO
-	[[ -d "${2}" ]] || error "please create the destination folder first" $LINENO
-	
-	printf "Installing to directory (${2})...\n"
-	cp -r -i ${CWD}/bin/Release/* "${2}"
-	
-	printf "Done.\n"
-	exit 0
-fi
-
-
 # - Basic GCC Setup --------------------------------------------------
 
 
@@ -154,6 +140,56 @@ srcdir="${CWD}/src"
 incdir="${CWD}/include"
 
 dirs="-L${srcdir} -L${libdir} -L${dlldir} -I${srcdir} -I${incdir}"
+
+
+# - Basic Installer --------------------------------------------------
+
+
+if [[ "${1}" == "install" ]]; then
+	installdir=${2}
+	if [[ -z "${2}" ]]; then
+		installdir=/usr/local/bin/LuaConsole
+	fi
+	
+	printf "Installing to directory (${installdir})...\n"
+	install -D -T "${root}/luaw" "${installdir}/luaw"
+	install -D -T "${root}/lua.ico" "${installdir}/lua.ico"
+	install ${root}/liblua*.* "/usr/local/lib"
+	install ${root}/liblc* "${installdir}"
+	install -D ${root}/lang/* -t "${installdir}/lang"
+	pushd ${root}
+		echo liblua*.* > "${installdir}/installation.config"
+	popd
+	ldconfig
+	
+	printf "Done. Don't forget to add '${installdir}' to your PATH.\n"
+	exit 0
+fi
+
+
+# - Basic Uninstaller --------------------------------------------------
+
+
+if [[ "${1}" == "uninstall" ]]; then
+	if [[ -z "${2}" ]]; then
+		installdir=/usr/local/bin/LuaConsole
+	else
+		installdir="${2}"
+	fi
+	printf "Deleting installed dependencies\n"
+	if [[ ! -f "${installdir}/installation.config" ]]; then
+		error "installation file missing. uninstallation failed" $LINENO
+	fi
+	for dep in $(cat "${installdir}/installation.config"); do
+		rm -i "/usr/local/lib/$dep"
+	done
+	printf "Deleting installation directory (${installdir})...\n"
+	rm -r -i "${installdir}"
+	ldconfig
+	
+	printf "Done.\n"
+	exit 0
+fi
 
 
 # - Basic Cache Checking ---------------------------------------------
@@ -182,9 +218,7 @@ build_luajit() {
 		cp lualib.h "${incdir}"
 		cp lauxlib.h "${incdir}"
 		cp luajit.h "${incdir}"
-		ln libluajit.so libluajit-5.1.so.2
 		cp libluajit.so "${dlldir}"
-		cp libluajit-5.1.so.2 "${dlldir}"
 	popd
 	
 	printf "Finished locally building & installing luajit.\n"
@@ -349,5 +383,5 @@ if [[ "$1" == "package" ]]; then
 	exit 0
 fi
 
-error "This shouldn't be reached!\n" $LINENO
+help_message
 
