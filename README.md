@@ -1,4 +1,6 @@
+![LuaConsole](https://user-images.githubusercontent.com/7494772/220745906-25bee8af-36c4-49cc-bd09-45ae82d6fc50.png)
 # LuaConsole
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
