@@ -11,7 +11,7 @@ branches:
   - master
 
 build_script:
-- cmd: appveyor.msvs.bat
+- cmd: ci\appveyor.msvs.bat
 
 test: off
 deploy: off

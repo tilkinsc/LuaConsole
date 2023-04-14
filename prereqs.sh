@@ -26,7 +26,7 @@
 # - Basic Variables --------------------------------------------------
 
 
-[[ -z "${ZIP}" ]] &&	ZIP="7zip"
+[[ -z "${ZIP}" ]] &&	ZIP="tar"
 [[ -z "${GIT}" ]] &&	GIT="git"
 [[ -z "${DLM}" ]] &&	DLM="curl"
 
@@ -164,7 +164,7 @@ if [[ "${1}" == "download" ]]; then
 	if [[ ! -d "${CWD}/lua-all" ]]; then
 		printf "Not found. Unpacking...\n"
 		[[ "${ZIP}" == "tar" ]] && tar xzf "${CWD}/lua-all.tar.gz"
-		[[ "${ZIP}" == "7zip" ]] && 7z x "${CWD}/lua-all.tar.gz"
+		[[ "${ZIP}" == "7zip" ]] && 7z x "${CWD}/lua-all.tar.gz" && 7z x "${CWD}/lua-all.tar"
 		[[ -d "${CWD}/lua-all" ]] || error "failed to unpack '${CWD}/lua-all' using ${ZIP}" $LINENO
 	fi
 	printf "Cached.\n"

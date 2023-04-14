@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <locale.h>
+#include <stdint.h>
 
 #if defined(_WIN32) || defined(_WIN64)
 #	define WIN32_LEAN_AND_MEAN
@@ -77,50 +78,107 @@ static inline void check_error(int cond, const char* str) {
 	}
 }
 
+static inline size_t strip_filename(char* buffer, char delim)
+{
+	char* iter = buffer;
+	char* last_slash = 0;
+	while (*iter++ != 0)
+	{
+		if (*iter == delim)
+			last_slash = iter;
+	}
+	iter = last_slash;
+	while (*iter != 0)
+	{
+		*iter = 0;
+		iter++;
+	}
+	return strlen(buffer);
+}
+
 
 int main(int argc, char** argv) {
 	
 	const char* language = 0;
+	char langbuf[260];
+	memset(langbuf, 0, 260);
+	const char english[] = "/lang/english.txt";
+	const char chinese[] = "/lang/chinese.txt";
+	const char japanese[] = "/lang/japanese.txt";
+	const char russian[] = "/lang/russian.txt";
+	const char portuguese[] = "/lang/portuguese.txt";
+	const char spanish[] = "/lang/spanish.txt";
 	#if defined(_WIN32) || defined(_WIN64)
-		const char english[] = "lang/english.txt";
-		const char chinese[] = "lang/chinese.txt";
-		const char russian[] = "lang/russian.txt";
-		const char portuguese[] = "lang/portuguese.txt";
-		const char spanish[] = "lang/spanish.txt";
 		
 		setlocale(LC_ALL, "");
 		
+		DWORD length = GetModuleFileName(NULL, langbuf, 260);
+		length = strip_filename(langbuf, '\\');
 		switch(GetUserDefaultUILanguage() | 0xFF) { // first byte is lang id
 		case 0x09: // english
-			language = "lang/english.txt";
+			language = english;
 			break;
 		case 0x04: // chinese
-			language = "lang/chinese.txt";
+			language = chinese;
 			break;
 		case 0x11: // japanese
-			language = "lang/japanese.txt";
+			language = japanese;
 			break;
 		case 0x19: // russian
-			language = "lang/russian.txt";
+			language = russian;
 			break;
 		case 0x16: // portuguese
-			language = "lang/portuguese.txt";
+			language = portuguese;
 			break;
 		case 0x0A: // spanish
-			language = "lang/spanish.txt";
+			language = spanish;
 			break;
 		default: // needs translation >:(
-			language = "lang/english.txt";
+			language = english;
 			break;
 		}
 	#else
-		language = "lang/english.txt";
+		char pathbuf[260];
+		memset(pathbuf, 0, 260);
+		size_t length = readlink("/proc/self/exe", pathbuf, 260);
+		dirname(pathbuf);
+		strncpy(langbuf, pathbuf, length);
+		
+		char* shortcode = getenv("LANG");
+		if (shortcode != NULL) {
+			uint16_t code = *(uint16_t*) shortcode;
+			switch (code)
+			{
+			case 0x656E: // english
+				language = english;
+				break;
+			case 0x7A68: // chinese
+				language = chinese;
+				break;
+			case 0x6A61: // japanese
+				language = japanese;
+				break;
+			case 0x7275: // russian
+				language = russian;
+				break;
+			case 0x7074: // portuguese
+				language = portuguese;
+				break;
+			case 0x6573: // spanish
+				language = spanish;
+				break;
+			default: // needs translations >:(
+				language = english;
+				break;
+			}
+		} else {
+			language = "/lang/english.txt";
+		}
 	#endif
-	
-	language = "lang/english.txt";
+	strcat(langbuf, language);
 	
 	// load language file
-	lang = langfile_load(language);
+	lang = langfile_load(langbuf);
 	if(lang == 0) {
 		puts("Failed to load lang file!");
 		return EXIT_FAILURE;
@@ -268,8 +326,12 @@ int main(int argc, char** argv) {
 	luacon_loaddll _luacon_loaddll = (luacon_loaddll) 0;
 	
 	char luastr[260];
-	if(ARGS.luaver != 0) {
-		memset(luastr, 0, 260);
+	memset(luastr, 0, 260);
+	strcat(luastr, pathbuf);
+	strcat(luastr, "/");
+	if (ARGS.luaver == 0) {
+		strcat(luastr, DEFAULT_LUA);
+	} else {
 		strcat(luastr, "liblc");
 		strcat(luastr, ARGS.luaver);
 		#if defined(_WIN32) || defined(_WIN64)
@@ -281,14 +343,14 @@ int main(int argc, char** argv) {
 	
 	#if defined(_WIN32) || defined(_WIN64)
 		HMODULE luacxt;
-		luacxt = LoadLibrary(ARGS.luaver == 0 ? DEFAULT_LUA : luastr);
+		luacxt = LoadLibrary(luastr);
 		check_error(luacxt == 0, _("LC_DLL_MIA"));
 		
 		_luacon_loaddll = (luacon_loaddll) GetProcAddress(luacxt, "luacon_loaddll");
 		check_error(_luacon_loaddll == 0, _("LC_DLL_NO_FUNC"));
 	#else
 		void* luacxt;
-		luacxt = dlopen(ARGS.luaver == 0 ? DEFAULT_LUA : luastr, RTLD_NOW);
+		luacxt = dlopen(luastr, RTLD_NOW);
 		check_error(luacxt == 0, dlerror());
 		
 		_luacon_loaddll = dlsym(luacxt, "luacon_loaddll");

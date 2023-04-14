@@ -31,7 +31,7 @@ setlocal
 	
 	IF NOT DEFINED ZIP	set "ZIP=7zip"
 	IF NOT DEFINED GIT	set "GIT=git"
-	IF NOT DEFINED DLM	set "DLM=bitsadmin"
+	IF NOT DEFINED DLM	set "DLM=curl"
 	
 	
 	REM - Basic Switches ---------------------------------------------
@@ -56,7 +56,7 @@ setlocal
 	
 	setlocal EnableDelayedExpansion
 		IF [7zip] == [%ZIP%] (
-			where 7z.exe
+			where 7z
 			IF [!errorlevel!] == [1] (
 				echo %%ZIP%% - 7zip requested but not found in path
 				goto failure
@@ -64,7 +64,7 @@ setlocal
 		)
 		
 		IF [git] == [%GIT%] (
-			where git.exe
+			where git
 			IF [!errorlevel!] == [1] (
 				echo %%GIT%% - git requested but not found in path
 				goto failure
@@ -72,7 +72,7 @@ setlocal
 		)
 		
 		IF [bitsadmin] == [%DLM%] (
-			where bitsadmin.exe
+			where bitsadmin
 			IF [!errorlevel!] == [1] (
 				echo %%DLM%% - bitsadmin requested but not found in path
 				goto failure
@@ -80,7 +80,7 @@ setlocal
 		)
 		
 		IF [curl] == [%DLM%] (
-			where curl.exe
+			where curl
 			IF [!errorlevel!] == [1] (
 				echo %%DLM%% - curl requested but not found in path
 				goto failure
@@ -88,7 +88,7 @@ setlocal
 		)
 		
 		IF [wget] == [%DLM%] (
-			where wget.exe
+			where wget
 			IF [!errorlevel!] == [1] (
 				echo %%DLM%% - wget requested but not found in path
 				goto failure
@@ -166,8 +166,8 @@ setlocal
 		echo Checking for cached %CWD%\lua-all.tar.gz folder ...
 		IF NOT EXIST "%CWD%\lua-all.tar.gz" (
 			echo Not found. Downloading...
-			IF [bitsadmin] == [%DLM%] bitsadmin.exe /TRANSFER "lua-all.tar.gz" "https://www.lua.org/ftp/lua-all.tar.gz" %CWD%\lua-all.tar.gz
-			IF [wget] == [%DLM%] wget.exe "https://www.lua.org/ftp/lua-all.tar.gz"
+			IF [bitsadmin] == [%DLM%] bitsadmin /TRANSFER "lua-all.tar.gz" "https://www.lua.org/ftp/lua-all.tar.gz" %CWD%\lua-all.tar.gz
+			IF [wget] == [%DLM%] wget "https://www.lua.org/ftp/lua-all.tar.gz"
 			IF [curl] == [%DLM%] curl "https://www.lua.org/ftp/lua-all.tar.gz" > %CWD%\lua-all.tar.gz
 			IF NOT EXIST "%CWD%\lua-all.tar.gz" (
 				echo failed to download lua-all

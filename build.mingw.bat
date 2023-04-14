@@ -80,6 +80,9 @@ setlocal
 		echo Remove %CWD%\lib\*.a
 		del %CWD%\lib\*.a
 		rmdir /S /Q %CWD%\bin
+		pushd %CWD%\luajit-2.0\src
+			%MAKE% clean LUAJIT_A=libmingw_luajit.dll.a
+		popd
 		
 		echo Done.
 		exit /b 0
@@ -110,7 +113,6 @@ setlocal
 	REM - Basic GCC Setup --------------------------------------------------
 	
 	
-	REM GCC setup
 	IF [0] EQU [%debug%] (
 		set attrib=-std=gnu11 -Wall -O2
 		set root=%CWD%\bin\Release
@@ -232,8 +234,7 @@ setlocal
 	REM --------------------------------------------------------------------
 	
 	
-	echo This shouldn't be reached!
-	goto failure
+	goto help
 	
 	
 	REM --------------------------------------------------------------------
@@ -244,11 +245,10 @@ setlocal
 		echo Locally building luajit %CWD%\luajit-2.0 ...
 			
 		pushd %CWD%\luajit-2.0\src
-			IF EXIST "mingw_libluajit.dll" (
+			IF EXIST "mingw_libluajit.dll.a" (
 				echo libluajit.dll already cached.
 			) ELSE (
-				%MAKE% -j%NUMBER_OF_PROCESSORS%
-				move lua51.dll	mingw_libluajit.dll
+				%MAKE% -j%NUMBER_OF_PROCESSORS% TARGET_DLLNAME=libluajit.dll TARGET_DLLDOTANAME=libmingw_luajit.dll.a
 			)
 			
 			echo Locally installing luajit %CWD% ...
@@ -257,7 +257,8 @@ setlocal
 			copy /Y lualib.h		%incdir%\lualib.h
 			copy /Y lauxlib.h		%incdir%\lauxlib.h
 			copy /Y luajit.h		%incdir%\luajit.h
-			copy /Y mingw_libluajit.dll	%dlldir%\libluajit.dll
+			copy /Y libluajit.dll	%dlldir%\libluajit.dll
+			copy /Y libmingw_luajit.dll.a ..\..\lib\libmingw_luajit.dll.a
 		popd
 		
 		echo Finished locally building / installing luajit.
@@ -316,13 +317,13 @@ setlocal
 	setlocal
 		IF [%1] == [luajit] (
 			set luaverdef=-DLUA_JIT_51
-			set luaverout=%dlldir%\libluajit.dll
+			set luaverout=-lmingw_luajit.dll
 		) ELSE (
-			set luaverout=%dlldir%\lib%1.dll
+			set luaverout=-l%1
 		)
 		
 		echo Compiling luaw driver package %1...
-		%gcc% %attrib% %dirs% %luaverdef% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL -c %srcdir%\ldata.c %srcdir%\jitsupport.c
+		%gcc% %attrib% %dirs% -D__USE_MINGW_ANSI_STDIO=1 -DLC_LD_DLL %luaverdef% -c %srcdir%\ldata.c %srcdir%\jitsupport.c
 		
 		echo Linking luaw driver package liblc%1.dll...
 		%GCC% %attrib% %dirs% -shared -o liblc%1.dll ldata.o jitsupport.o %luaverout%
@@ -358,7 +359,7 @@ REM Simplex help message
 :help
 	echo Usage:
 	echo.
-	echo     build build lua-x.x.x           Builds the driver with a default package
+	echo     build driver lua-x.x.x          Builds the driver with a default package
 	echo     build package lua-x.x.x         Creates packages for the driver
 	echo     build clean                     Cleans the environment of built files
 	echo     build install [directory]       Installs to a pre-created directory
